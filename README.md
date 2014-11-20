@@ -20,3 +20,4 @@ Windows via Powershell
 * git commit -m "Kommentar" // Änderungen bestätigen (Änderungen ist jetzt im Head, aber noch nicht im entfernten Repository)
 # git push // Daten endgültig hochladen
 # git pull // Daten abfragen
+# test
