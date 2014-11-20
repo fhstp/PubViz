@@ -18,6 +18,5 @@ Windows via Powershell
 * git status // Syncstatus abfragen
 * git add <file> // Änderungen vorschlagen (zum Index hinzufügen)
 * git commit -m "Kommentar" // Änderungen bestätigen (Änderungen ist jetzt im Head, aber noch nicht im entfernten Repository)
-# git push // Daten endgültig hochladen
-# git pull // Daten abfragen
-# test
+* git push // Daten endgültig hochladen
+* git pull // Daten abfragen
