@@ -16,5 +16,7 @@ Windows via Powershell
 * dir - Ordnerinhalt anzeigen (Windows)
 * git clone [url] - Repository hinzufügen
 * git status - Syncstatus abfragen
-* git add [file] - Änderungen/Files hochladen
-* git commit -m "Kommentar" - Änderungen commiten
+* git add <file> - Änderungen vorschlagen (zum Index hinzufügen)
+* git commit -m "Kommentar" //Änderungen bestätigen (Änderungen ist jetzt im Head, aber noch nicht im entfernten Repository)
+# git push // Daten endgültig hochladen
+# git pull // Daten abfragen
