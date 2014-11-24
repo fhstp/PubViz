@@ -22,3 +22,4 @@ Windows via Powershell
 * git pull // Daten abfragen
 * git log // zeigt alle logs
 * git rm <file> // loescht file
+* git blame <file> // zeigt den Bearbeiter von jeder Zeile in dem File
