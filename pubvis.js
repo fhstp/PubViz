@@ -36,7 +36,7 @@ PUBVIS = function () {
         //console.log("DataArr filled ");
 
         bigJson = [];
-        errors = { index: [], errorMessage: [] };
+        errors = { index: [], errorMessage: [], errorEntry: [] };
         for (var i = 1 ; i <= dataArr.length-1; i++) {
 
             entry = dataArr[i].toString();
@@ -54,6 +54,7 @@ PUBVIS = function () {
             } catch (e) {
                 errors.index.push( i );
                 errors.errorMessage.push( e );
+                errors.errorEntry.push ( entryAt );
                // console.log ( e );
             }
 
@@ -82,6 +83,8 @@ PUBVIS = function () {
             var all_years_distinct = [], all_years_double = [], amount_per_years = [], actual_year, time_span;
             var oldest_year;
 
+            //@param.array = array
+            //@param.value = string (example "year") 
             var count_value_in_array = function (array, value) {
                 var counter = 0;
                 console.log ("array.length: " + array.length );
@@ -109,7 +112,8 @@ PUBVIS = function () {
             //console.log( "all_years: " + all_years_double.length);
 
             //sort array (as JS sorts all emlements as strings, this inner function is 
-            //necessary to order intagers correct)
+            //necessary to order intagers correct 
+            //source: Douglas Crockford, JavaScript. The good Parts., p.80
             all_years_double.sort( function ( a, b ) {
                 return a - b;
             });
