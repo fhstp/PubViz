@@ -2,18 +2,16 @@ PUBVIS = function () {
     var make_it_all = function (params) {
         filename = params.filename;
         target = params.target;
-        //console.log ('filename: ' + filename); 
-        //console.log ('target: ' + target);
 
         fetch_bibfile ( filename );        
     };
 
-    //get asynchron = stoßt weiteren verlauf an wenn daten geladen
+    //@param.filename = String (e.g "file.bib")
     var fetch_bibfile = function ( filename ) {
         var result; 
 
         $.get( filename, function( data ) {
-            //console.log( "Data Loaded" );
+
             result = bib2json( data );
         
             display_data( result.json ) ;
@@ -22,11 +20,11 @@ PUBVIS = function () {
         });    
     }
     //return oneBigJson and errors in an object
+    //@param.bibfile = bib data
     var bib2json = function ( bibfile ) {
         var dataArr, bigJson, errors, entry, entryAt;
 
         dataArr = bibfile.split("@");
-        //console.log("DataArr filled ");
 
         bigJson = [];
         errors = { index: [], errorMessage: [], errorEntry: [] };
@@ -34,47 +32,36 @@ PUBVIS = function () {
 
             entry = dataArr[i].toString();
             entryAt = "@" + entry;
-            //console.log("1. entryAt: " + entryAt);
 
             try {
-
                 //pars bib-entry to JSON list with one object
                 jsonFormat = bibtexParse.toJSON( entryAt );
-              //  console.log( "2. dataArr i: " + dataArr[i] );
-              //  console.dir( jsonFormat );
-
-
             } catch (e) {
                 errors.index.push( i );
                 errors.errorMessage.push( e );
                 errors.errorEntry.push ( entryAt );
                 jsonFormat = "";
-               // console.log ( e );
             }
 
             if ( jsonFormat !== "") { 
                 //combine lists 
                 bigJson = bigJson.concat (jsonFormat);
             }
-
-            //console.log ("entry #" + i + " added");
-            //console.log ("3. entry content: " + jsonFormatString);
         };
-
-        //console.dir( bigJson );
-        console.log("ende Bib2Json");
+        //console.log("ende Bib2Json");
         return { json: bigJson,
                  errors: errors }; 
-
     }
 
-    var display_data = function ( json ) {       
+    //@param.json = bib entries in json format
+    var display_data = function ( json ) {
         var real_life_data, generated_data, data_years, data_amount;
         //draw data
         //console.dir( json );
 
 
         //*************************SEARCH JSON******************************//
+        
         //returns an object with a list with all years (key: time_list)
         //and a list with the total amounts of publications per year (key: amount_list)
         var get_years = function () {
@@ -85,14 +72,11 @@ PUBVIS = function () {
             //@param.value = string (example "year") 
             var count_value_in_array = function (array, value) {
                 var counter = 0;
-                //console.log ("array.length: " + array.length );
 
                 for ( var z = 0; z < array.length; z++ ) {
-                    //console.log( "indexJahr: " + array[z] + " und value: " + value );
                     
                     if ( array[z] === value ) {
                         counter++
-                        //console.log ("match!" + " count: " + counter);
                     }
                 }
                 return counter;
@@ -107,7 +91,6 @@ PUBVIS = function () {
                 }
 
             }
-            //console.log( "all_years: " + all_years_double.length);
 
             //sort array (as JS sorts all emlements as strings, this inner function is 
             //necessary to order intagers correct 
@@ -115,16 +98,11 @@ PUBVIS = function () {
             all_years_double.sort( function ( a, b ) {
                 return a - b;
             });
-            //console.log ( "all_years_double" );
-            //console.dir (all_years_double);
 
             //get first element (= oldest year) and calculate time span for length of array           
             actual_year = new Date().getFullYear();
             oldest_year = parseInt(all_years_double[0], 10);
             time_span = actual_year - oldest_year;
-            //console.log( "oldest year: " + all_years_double[0]);
-            //console.log( "actual_year: " + actual_year );
-            //console.log( "time_span: " + time_span );
 
             //create a new list with time span
             for ( var y = 0; y <= time_span; y++ ) {
@@ -133,8 +111,6 @@ PUBVIS = function () {
                 oldest_year++;
 
             }
-            //console.log( "all_years_distinct: " );
-            //console.dir( all_years_distinct );
 
             //iterate list with all_years_double and count their orccurance
             for ( var y = 0; y <= time_span; y++ ) {
@@ -150,8 +126,9 @@ PUBVIS = function () {
 
 
         //*************************TEST DATA******************************//
-        //generate an array with testdata, returns a list with all years counted 
+        //generates an array with testdata, returns a list with all years counted 
         //from startYear and a list in the same length with randmom amount
+        //@params.startYear = number (e.g. 1980)
         var generate_testData = function ( startYear ) {
             var testArr_years = [], testArr_amount = [], year, amount;          
             year = startYear;
@@ -169,24 +146,36 @@ PUBVIS = function () {
 
         //*** datasets
         real_life_data = get_years( json );
-        generated_data = generate_testData( 1983 );
+        //generated_data = generate_testData( 1983 );
 
         data_years = real_life_data.time_list;
         //data_years = generated_data.years;
-            //console.log ( "data_years: " );
-            //console.dir ( data_years );
         data_amount = real_life_data.amount_list;
         //data_amount = generated_data.amount;
-            //console.log ( "amount_list" );
-            //console.dir ( data_amount ); 
 
 
         //*************************BAR*CHART*START***********************//
+        //@param.data_year = Array 
+        //@param.data_amount = Array
         var create_bar_chart = function ( data_years, data_amount ){ 
             //*** declare vars
             var chart = {};
             var margin, view_width, view_height, svgH, svgW, left, right, top, bottom, padd_bar;
             var xScale, yScale, svg;
+            var change_color_of_item, setup, create_bars, create_buttons, render;
+
+            //@param.clicked_item_id = String (e.g."#bar_2001")
+            //@param.color1 = original color of item (e.g. "balck" or "#xxxxxx" )
+            //@param.color2 = color for selected items (e.g. "balck" or "#xxxxxx" ) 
+            change_color_of_item = function( clicked_item_id, color1, color2 ) {
+                var clicked_class;
+
+                if ( $( clicked_item_id ).attr( "fill" ) === color1 ) { 
+                    $( clicked_item_id ).attr( "fill", color2);
+                } else {
+                    $( clicked_item_id ).attr( "fill", color1);
+                }
+            }
 
             chart.setup = function() { 
                 //*** Setup dimensons
@@ -200,8 +189,7 @@ PUBVIS = function () {
 
                 //calculate absolut width and height for svg
                 svgH = view_height - margin.top - margin.bottom;
-                svgW =  view_width - margin.left - margin.right; 
-                //console.log( "docWidth: " + $(document).width());       
+                svgW =  view_width - margin.left - margin.right;        
 
      
                 //*** Setting up a linear yScale for the height of the bars
@@ -229,7 +217,7 @@ PUBVIS = function () {
             }
 
             chart.create_bars = function () { 
-                var rect, bar_group, bar;
+                var rect, bar_group, bar, clicked_id_bar, clicked_id_text;
                 //create group for bars
                 bar_group = svg.append( "g" );  
 
@@ -241,32 +229,27 @@ PUBVIS = function () {
                         .attr ({
                             y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
                             x: function( d, i ){ return xScale( i ) },
-                            //time: x: function ( d, i ) { 
-                                //return i * ( svgW / data_years.length ) + padd_bar; },
                             width: xScale.rangeBand(),
-                            //time width: Math.floor( svgW / data_years.length - padd_bar),
                             height: function( d ){ return yScale( d ); },
                             fill: "#EEEEEE",
                             class: "bar",
                             id: function( d,i ) { 
-                                //console.log( "bar_id: " + data_years[i] ); 
-                                return data_years[i]; }
+                                return "bar_" + data_years[i]; }
                         }) 
                         .on( "click", function( d, j ) {
-                            console.log( "click: " + d );
+                            //bar is fist clicked >> bar and label_year turn into yellow
+                            //bar is second clicked >> bar and label_year turn into orignal color
 
-                            if ( d3.select(this).attr( "fill" ) === "#EEEEEE" ) { 
-                                d3.select(this).attr( "fill", "#FFE601");
-                            } else {
-                                d3.select(this).attr( "fill", "#EEEEEE");
-                            }
-                            //console.log( "fill: " + d3.select(this).attr("fill") );
-                            //console.log( "year: " + data_years[ j ] ); //log the clicked year
-                        });
+                            clicked_id_text = "#label_year_" + data_years[ j ];
+                            clicked_id_bar = "#" + d3.select(this).attr( "id" );
+
+                            change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                            change_color_of_item( clicked_id_text, "black", "#FFE601" );                      
+                        });           
             }       
 
             chart.create_labels = function () {
-                var labels, label_group;
+                var labels, label_group, clicked_id_bar, clicked_id_text;
 
                 //create group for labels years and move y to the bottom of the chart-svg
                 var label_group = svg.append( "g" )
@@ -279,31 +262,51 @@ PUBVIS = function () {
                             .append( "text" )
                             .text ( function( d ) { return d; } )
                             .attr({
-                                //time: x: function ( d, i ) { return i * ( svgW / data_years.length) + padd_bar + ( (svgW / data_years.length) /2) ; },
                                 x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
                                 y: 0, //cause of grouping and transform of the labels_group
                                 fill: "black",
                                 class: "labels",
                                 "text-anchor": "middle",
-                                id: function (d,i) { return d; }
+                                id: function (d,i) { return "label_year_" + d; }
                             })
-                            .on( "click", function( d ) {
-                                console.log( "click: " + d );
-                                if ( d3.select(this).attr( "fill" ) === "black" ) { 
-                                    d3.select(this).attr( "fill", "#FFE601");
-                                } else {
-                                    d3.select(this).attr( "fill", "black");
-                                }
-                                //selected_text_id = d3.select(this).attr("id");
-                                //console.log( "selected_text_id: " + selected_text_id );
-                            });  
+                            .on( "click", function( d, j ) {
+                                //label_year is fist clicked >> bar and label_year turn into yellow
+                                //label_year is second clicked >> bar and label_year turn into orignal color
+
+                                clicked_id_bar = "#bar_" + data_years[ j ];
+                                clicked_id_text = "#" + d3.select(this).attr( "id" );
+
+                                change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                                change_color_of_item( clicked_id_text, "black", "#FFE601" );
+                            
+                             });    
             } 
+
+            chart.create_buttons = function(){
+                var btn_left, btn_right, btn_group, buttons_text = [];
+
+                buttons_text = ["<", ">"];
+
+                btn_group = svg.append( "g" )
+                                .attr("transform", "translate(-15," + svgH + ")");
+
+                buttons = btn_group.selectAll( "text" )
+                                .data( buttons_text )
+                                .enter()
+                                .append( "text" )
+                                .text ( function( d ) { return d; } )
+                                .attr({
+                                    x: function( d, i ){ return i * 15 }, //later to include the width of the button image
+                                    y: 0,
+                                    id: function( d, i ){ console.log("btn_id: " + d ); return d },
+                                });
+            }
 
             chart.render = function() {
 
                 chart.create_bars();
                 chart.create_labels();
-
+                chart.create_buttons();
             } 
 
             chart.setup();
@@ -315,12 +318,10 @@ PUBVIS = function () {
         //call
         var bar_chart = create_bar_chart ( data_years, data_amount );
         //*************************BAR*CHART*ENDE***********************//
-
     }    
 
-
+    //@param.errors = list with entries that were not able to parst into a json
     var display_error = function ( errors ) {
-
         //draw errors
         //console.dir ( errors ); 
     }
