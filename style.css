@@ -1,5 +1,9 @@
 
-
+*{
+	font-family: "SourceSansPro-Regular", sans-serif;
+	src: url('source-sans-pro/SourceSansPro-Regular.otf') format('opentype');
+	font-size: 14px;
+}
 
 .axis path,
 .axis line {
