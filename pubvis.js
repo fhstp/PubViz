@@ -22,7 +22,7 @@ PUBVIS = function () {
     //return oneBigJson and errors in an object
     //@param.bibfile = bib data
     var bib2json = function ( bibfile ) {
-        var dataArr, bigJson, errors, entry, entryAt;
+        var dataArr, bigJson, errors, entry, entryAt, jsonFormat;
 
         dataArr = bibfile.split("@");
 
@@ -55,20 +55,14 @@ PUBVIS = function () {
 
     //@param.json = bib entries in json format
     var display_data = function ( json ) {
-        var real_life_data, generated_data, data_years, data_amount;
+        var real_life_data, generated_data, dataset_years, dataset_amount, dataset_types, dataset_types_text;
+        var change_color_of_item, get_width_of_text_element, set_scale;
         //draw data
         //console.dir( json );
 
 
         //*************************SEARCH JSON******************************//
-        
-            //returns an object with a list with all years (key: time_list)
-            //and a list with the total amounts of publications per year (key: amount_list)
-            var get_years = function () {
-                var all_years_distinct = [], all_years_double = [], amount_per_years = [], actual_year, time_span;
-                var oldest_year;
-
-                //@param.array = array
+            //@param.array = array
                 //@param.value = string (example "year") 
                 var count_value_in_array = function (array, value) {
                     var counter = 0;
@@ -82,6 +76,16 @@ PUBVIS = function () {
                     return counter;
                 }
 
+            //returns an object with a list with all years (key: time_list)
+            //and a list with the total amounts of publications per year (key: amount_list)
+            var get_years = function () {
+                var all_years_distinct = [];
+                var all_years_double = [];
+                var amount_per_years = [];
+                var oldest_year;
+                var actual_year, time_span;
+                
+                //console.log( "get_years start" );
 
                 //save all years into a list
                 for ( var i = 0; i < json.length; i++ ) {
@@ -89,7 +93,6 @@ PUBVIS = function () {
                     if ( json[i].entryTags.year){
                         all_years_double.push( json[i].entryTags.year );
                     }
-
                 }
 
                 //sort array (as JS sorts all emlements as strings, this inner function is 
@@ -105,11 +108,9 @@ PUBVIS = function () {
                 time_span = actual_year - oldest_year;
 
                 //create a new list with time span
-                for ( var y = 0; y <= time_span; y++ ) {
-                    
+                for ( var y = 0; y <= time_span; y++ ) {                    
                     all_years_distinct.push( oldest_year );
                     oldest_year++;
-
                 }
 
                 //iterate list with all_years_double and count their orccurance
@@ -120,8 +121,98 @@ PUBVIS = function () {
                     amount_per_years.push( amount );
                     //console.log ("year: " +  all_years_distinct[y] + " amount: " + amount);
                 }
+
                 return { time_list: all_years_distinct,
                          amount_list: amount_per_years };
+            }
+
+            var get_types = function ( json ) {
+
+                var all_entry_types = [];
+                var entryTypes_grouped_text = [ "Article", "Book", "Part of a Book", "Conference", "Thesis", "Misc", "Report" ];
+                var possible_types = ["article", "book", "booklet", "inbook", "incollection", "conference", "inproceedings", "proceeding", "mastersthesis", "thesis", "phdthesis", "misc", "manual", "techreport"];
+                var entryTypes_grouped_data = [ 0,0,0,0,0,0,0 ];
+                var all_types_counted = [];
+
+                //save all years into a list
+                for ( var i = 0; i < json.length; i++ ) {
+
+                    if ( json[i].entryType ){
+                        //console.log( "entry_type:" + json[i].entryType  );
+                        all_entry_types.push( json[i].entryType );
+                    }
+                    //console.dir( all_entry_types );
+                }
+
+                //group types
+                for ( var y = 0; y < all_entry_types.length; y++ ){
+                    //console.log( "all_entry_types[y]" + all_entry_types[y] );
+                    var count = 0;
+                    count++;
+
+                    if (all_entry_types[y] === "article" ) {
+                        entryTypes_grouped_data[0] += 1;
+                    }
+
+                    if (all_entry_types[y] === "book" ) {
+                        entryTypes_grouped_data[1] += 1;
+                    }
+
+                    if (all_entry_types[y] === "booklet" ) {
+                        entryTypes_grouped_data[1] += 1;
+                    }
+
+                    if (all_entry_types[y] === "inbook" ) {
+                        entryTypes_grouped_data[2] += 1;
+                    }
+
+                    if (all_entry_types[y] === "incollection" ) {
+                        entryTypes_grouped_data[2] += 1;
+                    }
+
+                    if (all_entry_types[y] === "conference" ) {
+                        entryTypes_grouped_data[3] += 1;
+                    }
+
+                    if (all_entry_types[y] === "inproceedings" ) {
+                        entryTypes_grouped_data[3] += 1;
+                    }
+
+                    if (all_entry_types[y] === "proceedings" ) {
+                        entryTypes_grouped_data[3] += 1;
+                    }
+
+                    if (all_entry_types[y] === "thesis" ) {
+                        entryTypes_grouped_data[4] += 1;
+                    }
+
+                    if (all_entry_types[y] === "mastersthesis" ) {
+                        entryTypes_grouped_data[4] += 1;
+                    }
+
+                    if (all_entry_types[y] === "phdthesis" ) {
+                        entryTypes_grouped_data[4] += 1;
+                    }
+
+                    if (all_entry_types[y] === "misc" ) {
+                        entryTypes_grouped_data[5] += 1;
+                    }
+
+                    if (all_entry_types[y] === "manual" ) {
+                        entryTypes_grouped_data[6] += 1;
+                    }
+
+                    if (all_entry_types[y] === "techreport" ) {
+                        entryTypes_grouped_data[6] += 1;
+                    }
+                }
+                //console.log( "count: " + count );
+                //console.log( "entryTypes_grouped_data: " );
+                //console.dir( entryTypes_grouped_data );
+
+                //console.dir( all_types_counted );
+                return { type_list: entryTypes_grouped_data,
+                         types_text: entryTypes_grouped_text };
             }
 
 
@@ -133,7 +224,7 @@ PUBVIS = function () {
                 var testArr_years = [], testArr_amount = [], year, amount;          
                 year = startYear;
                 
-                for (i = startYear; i <= 2014; i++ ) {
+                for (var i = startYear; i <= 2014; i++ ) {
                     amount = Math.floor((Math.random() * 10) + 1); //random # between 1 and 10
                     testArr_amount.push( amount );
                     testArr_years.push( year );
@@ -145,31 +236,21 @@ PUBVIS = function () {
             }
 
             //*** datasets
-            //real_life_data = get_years( json );
-            generated_data = generate_testData( 1983 );
+            real_life_data = get_years( json );
+            generated_data = generate_testData( 1955 );
 
-            //data_years = real_life_data.time_list;
-            data_years = generated_data.years;
-            //data_amount = real_life_data.amount_list;
-            data_amount = generated_data.amount;
+            //dataset_years = real_life_data.time_list;
+            dataset_years = generated_data.years;
+            //dataset_amount = real_life_data.amount_list;
+            dataset_amount = generated_data.amount;
+            
+            var real_life_data_types = get_types( json );
+            dataset_types = real_life_data_types.type_list;
+            dataset_types_text = real_life_data_types.types_text;
+            //var testdata = generate_testData( 2008 );
+            //dataset_types = testdata.amount;
 
-
-        //*************************BAR*CHART*START***********************//
-        //@param.data_year = Array 
-        //@param.data_amount = Array
-        var create_bar_chart = function ( data_years_all, data_amount_all ){ 
-            //console.log( "start create_bar_cart" );
-            //*** declare vars
-            var chart = {};
-            var margin, view_width, view_height, svgH, svgW, left, right, top, bottom, padd_bar;
-            var xScale, yScale, svg, max_number_of_bars;
-            var change_color_of_item, setup, bars, labels, create_buttons, render;
-            var data_years_all, data_years, data_amount_all, data_amount, sequence;
-            var number_of_periods, steps, max_number_of_bars, count_clicks;
-
-            count_clicks = 0; 
-            number_of_periods = 0;
-
+        //*************************HELPER FUNCTIONS***********************//
             //@param.clicked_item_id = String (e.g."#bar_2001")
             //@param.color1 = original color of item (e.g. "balck" or "#xxxxxx" )
             //@param.color2 = color for selected items (e.g. "balck" or "#xxxxxx" ) 
@@ -183,201 +264,38 @@ PUBVIS = function () {
                 }
             }
 
-            chart.setup = function() { 
-                //console.log( "start setup" );
+            //if the width of an text element is needed before the text element can be drawn (e.g because of the order of svg elements)
+            //creates the elements based on the given data, access the width 
+            //and removes the created element
+            //@params.data a list
+            get_width_of_text_element = function( svg, group, data ) {
+                    var element, element_width, element_height;
 
+                    //console.log( "get_width_of_text_element aufgerufen" );
 
-                //*** Setup dimensons
-                view_height = 200;
-                view_width = $(document).width(); //returns width of HTML document | $(window).width() returns width of browser viewport
-                margin = {top: 20, right: 20, bottom: 20, left: 20};
-                padd_bar = 5;
-                label_space = 19;
-                bar_height = 20; //height of the background bar behind the years
-                max_number_of_bars = 30;
-                steps = 5;
-                number_of_periods = 0;
-                
-
-                //calculate absolut width and height for svg
-                svgH = view_height - margin.top - margin.bottom;
-                svgW =  view_width - margin.left - margin.right;        
-
-     
-                
-                
-                //check if number of years contained in the data, extend the number of planed bars that will be shown
-                if ( data_years_all.length > max_number_of_bars ) { 
-                    
-                    //claculate the number of needed periods that have to be slidable
-                    number_of_periods = Math.floor( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
-                    console.log("number_of_periods: " + number_of_periods);
-
-                    data_amount = set_data_period( data_amount_all, 0, steps, max_number_of_bars);
-                    data_years = set_data_period( data_years_all, 0, steps, max_number_of_bars);
-
-                } else {
-
-                    data_amount = data_amount_all;
-                    data_years = data_years_all;
-                    
-                }
-
-                //*** Setting up a linear yScale for the height of the bars   
-                yScale = d3.scale.linear()
-                            .domain ([ d3.min( data_amount ), d3.max( data_amount ) ]) //max, min of inputrange
-                            .range([ 0, (svgH - label_space) ]); //subttact space for labels so scaling is correct
-                
-                xScale = d3.scale.ordinal()
-                                    .domain( d3.range( data_years.length ) ) //d3.range(x) returns an array with x elements sorted from 0-x
-                                    .rangeRoundBands([ 0, svgW ], 0.2); //5% space between bars
-                 
-
-                
-                //*** create svg element appens it to the param.target (=#pubvis_container)
-                svg = d3.select( target )
-                        .append( "svg" )
-                        .attr({
-                            class: "chart",
-                            width: view_width,
-                            height: view_height
-                        })
-                        .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); //move x,y of whole svg.chart
-                
-                //console.log( "setup ende" );
-            }
-
-            chart.bars = function () { 
-                var rect, bar_group, bar, clicked_id_bar, clicked_id_text, create_bars, update_bars;
-                
-                //create group for bars
-                bar_group = svg.append( "g" );
-
-                chart.create_bars = function () { 
-                    //console.log( "create_bars start" );  
-                    
-                    //fill group with bars
-                    bar = bar_group.selectAll( "rect" )
-                            .data( data_amount )
-                            .enter ()
-                            .append ( "rect" )
-                            .attr ({
-                                y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
-                                x: function( d, i ){ return xScale( i ) },
-                                width: xScale.rangeBand(),
-                                height: function( d ){ return yScale( d ); },
-                                fill: "#EEEEEE",
-                                class: "bar",
-                                id: function( d,i ) { 
-                                    return "bar_" + data_years[i]; }
-                            }) 
-                            .on( "click", function( d, j ) {
-                                //bar is fist clicked >> bar and label_year turn into yellow
-                                //bar is second clicked >> bar and label_year turn into orignal color
-
-                                clicked_id_text = "#label_year_" + data_years[ j ];
-                                clicked_id_bar = "#" + d3.select(this).attr( "id" );
-
-                                change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                change_color_of_item( clicked_id_text, "black", "#FFE601" );                      
-                            }); 
-                    //console.log( "create_bars ende" );          
-                } 
-
-                chart.update_bars = function ( dataset_amount, dataset_years ){
-                    //console.log( "update_bars aufgerufen" );
-                    
-                    //fill group with bars
-                    bar = bar_group.selectAll( "rect" )
-                            .data( dataset_amount )
-                            .attr ({
-                                y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
-                                x: function( d, i ){ return xScale( i ) },
-                                width: xScale.rangeBand(),
-                                height: function( d ){ return yScale( d ); },
-                                fill: "#EEEEEE",
-                                class: "bar",
-                                id: function( d,i ) { 
-                                    return "bar_" + dataset_years[i]; }
-                            }) 
-                            .on( "click", function( d, j ) {
-                                //bar is fist clicked >> bar and label_year turn into yellow
-                                //bar is second clicked >> bar and label_year turn into orignal color
-
-                                clicked_id_text = "#label_year_" + dataset_years[ j ];
-                                clicked_id_bar = "#" + d3.select(this).attr( "id" );
-
-                                change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                change_color_of_item( clicked_id_text, "black", "#FFE601" );                      
-                            }); 
-                    //console.log( "update_bars ende" );                                 
-                } 
-            }         
-
-            chart.labels = function () { 
-                var labels, label_group, clicked_id_bar, clicked_id_text;
-
-                //create group for labels years and move y to the bottom of the chart-svg
-                var label_group = svg.append( "g" )
-                                     .attr("transform", "translate(0," + svgH + ")");
-                
-                chart.create_labels = function () {
-
-                    //create labels for years
-                    labels = label_group.selectAll( "text" )
-                                .data( data_years )
+                    element = group.selectAll( "text" )
+                                .data( data )
                                 .enter()
                                 .append( "text" )
                                 .text ( function( d ) { return d; } )
                                 .attr({
-                                    x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
-                                    y: 0, //cause of grouping and transform of the labels_group
-                                    fill: "black",
-                                    class: "labels",
-                                    "text-anchor": "middle",
-                                    id: function (d,i) { return "label_year_" + d; }
+                                    x: 0,
+                                    y: 0,
+                                    class: "element"
                                 })
-                                .on( "click", function( d, j ) {
-                                    //label_year is fist clicked >> bar and label_year turn into yellow
-                                    //label_year is second clicked >> bar and label_year turn into orignal color
 
-                                    clicked_id_bar = "#bar_" + data_years[ j ];
-                                    clicked_id_text = "#" + d3.select(this).attr( "id" );
+                    element.each( function() {
+                        //console.log(this.getBBox().width);
+                        //console.log(this.getBBox().height);
+                        element_width = this.getBBox().width;
+                        element_height = this.getBBox().height
+                    } ) 
 
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "black", "#FFE601" );
-                                
-                                 });    
-                } 
+                    svg.selectAll( "text.element" ).remove();
+                    //console.log( "removed" );
 
-                chart.update_labels = function ( dataset_years ) {
-                    //console.log( "update_labels aufgerufen" );
-                    //create labels for years
-                    labels = label_group.selectAll( "text" )
-                                .data( dataset_years )
-                                .text ( function( d ) { return d; } )
-                                .attr({
-                                    x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
-                                    y: 0, //cause of grouping and transform of the labels_group
-                                    fill: "black",
-                                    class: "labels",
-                                    "text-anchor": "middle",
-                                    id: function (d,i) { return "label_year_" + d; }
-                                })
-                                .on( "click", function( d, j ) {
-                                    //label_year is fist clicked >> bar and label_year turn into yellow
-                                    //label_year is second clicked >> bar and label_year turn into orignal color
-
-                                    clicked_id_bar = "#bar_" + dataset_years[ j ];
-                                    clicked_id_text = "#" + d3.select(this).attr( "id" );
-
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "black", "#FFE601" );
-                                
-                                 });  
-                //console.log( "update_labels ende" );  
-                }
+                    return { width: element_width,
+                             height: element_height };           
             }
 
             //slices a given dataset into the needed periods that are demanded by the left/right-buttons next to the year labels 
@@ -385,7 +303,7 @@ PUBVIS = function () {
             //@params.count_clicks = number
             //@params.steps = number indicating how many years will be updated if button "left/right" is clicked
             //@params.max_number_of_bars = number of years to display in the bar chart (e.g 30 produce bars from 1984 - 2014)
-            var set_data_period = function ( incoming_dataset, count_clicks , steps, max_number_of_bars ) {
+            var set_data_period = function ( incoming_dataset, count_clicks , steps, max_number_of_bars, number_of_periods ) {
                 var new_dataset = {}, index_start, index_ende, end_period, start_period;
                 var incoming_dataset, count_clicks , steps, last_step, last_step_difference, max_number_of_bars;
 
@@ -418,17 +336,308 @@ PUBVIS = function () {
                 
                 return new_dataset;
             }
-           
 
-            chart.create_buttons = function(){
-                var btn_left, btn_right, btn_group, buttons_text = [];
 
-                buttons_text = ["<", ">"];
+        //*************************BAR*CHART*START***********************//
+        var CHART = function () {
+            //@param.view_height = number, gives the height of the availabel space; margins will be subtracted
+            //@param.list_of_margins = eg. margin = {top: 20, right: 30, bottom: 20, left: 10}
+            var create_bar_chart = function ( params ){ 
+                //console.log( "start create_bar_cart" );
+                //*** declare vars
+                var chart = {};
+                var view_width, view_height = 0;
+                var svg, svgH, svgW;
+                var oridinal_scale, linear_scale;
+                var margin;
+                var number_of_periods, steps, max_number_of_bars;
+        
+                //*** Setup dimensons
+                margin = params.margin;
+                view_height = params.view_height;
+                //view_width = $(document).width(); //returns width of HTML document | $(window).width() returns width of browser viewport
+                view_width = params.view_width;
+
+                //calculate absolut width and height for svg
+                svgH = view_height - margin.top - margin.bottom;
+                svgW =  view_width - margin.left - margin.right;
+                //console.log( "margins:" + margin.top + margin.right + margin.bottom + margin.left );
+
+                //public functions
+                //*** create svg element appens it to the param.target (=#pubvis_container)
+                chart.set_svg = function ( classname, transform_xPos, transform_yPos ) { 
+                    svg = d3.select( target )
+                            .append( "svg" )
+                            .attr({
+                                class: classname,
+                                width: view_width,
+                                height: view_height
+                            })
+                            .append("g")
+                            .attr("transform", "translate(" + transform_xPos + "," + transform_yPos + ")"); //move x,y of whole svg.chart
+                        
+                    //console.log( "svg ende" );
+                }
+                
+                //@params.array1 = array for y-scale (e.g. amount of pubblications)
+                //@params.array2 = array for x-scale (e.g years of publications)
+                chart.set_scale = function ( array, range_lin, range_ord, in_beteween_space ) {
+                    //var range_lin, range_ord;
+                    //console.log( "set_scale start" );
+
+                    //*** Setting up a linear yScale for the height of the bars   
+                    linear_scale = d3.scale.linear()
+                                .domain ([ d3.min( array ), d3.max( array ) ]) //max, min of inputrange
+                                .range([ 0, range_lin ]); 
+                    
+                    oridinal_scale = d3.scale.ordinal()
+                                        .domain( d3.range( array.length ) ) //d3.range(x) returns an array with x elements sorted from 0-x
+                                        .rangeRoundBands([ 0, range_ord ], in_beteween_space); //5% space between bars
+                }
+
+                chart.get_svg = function() { return svg };
+                chart.get_svgH = function() { return svgH };
+                chart.get_svgW = function() { return svgW };
+                chart.get_oridinal_scale = function() { return oridinal_scale };
+                chart.get_linear_scale = function() { return linear_scale };
+                chart.get_margins = function() { return margin };
+
+                chart.create_bars = function() { throw new Error ("NOT IMPLEMENTED") };
+                chart.update_bars = function() { throw new Error ("NOT IMPLEMENTED") };
+                chart.labels = function() { throw new Error ("NOT IMPLEMENTED") }; 
+
+                return chart;
+            }
+            return { create_bar_chart: create_bar_chart };
+        }();
+
+        var BAR_YEARS = function () {
+            //console.log( "bar_years start" );
+
+            //@param.data_year = Array 
+            //@param.data_amount = Array
+            var create_bar_years = function ( params ) {            
+                var create_bars, update_bars, create_labels, update_labels;
+                var rect, bar_group, bar, clicked_id_bar, clicked_id_text, create_bars, update_bars;            
+                var btn_group, label_group;
+                var data_years, data_amount;
+                var xScale, yScale;
+
+                var data_years_all = params.data_years_all; 
+                var data_amount_all = params.data_amount_all;
+                var new_bar_years = CHART.create_bar_chart( params );
+                
+                new_bar_years.set_svg( "chart", new_bar_years.get_margins().left, new_bar_years.get_margins().top );            
+                var svg = new_bar_years.get_svg();
+                var svgH = new_bar_years.get_svgH();
+                var svgW = new_bar_years.get_svgW();  
+                var count_clicks = 0;             
+                
+                var label_space = 19;
+                var max_number_of_bars = 30;
+                var steps = 5;
+                var overlap = 0.2 //percent how much the background div should extend the lable-width
+                  
+
+                //check if number of years contained in the data, extend the number of planed bars that will be shown
+                if ( data_years_all.length > max_number_of_bars ) { 
+                        
+                    //claculate the number of needed periods that have to be slidable
+                    number_of_periods = Math.floor( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
+
+                    data_amount = set_data_period( data_amount_all, 0, steps, max_number_of_bars, number_of_periods);
+                    data_years = set_data_period( data_years_all, 0, steps, max_number_of_bars, number_of_periods);
+
+                } else {
+
+                    data_amount = data_amount_all;
+                    data_years = data_years_all;
+                        
+                }
+
+                new_bar_years.set_scale( data_amount, svgH, svgW, 0.2 ); 
+                xScale = new_bar_years.get_oridinal_scale();
+                yScale = new_bar_years.get_linear_scale();
+                
+
+                //create group for bars
+                bar_group = svg.append( "g" );
+
+                //create group for labels years and move y to the bottom of the chart-svg
+                label_group = svg.append( "g" )
+                                .attr("transform", "translate(0," + svgH + ")");
 
                 btn_group = svg.append( "g" )
                                 .attr("transform", "translate(-5," + svgH + ")");
 
-                buttons = btn_group.selectAll( "text" )
+                var create_bars = function () { 
+                        //console.log( "create_bars start" );  
+                        //console.dir( data_amount );
+                        
+                        //fill group with bars
+                        bar = bar_group.selectAll( "rect" )
+                                .data( data_amount )
+                                .enter ()
+                                .append ( "rect" )
+                                .attr ({
+                                    x: function( d, i ){ return xScale( i ) },
+                                    y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
+                                    width: xScale.rangeBand(),
+                                    height: function( d ){ return yScale( d ); },
+                                    fill: "#EEEEEE",
+                                    class: "bar",
+                                    id: function( d,i ) { 
+                                        return "bar_" + data_years[i]; }
+                                }) 
+                                .on( "click", function( d, j ) {
+                                    //bar is fist clicked >> bar and label_year turn into yellow
+                                    //bar is second clicked >> bar and label_year turn into orignal color
+
+                                    clicked_id_text = "#label_year_" + data_years[ j ];
+                                    clicked_id_bar = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );                      
+                                });          
+                }; 
+
+                var update_bars = function ( dataset_amount, dataset_years ){
+                        //console.log( "update_bars aufgerufen" );
+                        
+                        //fill group with bars
+                        bar = bar_group.selectAll( "rect" )
+                                .data( dataset_amount )
+                                .attr ({
+                                    y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
+                                    x: function( d, i ){ return xScale( i ) },
+                                    width: xScale.rangeBand(),
+                                    height: function( d ){ return yScale( d ); },
+                                    fill: "#EEEEEE",
+                                    class: "bar",
+                                    id: function( d,i ) { 
+                                        return "bar_" + dataset_years[i]; }
+                                }) 
+                                .on( "click", function( d, j ) {
+                                    //bar is fist clicked >> bar and label_year turn into yellow
+                                    //bar is second clicked >> bar and label_year turn into orignal color
+
+                                    clicked_id_text = "#label_year_" + dataset_years[ j ];
+                                    clicked_id_bar = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                                    change_color_of_item( clicked_id_text, "black", "#FFE601" );                      
+                                }); 
+                    //console.log( "update_bars ende" );                                 
+                }; 
+
+                var create_background_divs = function () {
+                    var background_div, label_width, label_height;
+
+                    label_width = get_width_of_text_element( svg, label_group, data_years ).width;
+                    label_height = get_width_of_text_element( svg, label_group, data_years ).height;
+
+                    background_div = label_group.selectAll( "rect" )
+                                    .data( data_years )
+                                    .enter()
+                                    .append( "rect" )
+                                    .text ( function( d ) { return d; } )
+                                    .attr({
+                                        x: function( d, i ){ return xScale( i ) - ( (label_width * overlap / 2) ) },
+                                        y: 0 - label_height,  
+                                        id: function( d, i ){ return d },
+                                        width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
+                                        height: label_height + ( label_height * overlap ),
+                                        fill: "black"
+                                    })
+                }; 
+
+                var create_labels = function () {
+                    var labels;
+                    //create labels for years
+                    labels = label_group.selectAll( "text" )
+                                .data( data_years )
+                                .enter()
+                                .append( "text" )
+                                .text ( function( d ) { return d; } )
+                                .attr({
+                                    x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
+                                    y: 0, //cause of grouping and transform of the labels_group
+                                    fill: "white",
+                                    class: "labels",
+                                    "text-anchor": "middle",
+                                    id: function (d,i) { return "label_year_" + d; }
+                                })
+                                .on( "click", function( d, j ) {
+                                    //label_year is fist clicked >> bar and label_year turn into yellow
+                                    //label_year is second clicked >> bar and label_year turn into orignal color
+
+                                    clicked_id_bar = "#bar_" + data_years[ j ];
+                                    clicked_id_text = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );
+                                
+                                 });    
+                };
+
+                var update_labels = function ( dataset_years ) {
+                    //console.log( "update_labels aufgerufen" );
+
+                    //create labels for years
+                    labels = label_group.selectAll( "text" )
+                                .data( dataset_years )
+                                .text ( function( d ) { return d; } )
+                                .attr({
+                                    x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
+                                    y: 0, //cause of grouping and transform of the labels_group
+                                    fill: "white",
+                                    class: "labels",
+                                    "text-anchor": "middle",
+                                    id: function (d,i) { return "label_year_" + d; }
+                                })
+                                .on( "click", function( d, j ) {
+                                    //label_year is fist clicked >> bar and label_year turn into yellow
+                                    //label_year is second clicked >> bar and label_year turn into orignal color
+
+                                    clicked_id_bar = "#bar_" + dataset_years[ j ];
+                                    clicked_id_text = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
+                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );
+                                
+                                 });  
+                    //console.log( "update_labels ende" );  
+                };
+
+                var create_buttons = function () {
+                    var btn_left, btn_right, btn_group, buttons_text = [], background_div, buttons, buttons_width, buttons_height;
+
+                    buttons_text = ["<", ">"];
+
+                    btn_group = svg.append( "g" )
+                                    .attr("transform", "translate(-5," + svgH + ")");
+           
+                    
+                    buttons_width = get_width_of_text_element( svg, btn_group, buttons_text ).width;
+                    buttons_height = get_width_of_text_element( svg, btn_group, buttons_text ).height;
+
+                    background_div = btn_group.selectAll( "rect" )
+                                    .data( buttons_text )
+                                    .enter()
+                                    .append( "rect" )
+                                    .text ( function( d ) { return d; } )
+                                    .attr({
+                                        x: function( d, i ){ return i * svgW }, //later to include the width of the button image
+                                        y: 0 - buttons_height,
+                                        id: function( d, i ){ return d },
+                                        width: buttons_width,
+                                        height: buttons_height + ( buttons_height * overlap ),
+                                        fill: "black"
+                                    })
+                                    //console.log( "buttons_height: " + buttons_height );
+
+
+                    buttons = btn_group.selectAll( "text" )
                                 .data( buttons_text )
                                 .enter()
                                 .append( "text" )
@@ -437,6 +646,7 @@ PUBVIS = function () {
                                     x: function( d, i ){ return i * svgW }, //later to include the width of the button image
                                     y: 0,
                                     id: function( d, i ){ return d },
+                                    fill: "white"
                                 })
                                 .on( "click", function( d, j ) {
                                     //console.log( "button klicked: " + d );
@@ -465,36 +675,172 @@ PUBVIS = function () {
                                             //console.log("count_clicks: " + count_clicks);
                                     }
 
-                                    data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars);
-                                    data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars); 
+                                    data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars, number_of_periods);
+                                    data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods); 
 
-                                    chart.update_bars( data_amount, data_years );
-                                    chart.update_labels( data_years );
-
-                                    //console.log ("count_clicks" + count_clicks);
+                                    update_bars( data_amount, data_years );
+                                    update_labels( data_years );
                                 });
-            }
-    
+                    //console.log( "create_buttons ende" ); 
+                };
 
-            chart.render = function() {
+                new_bar_years.render = function () {
+                    create_bars();
+                    create_background_divs();
+                    create_labels();
+                    
+                    if ( (data_years_all.length - 1) >= max_number_of_bars + 1 ) {
+                        create_buttons();
+                    }
 
-                chart.bars();
-                chart.create_bars();
-                chart.labels();
-                chart.create_labels();
-                if ( (data_years_all.length - 1) >= max_number_of_bars + 1 ) {
-                    chart.create_buttons();
                 }
-            } 
+                //console.log( "ende create_bar_years" );
 
-            chart.setup();
-            chart.render();  
+                return new_bar_years;
+            };
+            
+            return { create_bar_years: create_bar_years };
+        }();
 
-            return chart;                   
+        var BAR_TYPE = function () {
+            //console.log ( "dataset_types: " );
+            //console.dir ( dataset_types );
 
-        }
+            var create_bar_type = function( params ){
+                //based on CHART
+                //with new code for bars and labels
+                var xScale, yScale, svg, svgH, svgW;
+                var all_entry_types = [];
+                var entry_types_text = [];
+                var new_bar_types;
+                var bar_group, labels_group, data_label_group, line_group;
+                var distance_label_to_bars = -10;
+                var label_height, label_space; 
+
+                label_space = 50;
+                new_bar_types = CHART.create_bar_chart( params );
+                all_entry_types = params.all_entry_types;
+                entry_types_text = params.entry_types_text;
+
+                new_bar_types.set_svg( "type_chart", ($(document).width()/2 ), 0 );
+                svg = new_bar_types.get_svg();
+                svgH = new_bar_types.get_svgH();
+                svgW = new_bar_types.get_svgW();
+
+                new_bar_types.set_scale( all_entry_types, (svgW/2), svgH, 0 ); 
+                xScale = new_bar_types.get_linear_scale();
+                yScale = new_bar_types.get_oridinal_scale();
+
+                //create svg-group
+                bar_group = svg.append( "g" );
+
+                //create group for labels years and move y to the bottom of the chart-svg
+                label_group = svg.append( "g" );
+
+                data_label_group = svg.append( "g" );
+                
+                line_group = svg.append("g");
+
+                label_height = get_width_of_text_element( svg, label_group, entry_types_text ).height;
+                
+
+                //functions to display data
+               var create_bars = function () {  
+                    bar = bar_group.selectAll( "rect" )
+                                .data( all_entry_types )
+                                .enter ()
+                                .append ( "rect" )
+                                .attr ({
+                                    x: 0,
+                                    y: function( d, i ){ return yScale( i ) },
+                                    width: function( d ){ return xScale( d ); },
+                                    //x: 0,
+                                    //y: function( d,i ){ console.log(d); return i+40 ; },
+                                    //width: function( d,i ){ console.log(d); return d ; },
+                                    //height: 10,
+                                    height: yScale.rangeBand(),
+
+                                    fill: "#EEEEEE",
+                                    class: "bar_type"
+                                    //id: 
+                                })                                     
+                }; 
+
+                var update_bars = function () {
+                    //under progress                     
+                }; 
+
+                var create_labels = function () {
+
+                    var labels, data_lbl;
+                    //create labels for years
+                    labels = label_group.selectAll( "text" )
+                                .data( entry_types_text )
+                                .enter()
+                                .append( "text" )
+                                .text ( function( d ) { return d; } )
+                                .attr({
+                                    y: function( d, i ){ return yScale( i ) + label_height }, 
+                                    x: distance_label_to_bars, 
+                                    fill: "black",
+                                    class: "label_type",
+                                    "text-anchor": "end",
+                                    id: function (d,i) { return "lbl_type_" + d; }
+                                })
+                                 
+                    data_lbl = data_label_group.selectAll( "text" )
+                                    .data( all_entry_types )
+                                    .enter()
+                                    .append( "text" )
+                                    .text ( function( d ) { return d; } )
+                                    .attr({
+                                        y: function( d, i ){ return yScale( i ) + label_height }, 
+                                        x: (svgW/2+label_space), 
+                                        fill: "black",
+                                        class: "lbl_text_data",
+                                        "text-anchor": "end"
+                                    })
+                };
+
+                var create_lines = function() {
+                    var lines;
+
+                    lines = line_group.selectAll( "line" )
+                                .data( all_entry_types )
+                                .enter()
+                                .append( "line" )
+                                .attr({
+                                    x1: 0,//function( d, i ){ return yScale( i ) + (label_height -3) }, //-3 so that the labels are in the middle of the bars
+                                    y1: function( d, i ){ return yScale( i ) + yScale.rangeBand() },//function( d, i ){ return yScale( i ) + (label_height -3) }, 
+                                    x2: svgW/2 + label_space,
+                                    y2: function( d, i ){ return yScale( i ) + yScale.rangeBand()},
+                                    "shape-rendering": "crispEdges",
+                                    "stroke": "black",
+                                    "stroke-width": 0.3
+                                })
+                };
+
+                var update_labels = function () {
+                };
+
+                new_bar_types.render = function () {
+                        create_bars();
+                        create_labels();
+                        create_lines();
+                }
+                return new_bar_types;
+            };
+
+            return { create_bar_type: create_bar_type };
+        }();
+        
         //call
-        var bar_chart = create_bar_chart ( data_years, data_amount );
+        var margin = {top: 20, right: 30, bottom: 20, left: 10};
+        var margin2 = {top: 0, right: 200, bottom: 0, left: 0};
+        var view_width = $(document).width(); //returns width of HTML document | $(window).width() returns width of browser viewport
+        var bar_chart = BAR_YEARS.create_bar_years( {data_years_all: dataset_years, data_amount_all: dataset_amount, view_height: 120, margin: margin, view_width: view_width } ).render();
+        var bar_type = BAR_TYPE.create_bar_type( {all_entry_types: dataset_types, entry_types_text: dataset_types_text, view_height: 170, margin: margin2, view_width: (view_width)} ).render();
+        //console.dir(bar_chart);
         //*************************BAR*CHART*ENDE***********************//
     }    
 
