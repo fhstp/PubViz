@@ -2,6 +2,7 @@ PUBVIS = function () {
     var make_it_all = function (params) {
         filename = params.filename;
         target = params.target;
+        selection_color = params.color;
 
         fetch_bibfile ( filename );        
     };
@@ -53,12 +54,15 @@ PUBVIS = function () {
                  errors: errors }; 
     }
 
+    //draw data
     //@param.json = bib entries in json format
     var display_data = function ( json ) {
-        var real_life_data, generated_data, dataset_years, dataset_amount, dataset_types, dataset_types_text;
-        var change_color_of_item, get_width_of_text_element, set_scale;
-        //draw data
         //console.dir( json );
+        var real_life_data, generated_data, dataset_years, dataset_amount, dataset_types, dataset_types_text;
+        var change_color_of_item, get_width_of_text_element, set_data_period;
+        var bar_chart, bar_type;
+        
+        
 
 
         //*************************SEARCH JSON******************************//
@@ -225,7 +229,7 @@ PUBVIS = function () {
                 year = startYear;
                 
                 for (var i = startYear; i <= 2014; i++ ) {
-                    amount = Math.floor((Math.random() * 10) + 1); //random # between 1 and 10
+                    amount = Math.floor((Math.random() * 40) + 1); //random # between 1 and 10
                     testArr_amount.push( amount );
                     testArr_years.push( year );
                     year++;
@@ -237,18 +241,20 @@ PUBVIS = function () {
 
             //*** datasets
             real_life_data = get_years( json );
-            generated_data = generate_testData( 1955 );
+            generated_data = generate_testData( 1959 );
 
-            //dataset_years = real_life_data.time_list;
-            dataset_years = generated_data.years;
-            //dataset_amount = real_life_data.amount_list;
-            dataset_amount = generated_data.amount;
+            dataset_years = real_life_data.time_list;
+            //dataset_years = generated_data.years;
+            dataset_amount = real_life_data.amount_list;
+            //dataset_amount = generated_data.amount;
             
             var real_life_data_types = get_types( json );
             dataset_types = real_life_data_types.type_list;
             dataset_types_text = real_life_data_types.types_text;
             //var testdata = generate_testData( 2008 );
             //dataset_types = testdata.amount;
+            //console.dir( dataset_types );
+
 
         //*************************HELPER FUNCTIONS***********************//
             //@param.clicked_item_id = String (e.g."#bar_2001")
@@ -303,7 +309,7 @@ PUBVIS = function () {
             //@params.count_clicks = number
             //@params.steps = number indicating how many years will be updated if button "left/right" is clicked
             //@params.max_number_of_bars = number of years to display in the bar chart (e.g 30 produce bars from 1984 - 2014)
-            var set_data_period = function ( incoming_dataset, count_clicks , steps, max_number_of_bars, number_of_periods ) {
+            set_data_period = function ( incoming_dataset, count_clicks , steps, max_number_of_bars, number_of_periods ) {
                 var new_dataset = {}, index_start, index_ende, end_period, start_period;
                 var incoming_dataset, count_clicks , steps, last_step, last_step_difference, max_number_of_bars;
 
@@ -351,12 +357,15 @@ PUBVIS = function () {
                 var oridinal_scale, linear_scale;
                 var margin;
                 var number_of_periods, steps, max_number_of_bars;
+                var color_bar, color_text;
         
                 //*** Setup dimensons
                 margin = params.margin;
                 view_height = params.view_height;
                 //view_width = $(document).width(); //returns width of HTML document | $(window).width() returns width of browser viewport
                 view_width = params.view_width;
+                color_bar = params.color_bar; 
+                color_text = params.color_text;
 
                 //calculate absolut width and height for svg
                 svgH = view_height - margin.top - margin.bottom;
@@ -379,20 +388,22 @@ PUBVIS = function () {
                     //console.log( "svg ende" );
                 }
                 
-                //@params.array1 = array for y-scale (e.g. amount of pubblications)
-                //@params.array2 = array for x-scale (e.g years of publications)
+                
                 chart.set_scale = function ( array, range_lin, range_ord, in_beteween_space ) {
                     //var range_lin, range_ord;
                     //console.log( "set_scale start" );
 
                     //*** Setting up a linear yScale for the height of the bars   
                     linear_scale = d3.scale.linear()
-                                .domain ([ d3.min( array ), d3.max( array ) ]) //max, min of inputrange
+                                //.domain ([ d3.min( array ), d3.max( array ) ]) 
+                                .domain ([ 0, d3.max( array ) ]) 
                                 .range([ 0, range_lin ]); 
+                    //console.log( "Linear_scale min: " +  d3.min( array ) + " max: " + d3.max( array ) + " range_lin: " + range_lin);
                     
                     oridinal_scale = d3.scale.ordinal()
                                         .domain( d3.range( array.length ) ) //d3.range(x) returns an array with x elements sorted from 0-x
                                         .rangeRoundBands([ 0, range_ord ], in_beteween_space); //5% space between bars
+                    //console.log( "ordinal_scale domain#: " +  array.length + " range_ord: " + range_ord + " in_beteween_space: " + in_beteween_space);
                 }
 
                 chart.get_svg = function() { return svg };
@@ -401,6 +412,8 @@ PUBVIS = function () {
                 chart.get_oridinal_scale = function() { return oridinal_scale };
                 chart.get_linear_scale = function() { return linear_scale };
                 chart.get_margins = function() { return margin };
+                chart.get_color_bar = function( ) { return color_bar };
+                chart.get_color_text = function( ) { return color_text };
 
                 chart.create_bars = function() { throw new Error ("NOT IMPLEMENTED") };
                 chart.update_bars = function() { throw new Error ("NOT IMPLEMENTED") };
@@ -424,7 +437,9 @@ PUBVIS = function () {
                 var xScale, yScale;
 
                 var data_years_all = params.data_years_all; 
-                var data_amount_all = params.data_amount_all;
+                var data_amount_all = params.data_amount_all;  
+                var color_background_div = params.color_background_div;           
+                
                 var new_bar_years = CHART.create_bar_chart( params );
                 
                 new_bar_years.set_svg( "chart", new_bar_years.get_margins().left, new_bar_years.get_margins().top );            
@@ -465,6 +480,7 @@ PUBVIS = function () {
 
                 //create group for labels years and move y to the bottom of the chart-svg
                 label_group = svg.append( "g" )
+                                .attr( "class", "label_group" ) 
                                 .attr("transform", "translate(0," + svgH + ")");
 
                 btn_group = svg.append( "g" )
@@ -484,7 +500,7 @@ PUBVIS = function () {
                                     y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
                                     width: xScale.rangeBand(),
                                     height: function( d ){ return yScale( d ); },
-                                    fill: "#EEEEEE",
+                                    fill: new_bar_years.get_color_bar(),
                                     class: "bar",
                                     id: function( d,i ) { 
                                         return "bar_" + data_years[i]; }
@@ -496,8 +512,8 @@ PUBVIS = function () {
                                     clicked_id_text = "#label_year_" + data_years[ j ];
                                     clicked_id_bar = "#" + d3.select(this).attr( "id" );
 
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );                      
+                                    change_color_of_item( clicked_id_bar, new_bar_years.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text, new_bar_years.get_color_text(), selection_color );                      
                                 });          
                 }; 
 
@@ -512,7 +528,7 @@ PUBVIS = function () {
                                     x: function( d, i ){ return xScale( i ) },
                                     width: xScale.rangeBand(),
                                     height: function( d ){ return yScale( d ); },
-                                    fill: "#EEEEEE",
+                                    fill: new_bar_years.get_color_bar(),
                                     class: "bar",
                                     id: function( d,i ) { 
                                         return "bar_" + dataset_years[i]; }
@@ -524,8 +540,8 @@ PUBVIS = function () {
                                     clicked_id_text = "#label_year_" + dataset_years[ j ];
                                     clicked_id_bar = "#" + d3.select(this).attr( "id" );
 
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "black", "#FFE601" );                      
+                                    change_color_of_item( clicked_id_bar, new_bar_years.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text,new_bar_years.get_color_text(), selection_color );                      
                                 }); 
                     //console.log( "update_bars ende" );                                 
                 }; 
@@ -547,7 +563,7 @@ PUBVIS = function () {
                                         id: function( d, i ){ return d },
                                         width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
                                         height: label_height + ( label_height * overlap ),
-                                        fill: "black"
+                                        fill: color_background_div
                                     })
                 }; 
 
@@ -562,7 +578,7 @@ PUBVIS = function () {
                                 .attr({
                                     x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
                                     y: 0, //cause of grouping and transform of the labels_group
-                                    fill: "white",
+                                    fill: new_bar_years.get_color_text(),
                                     class: "labels",
                                     "text-anchor": "middle",
                                     id: function (d,i) { return "label_year_" + d; }
@@ -574,8 +590,8 @@ PUBVIS = function () {
                                     clicked_id_bar = "#bar_" + data_years[ j ];
                                     clicked_id_text = "#" + d3.select(this).attr( "id" );
 
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );
+                                    change_color_of_item( clicked_id_bar, new_bar_years.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text, new_bar_years.get_color_text(), selection_color );
                                 
                                  });    
                 };
@@ -590,7 +606,7 @@ PUBVIS = function () {
                                 .attr({
                                     x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
                                     y: 0, //cause of grouping and transform of the labels_group
-                                    fill: "white",
+                                    fill: new_bar_years.get_color_text(),
                                     class: "labels",
                                     "text-anchor": "middle",
                                     id: function (d,i) { return "label_year_" + d; }
@@ -602,8 +618,8 @@ PUBVIS = function () {
                                     clicked_id_bar = "#bar_" + dataset_years[ j ];
                                     clicked_id_text = "#" + d3.select(this).attr( "id" );
 
-                                    change_color_of_item( clicked_id_bar, "#EEEEEE", "#FFE601" );
-                                    change_color_of_item( clicked_id_text, "white", "#FFE601" );
+                                    change_color_of_item( clicked_id_bar, new_bar_years.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text, new_bar_years.get_color_text(), selection_color );
                                 
                                  });  
                     //console.log( "update_labels ende" );  
@@ -632,7 +648,7 @@ PUBVIS = function () {
                                         id: function( d, i ){ return d },
                                         width: buttons_width,
                                         height: buttons_height + ( buttons_height * overlap ),
-                                        fill: "black"
+                                        fill: color_background_div
                                     })
                                     //console.log( "buttons_height: " + buttons_height );
 
@@ -646,7 +662,7 @@ PUBVIS = function () {
                                     x: function( d, i ){ return i * svgW }, //later to include the width of the button image
                                     y: 0,
                                     id: function( d, i ){ return d },
-                                    fill: "white"
+                                    fill: new_bar_years.get_color_text()
                                 })
                                 .on( "click", function( d, j ) {
                                     //console.log( "button klicked: " + d );
@@ -713,7 +729,7 @@ PUBVIS = function () {
                 var all_entry_types = [];
                 var entry_types_text = [];
                 var new_bar_types;
-                var bar_group, labels_group, data_label_group, line_group;
+                var bar, bar_group, label_group, data_label_group, line_group;
                 var distance_label_to_bars = -10;
                 var label_height, label_space; 
 
@@ -727,6 +743,7 @@ PUBVIS = function () {
                 svgH = new_bar_types.get_svgH();
                 svgW = new_bar_types.get_svgW();
 
+                //new_bar_years.set_scale( data_amount, svgH, svgW, 0.2 ); 
                 new_bar_types.set_scale( all_entry_types, (svgW/2), svgH, 0 ); 
                 xScale = new_bar_types.get_linear_scale();
                 yScale = new_bar_types.get_oridinal_scale();
@@ -754,21 +771,24 @@ PUBVIS = function () {
                                     x: 0,
                                     y: function( d, i ){ return yScale( i ) },
                                     width: function( d ){ return xScale( d ); },
-                                    //x: 0,
-                                    //y: function( d,i ){ console.log(d); return i+40 ; },
-                                    //width: function( d,i ){ console.log(d); return d ; },
-                                    //height: 10,
                                     height: yScale.rangeBand(),
+                                    fill: new_bar_types.get_color_bar(),
+                                    class: "bar_type",
+                                    id: function( d,i ) { 
+                                        return "bar_type_" + i; }
+                                })
+                                .on( "click", function( d, i ) {
+                                    //bar is fist clicked >> bar and label_year turn into yellow
+                                    //bar is second clicked >> bar and label_year turn into orignal color
 
-                                    fill: "#EEEEEE",
-                                    class: "bar_type"
-                                    //id: 
-                                })                                     
+                                    clicked_id_text = "#lbl_type_" + i;
+                                    clicked_id_bar = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, new_bar_types.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text, new_bar_types.get_color_text(), selection_color );                      
+                                });                                     
                 }; 
 
-                var update_bars = function () {
-                    //under progress                     
-                }; 
 
                 var create_labels = function () {
 
@@ -782,11 +802,23 @@ PUBVIS = function () {
                                 .attr({
                                     y: function( d, i ){ return yScale( i ) + label_height }, 
                                     x: distance_label_to_bars, 
-                                    fill: "black",
+                                    fill: new_bar_types.get_color_text(),
                                     class: "label_type",
                                     "text-anchor": "end",
-                                    id: function (d,i) { return "lbl_type_" + d; }
+                                    id: function ( d, i ) { return "lbl_type_" + i; }
                                 })
+                                .on( "click", function( d, i ) {
+                                    //label_year is fist clicked >> bar and label_year turn into yellow
+                                    //label_year is second clicked >> bar and label_year turn into orignal color
+
+                                    clicked_id_bar = "#bar_type_" + i;
+                                    clicked_id_text = "#" + d3.select(this).attr( "id" );
+
+                                    change_color_of_item( clicked_id_bar, new_bar_types.get_color_bar(), selection_color );
+                                    change_color_of_item( clicked_id_text, new_bar_types.get_color_text(), selection_color );
+                                
+                                 }); 
+
                                  
                     data_lbl = data_label_group.selectAll( "text" )
                                     .data( all_entry_types )
@@ -796,7 +828,7 @@ PUBVIS = function () {
                                     .attr({
                                         y: function( d, i ){ return yScale( i ) + label_height }, 
                                         x: (svgW/2+label_space), 
-                                        fill: "black",
+                                        fill: new_bar_types.get_color_text(),
                                         class: "lbl_text_data",
                                         "text-anchor": "end"
                                     })
@@ -820,8 +852,6 @@ PUBVIS = function () {
                                 })
                 };
 
-                var update_labels = function () {
-                };
 
                 new_bar_types.render = function () {
                         create_bars();
@@ -835,11 +865,26 @@ PUBVIS = function () {
         }();
         
         //call
-        var margin = {top: 20, right: 30, bottom: 20, left: 10};
-        var margin2 = {top: 0, right: 200, bottom: 0, left: 0};
-        var view_width = $(document).width(); //returns width of HTML document | $(window).width() returns width of browser viewport
-        var bar_chart = BAR_YEARS.create_bar_years( {data_years_all: dataset_years, data_amount_all: dataset_amount, view_height: 120, margin: margin, view_width: view_width } ).render();
-        var bar_type = BAR_TYPE.create_bar_type( {all_entry_types: dataset_types, entry_types_text: dataset_types_text, view_height: 170, margin: margin2, view_width: (view_width)} ).render();
+
+        bar_chart = BAR_YEARS.create_bar_years({
+            data_years_all: dataset_years, 
+            data_amount_all: dataset_amount, 
+            color_bar: "#d9d9d9", 
+            color_text: "white", 
+            color_background_div: "#333333", 
+            view_height: 120, 
+            margin: {top: 20, right: 30, bottom: 20, left: 10}, 
+            view_width: $(document).width() //returns width of HTML document | $(window).width() returns width of browser viewport 
+        }).render();
+
+        bar_type = BAR_TYPE.create_bar_type({
+            all_entry_types: dataset_types, 
+            entry_types_text: dataset_types_text, 
+            color_bar: "#d9d9d9", color_text: "black", 
+            view_height: 170, 
+            margin: {top: 0, right: 200, bottom: 0, left: 0}, 
+            view_width: $(document).width()
+        }).render();
         //console.dir(bar_chart);
         //*************************BAR*CHART*ENDE***********************//
     }    
