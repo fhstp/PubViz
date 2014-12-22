@@ -2,21 +2,7 @@
 *{
 	font-family: "SourceSansPro-Regular", sans-serif;
 	src: url('source-sans-pro/SourceSansPro-Regular.otf') format('opentype');
-	font-size: 14px;
-}
-
-.axis path,
-.axis line {
-	fill: none;
-	stroke: black;
-	shape-rendering: crispEdges;
-}
-
-.axis text {
-	font-family: sans-serif;
 	font-size: 11px;
+	background-color: #eeeeee;
 }
 
-.labels {
-	background-color: black;
-}
