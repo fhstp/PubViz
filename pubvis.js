@@ -67,6 +67,7 @@ PUBVIS = function () {
         var count_key_in_entryTags, get_years, get_types;
         var entryTypes_grouped_text = [ "Article", "Book", "Part of a Book", "Conference", "Thesis", "Report", "Misc" ];
         var selected_items_changed = false;
+        var timeline_changed = false;
         var setup_layout;
         var max_width = $(document).width();;
         var width = 1024;
@@ -169,7 +170,7 @@ PUBVIS = function () {
                 var list = params.list;
                 var item_contained = false;
 
-                if ( key === undefined ) { 
+                if ( key === undefined && list !== undefined ) { 
 
                     for ( var i = 0; i < array[list].length; i++)  {
 
@@ -179,7 +180,7 @@ PUBVIS = function () {
                     }
                 }
 
-                if ( list === undefined ) {
+                if ( list === undefined && key !== undefined ) {
 
                     for ( var z = 0; z < array.length; z++)  {
 
@@ -188,6 +189,17 @@ PUBVIS = function () {
                         }
                     }
                 }
+
+                if ( key === undefined && list === undefined ) {
+
+                    for ( var y = 0; y < array.length; y++)  {
+                        
+                        if ( array[ y ].toString() === value ) {
+                            item_contained = true;
+                        }
+                    }
+                }
+
                 return item_contained;
             }
 
@@ -250,7 +262,7 @@ PUBVIS = function () {
 
                     element.each( function() {
                         element_width = this.getBBox().width;
-                        element_height = this.getBBox().height
+                        element_height = this.getBBox().height;
                     } ) 
 
                     svg.selectAll( "text.element" ).remove();
@@ -498,6 +510,22 @@ PUBVIS = function () {
                 chart_type.highlight_subset( get_types( dataset ).type_list ); 
             }
 
+            var tooltip_change_visibility = function ( hoovered_year, bool ){
+                //console.log( "tooltip_change_visibility aufgerufen" );
+                var tooltip_id_normal = "#tooltip_normal_" + hoovered_year;
+                var tooltip_id_subset = "#tooltip_subset_" + hoovered_year;
+
+                if ( bool === true ){
+                    d3.select( tooltip_id_normal ).attr( "opacity", "1" );
+                    d3.select( tooltip_id_subset ).attr( "opacity", "1" );
+                } else {
+                    d3.select( tooltip_id_normal ).attr( "opacity", "0" );
+                    d3.select( tooltip_id_subset ).attr( "opacity", "0" );
+                }
+                //console.log( "opacity normal: " + d3.select( tooltip_id_normal ).attr( "opacity" ) );
+                //console.log( "opacity subset: " + d3.select( tooltip_id_subset ).attr( "opacity" ) );
+            }
+
         //*************************SEARCH JSON******************************//
             
 
@@ -582,7 +610,7 @@ PUBVIS = function () {
             //contained in the given list with filter criteria
             //@params.filter_criteria = Object with a list "years" and a list "types" (eg the "selected_items" list)
             var create_filtered_json = function( params ){
-                console.log( "create_filtered_json aufgerufen" );
+                //console.log( "create_filtered_json aufgerufen" );
                 var result = [];
                 var filter_criteria = params.filter_criteria;
                 var shorter_list, longer_list;
@@ -705,7 +733,7 @@ PUBVIS = function () {
                                 }
 
                                 if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Part of a book") ) { 
+                                    && (filter_criteria.types[v] === "Part of a Book") ) { 
 
                                     if (   ( json[i].entryType === "inbook")  
                                         || ( json[i].entryType === "incollection" ) ) {
@@ -904,10 +932,10 @@ PUBVIS = function () {
                     //calculate absolut width and height for svg
                     svgH = view_height - margin.top - margin.bottom;
                     svgW =  view_width - margin.left - margin.right;
-                    console.log( "svgH: " + svgH );
+                    //console.log( "svgH: " + svgH );
 
                     //public functions
-                    //*** create svg group appens it to the g-overview
+                    //*** create svg group appends it to the g-overview
                     chart.set_svg_group = function ( params ) { 
                         var id = params.id;
                         var transform_xPos = params.transform_xPos;
@@ -981,7 +1009,9 @@ PUBVIS = function () {
                     var max_number_of_bars = 30;
                     var steps = 5;
                     var overlap = 0.2 //percent how much the background div should extend the lable-width
-                      
+                    var tooltip_subset_height;
+                    var hoovered_year;
+
                     //check if number of years contained in the data, extend the number of planed bars that will be shown
                     if ( data_years_all.length > max_number_of_bars ) { 
                             
@@ -1032,11 +1062,13 @@ PUBVIS = function () {
                                         width: xScale.rangeBand(),
                                         height: function( d ){ return yScale( d ); },
                                         fill: new_bar_years.get_color_bar(),
-                                        class: "bar",
+                                        //class: "bar",
+                                        class: function( d,i ) { return "bar " + data_years[i]; },
                                         id: function( d,i ) { 
                                             return "bar_" + data_years[i]; }
                                     }) 
                                     .on( "click", function( d, j ) {
+                                        //console.log( "CLICK: create_bars" );
                                         
                                         item_value = data_years[ j ].toString();
                                         var item_type = "year";
@@ -1056,13 +1088,122 @@ PUBVIS = function () {
                                             add_selected_item( {value: item_value, 
                                                                 key: item_key} );
 
+
                                         } 
-                                    });          
+                                    })
+                                    .on("mouseover", function( d, i ) {
+                                        //console.log( "mouseover create_bar" );
+
+                                        hoovered_year = data_years[ i ].toString();
+
+                                        tooltip_change_visibility( hoovered_year, true );
+
+                                    })
+                                    .on("mouseout", function( d, i ) {
+                                        //console.log( "mouseoverout create_bar" );
+
+                                        hoovered_year = data_years[ i ].toString();
+
+                                        if ( !item_already_selected( {array: selected_items, list: item_key, value: hoovered_year} ) ) {
+                                            tooltip_change_visibility( hoovered_year, false );
+                                        }
+
+                                    });                                         
                     }; 
+
+                    var create_tooltip = function(){
+                        //console.log("tooltip aufgerufen");
+                        var distance_to_bar = 3;
+                        var selected_dataset = [];
+                        
+                        tooltip_subset_height = get_width_of_text_element({ svg: svg, group: bar_group, data: data_amount }).height;
+                        //console.log( "tooltip_subset_height: " + tooltip_subset_height );
+                        
+                        var  tooltips = bar_group.selectAll( "text" )
+                                        .data( data_amount )
+                                        .enter()
+                                        .append( "text" )
+                                        .text ( function( d ) { return d; } )
+                                        .attr({
+                                            x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2)},
+                                            y: function( d ){ return svgH - yScale( d ) - label_space - tooltip_subset_height - distance_to_bar; }, //3 space between bar and label
+                                            fill: "black",
+                                            opacity: 0,
+                                            "font-weight": "normal",
+                                            id: function( d,i ) { return "tooltip_normal_" + data_years[i]; },
+                                            "text-anchor": "middle"
+                                        })
+
+                        //if no data is selected we need an array which contains 0 for each selected data 
+                        for( var i = 0; i < dataset_amount.length; i++ ){
+                            selected_dataset.push(0);
+                        }
+
+                        var  tooltips_subset = bar_highlight.selectAll( "text" )
+                                        .data( data_amount )
+                                        .enter()
+                                        .append( "text" )
+                                        .text ( function( d,i ) { return selected_dataset[i]; } )
+                                        .attr({
+                                            x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2)},
+                                            y: function( d ){ return svgH - yScale( d ) - label_space - distance_to_bar; }, //3 space between bar and label
+                                            fill: "black",
+                                            opacity: 0,
+                                            id: function( d,i ) { return "tooltip_subset_" + data_years[i]; },
+                                            "font-weight": "bold",
+                                            "text-anchor": "middle"
+                                        })
+                    }
+
+                    var update_tooltip = function( params ){
+                        //console.log("update tooltip aufgerufen");
+                        var data_amount = params.data_amount;
+                        var dataset_years = params.data_years;
+                        var selected_dataset = params.selected_dataset;
+                        var distance_to_bar = 3;
+
+                        var tooltips = bar_group.selectAll( "text" )
+                                        .data( data_amount )
+                                        .text ( function( d ) { return d; } )
+                                        .attr({
+                                            x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2)},
+                                            y: function( d ){ return svgH - yScale( d ) - label_space - tooltip_subset_height - distance_to_bar; }, //3 space between bar and label
+                                            fill: "black",
+                                            opacity: 0,
+                                            id: function( d,i ) { return "tooltip_normal_" + dataset_years[i]; },
+                                            "font-weight": "normal",
+                                            class: "tooltip_normal",
+                                            "text-anchor": "middle"
+                                        })
+
+                        if ( selected_dataset === undefined ){
+                            console.log( "selected_dataset undefined" );
+                            selected_dataset = [];
+                            for( var i = 0; i < data_amount.length; i++ ){
+                                selected_dataset.push(0);
+                            }
+                        }
+
+                        var  tooltips_subset = bar_highlight.selectAll( "text" )
+                                        .data( data_amount )
+                                        .text ( function( d,i ) { return selected_dataset[i]; } )
+                                        .attr({
+                                            x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2)},
+                                            y: function( d ){ return svgH - yScale( d ) - label_space - distance_to_bar; }, //3 space between bar and label
+                                            fill: "black",
+                                            opacity: 0,
+                                            id: function( d,i ) { return "tooltip_subset_" + dataset_years[i]; },
+                                            "font-weight": "bold",
+                                            class: "tooltip_subset",
+                                            "text-anchor": "middle"
+                                        })
+                    }
 
                     var update_bars = function ( dataset_amount, dataset_years ){
                             //console.log( "update_bars aufgerufen" );
                             
+                            update_tooltip({ data_amount: dataset_amount, data_years: dataset_years });
+
                             //fill group with bars
                             bar = bar_group.selectAll( "rect" )
                                     .data( dataset_amount )
@@ -1077,6 +1218,7 @@ PUBVIS = function () {
                                             return "bar_" + dataset_years[i]; }
                                     }) 
                                     .on( "click", function( d, j ) {
+                                        //console.log( "CLICK: update_bars" );
 
                                         item_value = data_years[ j ].toString();
                                         item_key = "years";
@@ -1091,6 +1233,20 @@ PUBVIS = function () {
 
                                         }
                                     
+                                    })
+                                    .on("mouseover", function( d, i ) {
+                                        //console.log( "mouseover update_bars" );
+
+                                        hoovered_year = data_years[ i ].toString();
+                                        tooltip_change_visibility( hoovered_year, true );
+
+                                    })
+                                    .on("mouseout", function( d, i ) {
+                                        //console.log( "mouseoverout update_bars" );
+
+                                        hoovered_year = data_years[ i ].toString();
+                                        tooltip_change_visibility( hoovered_year, false );
+
                                     });                                  
                     }; 
 
@@ -1108,8 +1264,7 @@ PUBVIS = function () {
                                         width: xScale.rangeBand(),
                                         height: function( d ){ return yScale( d ); },
                                         opacity:0,
-                                        //fill: new_bar_years.get_color_bar(),
-                                        class: "bar",
+                                        class: function( d,i ) { return "bar subset " + data_years[i]; },
                                         id: function( d,i ) { 
                                             return "bar_subset" + data_years[i]; }
                                     }) 
@@ -1122,17 +1277,38 @@ PUBVIS = function () {
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                              console.log( "arleady sel" );
                                              remove_selected_item( {value: item_value, key: item_key} ); 
+
                                         } else {
                                             
                                             add_selected_item( {value: item_value, key: item_key} );
 
+
                                         } 
-                                    });          
+                                    })
+                                    .on("mouseover", function( d, i ) {
+                                        //console.log( "mouseover: create_bars_subset" );
+
+                                        hoovered_year = data_years[ i ].toString();
+                                        tooltip_change_visibility( hoovered_year, true );
+
+                                    })
+                                    .on("mouseout", function( d, i ) {
+                                        //console.log( "mouseoverOut: create_bars_subset" );
+
+                                        hoovered_year = data_years[ i ].toString();
+                                        item_key = "years";
+
+                                        if ( !item_already_selected( {array: selected_items, list: item_key, value: hoovered_year} ) ) {
+                                            tooltip_change_visibility( hoovered_year, false );
+                                        }
+                                    });                                        
                     };
 
                     new_bar_years.highlight_subset = function ( data_selected ) {
                         //console.log( "years: highlight_subset aufgerufen" );
-
+                        
+                        update_tooltip({ selected_dataset: data_selected, data_amount: data_amount, data_years: data_years });
+                        
                         bar = bar_highlight.selectAll( "rect" )
                                     .data( data_selected )
                                     .attr ({
@@ -1141,26 +1317,35 @@ PUBVIS = function () {
                                         width: xScale.rangeBand(),
                                         height: function( d ){ return yScale( d ); },
                                         fill: selection_color,
-                                        opacity:1,
-                                        class: "bar",
+                                        opacity: 1,
+                                        //class: "bar",
+                                        class: function( d,i ) { return "bar subset highlight " + data_years[i]; },
                                         id: function( d,i ) { 
                                             return "bar_subset" + data_years[i]; }
                                     }) 
                                     .on( "click", function( d, j ) {
-
+                                        //console.log( "CLICK: highlight_subset_bar" );
+                                        
                                         item_value = data_years[ j ].toString();
                                         item_key = "years";
 
-
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
-                                             console.log( "arleady sel" );
-                                             remove_selected_item( {value: item_value, key: item_key} ); 
+                                             
+                                             remove_selected_item( {value: item_value, key: item_key} );
+                                             tooltip_change_visibility( item_value, false ); 
                                         } else {
                                             
-                                            add_selected_item( {value: item_value, key: item_key} );
-
-                                        } 
-                                    }); 
+                                            add_selected_item( {value: item_value, key: item_key} );  
+                                            tooltip_change_visibility( item_value, true );                                    
+                                        }                                       
+                                    })
+                                    
+                        for ( var x = 0; x < selected_items.years.length; x++ ) { 
+                            
+                            if ( item_already_selected( {array: data_years, value: selected_items.years[x]} ) ) { 
+                                tooltip_change_visibility( selected_items.years[x], true );
+                            }
+                        }                   
                     };
 
                     var create_background_divs = function () {
@@ -1341,11 +1526,17 @@ PUBVIS = function () {
 
                                         update_bars( data_amount, data_years );
                                         update_labels( data_years );
+                                        update_tooltip({ data_amount: data_amount, data_years: data_years });
+
+                                        timeline_changed = true;
+
+                                            
                                     }); 
                     };
 
                     new_bar_years.render = function () {
                         create_bars();
+                        create_tooltip();
                         create_bars_subset();
                         create_background_divs();
                         create_labels();
@@ -1625,7 +1816,7 @@ PUBVIS = function () {
             }();
 
             var AMOUNT = function ( params ) {
-                console.log( "amount aufgerufen" );
+                //console.log( "amount aufgerufen" );
                 var amount;
                 var total_nb = params.total;
                 var selected_nb = params.selected;
@@ -1719,12 +1910,17 @@ PUBVIS = function () {
 
             $( "svg" ).click(function(event) {
 
-                var filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
+                if ( selected_items_changed || timeline_changed ) { 
+                    
+                    var filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
 
-                update_views({ changed_data: filtered_json });
+                    update_views({ changed_data: filtered_json });
 
-                show_amount.update_selected_amount({ selected_new: filtered_json.length });
+                    show_amount.update_selected_amount({ selected_new: filtered_json.length });
 
+                    selected_items_changed = false;
+                    timeline_changed = false;
+                }
 
             });   
     } 
