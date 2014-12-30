@@ -792,6 +792,101 @@ PUBVIS = function () {
                 return { entries: result };
             }
 
+            //function that capitalize fist letters of each word in the given string
+            //returns string
+            //source: http://stackoverflow.com/questions/4878756/javascript-how-to-capitalize-first-letter-of-each-word-like-a-2-word-city
+            var to_title_case = function (str) {
+
+                return str.replace(/\w\S*/g, function(txt) {
+                                                    //console.log( "txt.charAt(0): " + txt.charAt(0) );
+                                                    //console.log( "txt.substr(1): " + txt.substr(1) );
+                                                    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                                                }
+                                        );
+            }
+
+            var get_words = function ( json ) {
+                console.log( "get_words aufgerufen" );
+                var all_words = [];
+                var all_words_str;
+                var all_words_single;
+                //var all_words_trimed = [];
+                var words = [];
+                //var item;
+                var count = 1;
+                var current, next;
+
+                //fetch all words from json
+                all_words = collect_key_in_entryTags( { json: json, key: "keywords", value: "" } ).values;
+                //console.dir( all_words );
+                
+                all_words_str = all_words.toString();
+                //cleanup commas
+                //all_words_str = all_words_str.replace (/,/g, "");
+                all_words_str = all_words_str.replace (/,|\[|\]|\(|\)/g, "");
+
+                //split string at every whitspace
+                all_words_single = all_words_str.split( " " );
+                //console.dir( all_words_single );
+                
+                //sort the array ignoring upper and lower case
+                all_words_single.sort(
+                    function(a, b) {
+                        var a_lowerCase = a.toLowerCase();
+                        var b_lowerCase = b.toLowerCase();
+
+                        if (a_lowerCase < b_lowerCase) return -1;
+                        if (a_lowerCase > b_lowerCase) return 1;
+
+                        return 0;
+                    }
+                );
+                //console.dir( all_words_single );
+
+
+                for (var i = 0; i < all_words_single.length; i++) {
+
+                    current = to_title_case( all_words_single[i] );
+                    
+                    if ( i < all_words_single.length-1 ) { 
+                        next = to_title_case( all_words_single[( i + 1 )] );
+                    } else {
+                        next = "";  
+                    }
+                    
+
+                    if ( current === next ){ 
+
+                        count += 1;
+                        
+                    } else {
+                        //console.log( "current: " + current + " next: " + next );
+                        if (    (current !== "") 
+                             && (current !== "And") 
+                             && (current !== "&")
+                             && (current !== "+")
+                             && (current !== "-")
+                             && (current !== "/") 
+                             && (current !== "#")
+                             && (current !== "*")
+                             && (current !== "%")
+                             && (current !== "$")
+                             && (current !== "Of")
+                             && (current !== "E.g.") 
+                             && (current !== "I.e.") 
+                             && (current !== "The") ) { 
+
+                            words.push( {text: current, size: count} );
+                            count = 1;
+                        }
+                    }
+                    
+                }
+                console.log( "words" );
+                console.dir( words );               
+            }
+            get_words( json );
+
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
