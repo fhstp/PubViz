@@ -60,8 +60,11 @@ PUBVIS = function () {
     var display_data = function ( json ) {
         //console.dir( json );
         var real_life_data, generated_data, dataset_years, dataset_amount, dataset_types, dataset_types_text;
+        var filtered_json;
         var change_color_of_item, get_width_of_text_element, set_data_period;
+        var show_header, show_amount, show_btn_clearAll;
         var chart_years = {}, chart_type = {};
+        var keywords = [], wordcloud = {}, list = {};
         var selected_items = { years: [], types: [] };
         var add_selected_item, remove_selected_item, item_already_selected;
         var count_key_in_entryTags, get_years, get_types;
@@ -69,32 +72,41 @@ PUBVIS = function () {
         var selected_items_changed = false;
         var timeline_changed = false;
         var setup_layout;
-        var max_width = $(document).width();;
+        var window_width = $(document).width();
+        var max_width = 1024;
         var width = 1024;
         var space_left = 0;
 
-        //calculate how much space of the left is needed to setup in the middle
-        if ( max_width > width){
-            space_left = (max_width - width) /2
+        //set width and calculate how much space of the left is needed to setup the svg in the middle
+        if ( window_width > width){
+            space_left = (window_width - width) /2;
+            width = max_width;
+        } else { 
+            width = window_width;
+            space_left = 0;
         }
-        //console.log( "width: " + width );
-        //console.log( "space_left: " + space_left );
-
 
         //*************************HELPER FUNCTIONS***********************//
             //builds the necessary svg and svg-groups
             setup_layout = function () { 
+                //console.log( "setup aufgerufen" );
+                //console.log( "window_width: " + window_width );
                 var header;
                 var overview;
+                var clouds;
+                var list;
                 var background_overview;
+                var background_cloud_words;
+                var background_cloud_authors;
+                var background_list;
 
 
                 svg = d3.select( "#pubvis_container" )
                   .append( "svg" )
                   .attr({
                     id: "pubVis",
-                    width: max_width, //full size of screen for the svg
-                    height: 800
+                    width: window_width, //full size of screen for the svg
+                    height: 880
                   })
                   .attr("transform", "translate(" + space_left + "," + 30 + ")"); 
          
@@ -110,7 +122,21 @@ PUBVIS = function () {
                                             width: width,
                                             height: 30
                                         })
-                                        .attr("transform", "translate( 0, 0)")
+                                        //.attr("transform", "translate( 0, 0)")
+                                        .attr("transform", "translate( 0, -10)")
+
+                var clearAll = d3.select( "#pubVis" )
+                                        .append( "g" )
+                                        .attr({
+                                            id: "clearAll",
+                                            width: 75,
+                                            height: 28
+                                        })
+                                        //btn middle: .attr("transform", "translate(" + (width/2 - (75/2)) + "," + 25 + ")");
+                                        .attr("transform", "translate(" + (width - 75) + "," + 25 + ")");
+                                        
+
+                
                                     
 
                 overview = d3.select( "#pubVis" )
@@ -134,6 +160,67 @@ PUBVIS = function () {
                                             id: "background_overview"
                                         })
                                         .attr("transform", "translate( 0, 0)");
+
+                clouds = d3.select( "#pubVis" )
+                                        .append( "g" )
+                                        .attr({
+                                            id: "clouds",
+                                            width: width,
+                                            height: 390 //includes space between overivew and cloud
+                                        })
+                                        .attr("transform", "translate( 0, 460)");
+
+                background_clouds_words = d3.select( "#clouds" )
+                                        .append ( "rect" )
+                                        .attr ({
+                                            x: 0,
+                                            y: 0, 
+                                            width: (width/2-15), //15 because of the space between the two clouds
+                                            height: 360 ,
+                                            fill: "#FFFFFF",
+                                            opacity: 1,
+                                            id: "background_clouds_words"
+                                        })
+                                        //.attr("transform", "translate( 0, 0)");
+                                        .attr("transform", "translate(" + (width/2 + 15) + "," + 0 + ")");
+
+                background_clouds_authors = d3.select( "#clouds" )
+                                        .append ( "rect" )
+                                        .attr ({
+                                            x: 0,
+                                            y: 0, 
+                                            width: (width/2-15), //15 because of the space between the two clouds
+                                            height: 360 ,
+                                            fill: "#FFFFFF",
+                                            opacity: 1,
+                                            id: "background_clouds_authors"
+                                        })
+                                        //.attr("transform", "translate( 0, 0)");
+                                        .attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+                /*list = d3.select( "#pubVis" )
+                                        .append( "g" )
+                                        .attr({
+                                            id: "list",
+                                            width: width,
+                                            height: 390 //includes space between overivew and cloud
+                                        })
+                                        .attr("transform", "translate( 0, 850)");
+
+                background_list = d3.select( "#list" )
+                                        .append ( "rect" )
+                                        .attr ({
+                                            x: 0,
+                                            y: 0, 
+                                            width: width,
+                                            height: 360 ,
+                                            fill: "#FFFFFF",
+                                            opacity: 1,
+                                            id: "background_list"
+                                        })
+                                        .attr("transform", "translate( 0, 0)");
+                    */
+
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -497,10 +584,11 @@ PUBVIS = function () {
                          entries: result_entries };
             } 
 
-            //update the views of the years-chart and the type-chart according to the given entry list
+            //update the views of the years-chart, type-chart, wordCloud and according to the given entry list
             //@params.canged_data = a list with etries
             var update_views = function( params ){
                 var dataset = params.changed_data;
+                var selected_words;
 
                 chart_years.highlight_subset( get_years({ 
                                                     json: dataset, 
@@ -508,12 +596,31 @@ PUBVIS = function () {
                                                 }).amount_list );
 
                 chart_type.highlight_subset( get_types( dataset ).type_list ); 
+
+                show_amount.update_selected_amount({ selected_new: dataset.length });
+
+                if ( dataset.length === 0 ){ 
+                    list = LIST({ data:json, update:true });
+                }else{
+                    list = LIST({ data:dataset, update:true });
+                }
+
+                selected_words = get_words(dataset).words;
+                wordCloud = CLOUD({ id_name:"keywords", 
+                                        words: keywords, 
+                                        xPos: (width/2 + 15), 
+                                        yPos: 0, 
+                                        selection: selected_words, 
+                                        color_text: "#333333" 
+                                    });                
             }
 
             var tooltip_change_visibility = function ( hoovered_year, bool ){
                 //console.log( "tooltip_change_visibility aufgerufen" );
+               // var ids = [];
                 var tooltip_id_normal = "#tooltip_normal_" + hoovered_year;
                 var tooltip_id_subset = "#tooltip_subset_" + hoovered_year;
+                //ids.push( tooltip_id_normal, tooltip_id_subset );
 
                 if ( bool === true ){
                     d3.select( tooltip_id_normal ).attr( "opacity", "1" );
@@ -523,7 +630,19 @@ PUBVIS = function () {
                     d3.select( tooltip_id_subset ).attr( "opacity", "0" );
                 }
                 //console.log( "opacity normal: " + d3.select( tooltip_id_normal ).attr( "opacity" ) );
-                //console.log( "opacity subset: " + d3.select( tooltip_id_subset ).attr( "opacity" ) );
+                //console.log( "opacity subset: " + d3.select( tooltip_id_subset ).attr( "opacity" ) );                
+            }
+
+            var get_tooltip_ids = function( year ){
+                var ids = [];
+
+                var tooltip_id_normal = "#tooltip_normal_" + year;
+                var tooltip_id_subset = "#tooltip_subset_" + year;
+                ids.push( tooltip_id_normal, tooltip_id_subset );
+
+                return { //id_normal: tooltip_id_normal,
+                         //id_subset: tooltip_id_subset 
+                         ids: ids};
             }
 
         //*************************SEARCH JSON******************************//
@@ -805,8 +924,11 @@ PUBVIS = function () {
                                         );
             }
 
+            //fetch all keywords of the given object
+            //count the occuance of any words 
+            //(eg the keyword "visual analytics" will be splited up into two words )
             var get_words = function ( json ) {
-                console.log( "get_words aufgerufen" );
+                //console.log( "get_words aufgerufen" );
                 var all_words = [];
                 var all_words_str;
                 var all_words_single;
@@ -878,14 +1000,83 @@ PUBVIS = function () {
 
                             words.push( {text: current, size: count} );
                             count = 1;
+                        } else {
+                            //console.log( "current: " + current );
                         }
                     }
                     
                 }
-                console.log( "words" );
-                console.dir( words );               
+                //console.log( "words" );
+                //console.dir( words );  
+                return{ words: words };             
             }
-            get_words( json );
+
+            var limit_words = function ( params ) {
+                var words = params.words;
+                var max = params.max;
+                var min = params.min;
+                var absolut_max = 85;
+
+                //console.log( "words.length: " + words.length );
+                words.sort( function ( a, b ) {
+                    //console.log( "a[1]: " + a[1] ); 
+                    return b.size - a.size;
+                });
+
+                //console.dir( words );
+
+                if (words.length >= max) {
+                    //console.log( "max exceeded" );
+                    //console.log( "words[max].size: " + words[max].size )
+                    var max_size = words[max].size;
+                    //console.log( "max_size" + max_size );
+                    var new_length;
+                    var number_to_remove;
+
+                    for ( var i = max; i >= 0; i-- ) {
+                        //console.log( "i: " + i );
+                        //console.log( "max_size: " + max_size + " words[i].size: " + words[i].size);
+                        if ( max_size < words[i].size ){ 
+                            //console.log( "max_size: " + max_size + " < " + " words[i].size: " + words[i].size);
+
+                            //console.log( "max_size: " + words[i].text );
+                            //console.log( "i: " + i );
+                            new_length = i;
+
+                            if ( new_length < min ){
+                                //console.log( "new_length: " + new_length + " < " + " min: " + min);
+                                
+                                for ( var i = max; i < words.length; i++ ) {
+                                    
+                                    if ( max_size > words[i].size && i < absolut_max ){ 
+                                        //console.log( "max_size: " + max_size + " > " + " words[i].size: " + words[i].size + " && " + " i: " + i + " < " + " absolut_max: " + absolut_max );
+                                        //console.log( "max_size: " + words[i].size );
+                                        //console.log( "i: " + i );
+                                        //console.log( "cut here: " + words[i].text );
+                                        new_length = i;
+                                        break;
+                                    }
+                                }    
+
+                            }
+                            number_to_remove = words.length - new_length ;
+                            //console.log( "remove: " + remove );
+                            words.splice( (new_length), number_to_remove);
+                            break;
+                        }
+                    }
+                }
+
+                //console.log( "words from limit function:" );
+                //console.dir( words );
+
+                return words;
+            }
+
+            //var words = get_words(json).words;
+            //console.log( "words.length:" + words.length );
+            //console.dir( words );
+            //limit_words({ words: words, max: 17, min: 15 });
 
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
@@ -1001,7 +1192,72 @@ PUBVIS = function () {
                                     })
             }
 
-        //**************************OVERVIEW******************************//
+        //***************************CLEAR ALL******************************//
+
+            var CLEAR_ALL = function(){
+                var empty = [];
+                var btn_clearAll;
+                var clearAll;
+                var btn_text
+
+                btn_clearAll = d3.select( "#clearAll" )
+                                .append("g")
+                                .attr( "id", "btn_clearAll" )
+                                .on("click", function( d, i ) {
+                                    //console.log( "clearAll" );
+                                    //console.dir( selected_items );
+                                    selected_items = { years: [], types: [] };
+                                    update_views({ changed_data: empty });
+                                }).on("mouseover", function() {
+                                        d3.select("#btn_clearAll_line").attr( "stroke", selection_color );
+
+                                }).on("mouseout", function() {
+                                        d3.select("#btn_clearAll_line").attr( "stroke", "#333333" );
+
+                                }).on("mousedown", function() {
+                                        d3.select("#txt_clearAll").attr( "fill", selection_color );
+                                }).on("mouseup", function() {
+                                        d3.select("#txt_clearAll").attr( "fill", "#f5f5f5" );
+                                });
+
+                clearAll = btn_clearAll.append ( "rect" )
+                                        .attr({
+                                            x: 0, 
+                                            y: 0, 
+                                            width: 75,
+                                            height: 28,
+                                            fill: "#333333",
+                                            id: "clearAll_div"
+                                    });
+
+                var lines = btn_clearAll.append( "line" )
+                                    .attr({
+                                        x1: 0,
+                                        y1: 0,
+                                        x2: 0,
+                                        y2: 28,
+                                        id: "btn_clearAll_line",
+                                        "shape-rendering": "crispEdges",
+                                        "stroke": "#333333",
+                                        "stroke-width": "5"
+                                    });
+
+
+                btn_text = btn_clearAll.append( "text" )
+                                    .text( "ClearAll" )
+                                    .attr({
+                                            x: 20, 
+                                            y: 18, 
+                                            id: "txt_clearAll",
+                                            fill: "#f5f5f5",
+                                            "text-anchor": "start",
+                                            "font-weight": "lighter"
+
+                                    });
+
+            }
+
+        //***************************OVERVIEW******************************//
             var CHART = function () {
                 //@param.view_height = number, gives the height of the availabel space; margins will be subtracted
                 //@param.list_of_margins = eg. margin = {top: 20, right: 30, bottom: 20, left: 10}
@@ -1103,13 +1359,15 @@ PUBVIS = function () {
                     var label_space = 19;
                     var max_number_of_bars = 30;
                     var steps = 5;
-                    var overlap = 0.2 //percent how much the background div should extend the lable-width
+                    var overlap = 0.5 //percent how much the background div should extend the lable-width
                     var tooltip_subset_height;
                     var hoovered_year;
+                    var ids;
 
                     //check if number of years contained in the data, extend the number of planed bars that will be shown
                     if ( data_years_all.length > max_number_of_bars ) { 
-                            
+                        
+                        overlap = 0.2;  
                         //claculate the number of needed periods that have to be slidable
                         number_of_periods = Math.floor( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
 
@@ -1129,17 +1387,21 @@ PUBVIS = function () {
                     
 
                     //create group for bars
-                    bar_group = svg.append( "g" );
+                    bar_group = svg.append( "g" )
+                                   .attr( "class", "bar_group" ) ;
 
                     var bar_highlight = svg.append( "g" );
 
                     //create group for labels years and move y to the bottom of the chart-svg
                     label_group = svg.append( "g" )
                                     .attr( "class", "label_group" ) 
-                                    .attr("transform", "translate(0," + svgH + ")");
+                                    .attr("transform", "translate(0," + (svgH) + ")");
 
                     btn_group = svg.append( "g" )
+                                    .attr( "class", "btn_group" ) 
                                     .attr("transform", "translate(-5," + svgH + ")");
+
+                    var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
 
                     new_bar_years.get_current_displayed_years = function() { return data_years };
 
@@ -1198,9 +1460,14 @@ PUBVIS = function () {
                                         //console.log( "mouseoverout create_bar" );
 
                                         hoovered_year = data_years[ i ].toString();
+                                        ids = get_tooltip_ids( hoovered_year).ids;
 
-                                        if ( !item_already_selected( {array: selected_items, list: item_key, value: hoovered_year} ) ) {
+                                        if ( d3.select(ids[0]).attr( "class") !== "permanent" ){
+                                            //console.log( "class is not permanent" );
                                             tooltip_change_visibility( hoovered_year, false );
+                                        }else{
+                                            //console.log( "class is permanent" );
+                                            tooltip_change_visibility( hoovered_year, true );
                                         }
 
                                     });                                         
@@ -1226,7 +1493,7 @@ PUBVIS = function () {
                                             opacity: 0,
                                             "font-weight": "normal",
                                             id: function( d,i ) { return "tooltip_normal_" + data_years[i]; },
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
 
                         //if no data is selected we need an array which contains 0 for each selected data 
@@ -1246,7 +1513,7 @@ PUBVIS = function () {
                                             opacity: 0,
                                             id: function( d,i ) { return "tooltip_subset_" + data_years[i]; },
                                             "font-weight": "bold",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
                     }
 
@@ -1268,7 +1535,7 @@ PUBVIS = function () {
                                             id: function( d,i ) { return "tooltip_normal_" + dataset_years[i]; },
                                             "font-weight": "normal",
                                             class: "tooltip_normal",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
 
                         if ( selected_dataset === undefined ){
@@ -1290,7 +1557,7 @@ PUBVIS = function () {
                                             id: function( d,i ) { return "tooltip_subset_" + dataset_years[i]; },
                                             "font-weight": "bold",
                                             class: "tooltip_subset",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
                     }
 
@@ -1320,7 +1587,7 @@ PUBVIS = function () {
 
 
                                         if ( item_already_selected( { array: selected_items, list: item_key, value: item_value} ) ) {
-                                             console.log( "arleady sel" );
+                                             
                                              remove_selected_item( { value: item_value, key: item_key} ); 
                                         } else {
                                             
@@ -1340,7 +1607,15 @@ PUBVIS = function () {
                                         //console.log( "mouseoverout update_bars" );
 
                                         hoovered_year = data_years[ i ].toString();
-                                        tooltip_change_visibility( hoovered_year, false );
+                                        ids = get_tooltip_ids( hoovered_year ).ids;
+
+                                        if ( d3.select(ids[0]).attr( "class") !== "permanent" ){
+                                            console.log( "class is permanent" );
+                                            tooltip_change_visibility( hoovered_year, false );
+                                        }else{
+                                            console.log( "class is permanent" );
+                                            tooltip_change_visibility( hoovered_year, true );
+                                        }
 
                                     });                                  
                     }; 
@@ -1391,10 +1666,14 @@ PUBVIS = function () {
                                         //console.log( "mouseoverOut: create_bars_subset" );
 
                                         hoovered_year = data_years[ i ].toString();
-                                        item_key = "years";
+                                        ids = get_tooltip_ids( hoovered_year ).ids;
 
-                                        if ( !item_already_selected( {array: selected_items, list: item_key, value: hoovered_year} ) ) {
+                                        if ( d3.select(ids[0]).attr( "class") !== "permanent" ){
+                                            //console.log( "class is not permanent" );
                                             tooltip_change_visibility( hoovered_year, false );
+                                        }else{
+                                            //console.log( "class is permanent" );
+                                            tooltip_change_visibility( hoovered_year, true );
                                         }
                                     });                                        
                     };
@@ -1403,17 +1682,29 @@ PUBVIS = function () {
                         //console.log( "years: highlight_subset aufgerufen" );
                         
                         update_tooltip({ selected_dataset: data_selected, data_amount: data_amount, data_years: data_years });
-                        
+
                         bar = bar_highlight.selectAll( "rect" )
                                     .data( data_selected )
                                     .attr ({
                                         x: function( d, i ){ return xScale( i ) },
                                         y: function( d ){ return svgH - yScale( d ) - label_space; }, //subtract space for labels to have space for labels ;o)
                                         width: xScale.rangeBand(),
-                                        height: function( d ){ return yScale( d ); },
+                                        height: function( d, i ) { 
+                                                    ids = get_tooltip_ids( data_years[i] ).ids;
+                                                    if ( yScale( d ) > 0 ){
+                                                        tooltip_change_visibility( data_years[i], true );
+                                                        d3.select(ids[0]).attr( "class", "permanent" );
+                                                        d3.select(ids[1]).attr( "class", "permanent" );
+
+                                                    }else{
+                                                        d3.select(ids[0]).attr( "class", "" );
+                                                        d3.select(ids[1]).attr( "class", "" );
+
+                                                    }
+                                                    return yScale( d ); 
+                                                },
                                         fill: selection_color,
                                         opacity: 1,
-                                        //class: "bar",
                                         class: function( d,i ) { return "bar subset highlight " + data_years[i]; },
                                         id: function( d,i ) { 
                                             return "bar_subset" + data_years[i]; }
@@ -1433,14 +1724,7 @@ PUBVIS = function () {
                                             add_selected_item( {value: item_value, key: item_key} );  
                                             tooltip_change_visibility( item_value, true );                                    
                                         }                                       
-                                    })
-                                    
-                        for ( var x = 0; x < selected_items.years.length; x++ ) { 
-                            
-                            if ( item_already_selected( {array: data_years, value: selected_items.years[x]} ) ) { 
-                                tooltip_change_visibility( selected_items.years[x], true );
-                            }
-                        }                   
+                                    })              
                     };
 
                     var create_background_divs = function () {
@@ -1456,10 +1740,10 @@ PUBVIS = function () {
                                         .text ( function( d ) { return d; } )
                                         .attr({
                                             x: function( d, i ){ return xScale( i ) - ( (label_width * overlap / 2) ) },
-                                            y: 0 - label_height,  
+                                            y: 0 - label_height-4,  
                                             id: function( d, i ){ return d },
                                             width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
-                                            height: label_height + ( label_height * overlap ),
+                                            height: label_height ,
                                             fill: color_background_div
                                         })
                                         .on( "click", function( d, j ) {
@@ -1484,6 +1768,8 @@ PUBVIS = function () {
                     var create_labels = function () {
                         //console.log( "create_labels aufgerufen" );
                         var labels;
+                        //var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
+                        //console.log( "lable_height: " + label_height );
                         //create labels for years
                         labels = label_group.selectAll( "text" )
                                     .data( data_years )
@@ -1492,7 +1778,7 @@ PUBVIS = function () {
                                     .text ( function( d ) { return d; } )
                                     .attr({
                                         x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
-                                        y: 0, 
+                                        y: -label_height/2, 
                                         fill: new_bar_years.get_color_text(),
                                         class: "labels",
                                         "text-anchor": "middle",
@@ -1522,14 +1808,14 @@ PUBVIS = function () {
 
                     var update_labels = function ( dataset_years ) {
                         //console.log( "update_labels aufgerufen" );
-
+                        //var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
                         //create labels for years
                         labels = label_group.selectAll( "text" )
                                     .data( dataset_years )
                                     .text ( function( d ) { return d; } )
                                     .attr({
                                         x: function( d, i ){ return xScale( i ) + (xScale.rangeBand()/2) },
-                                        y: 0, //cause of grouping and transform of the labels_group
+                                        y: -label_height/2, //cause of grouping and transform of the labels_group
                                         fill: new_bar_years.get_color_text(),
                                         class: "labels",
                                         "text-anchor": "middle",
@@ -1559,7 +1845,7 @@ PUBVIS = function () {
                         buttons_text = ["<", ">"];
 
                         btn_group = svg.append( "g" )
-                                        .attr("transform", "translate(-5," + svgH + ")");
+                                        .attr("transform", "translate(-5," + (svgH-19) + ")");
                
                         
                         buttons_width = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).width;
@@ -1572,10 +1858,10 @@ PUBVIS = function () {
                                         .text ( function( d ) { return d; } )
                                         .attr({
                                             x: function( d, i ){ return i * svgW }, //later to include the width of the button image
-                                            y: 0 - buttons_height,
+                                            y: 0,
                                             id: function( d, i ){ return d },
                                             width: buttons_width,
-                                            height: buttons_height + ( buttons_height * overlap ),
+                                            height: label_height ,
                                             fill: color_background_div
                                         })
 
@@ -1587,7 +1873,7 @@ PUBVIS = function () {
                                     .text ( function( d ) { return d; } )
                                     .attr({
                                         x: function( d, i ){ return i * svgW }, //later to include the width of the button image
-                                        y: 0,
+                                        y: label_height/1.25,
                                         id: function( d, i ){ return d },
                                         fill: new_bar_years.get_color_text()
                                     })
@@ -1809,7 +2095,7 @@ PUBVIS = function () {
                                     .append( "text" )
                                     .text ( function( d ) { return d; } )
                                     .attr({
-                                        y: function( d, i ){ return yScale( i ) + label_height +(label_height/2)}, 
+                                        y: function( d, i ){ return yScale( i ) + label_height +(label_height/3)}, 
                                         x: distance_label_to_bars, 
                                         fill: new_bar_types.get_color_text(),
                                         class: "label_type",
@@ -1840,11 +2126,11 @@ PUBVIS = function () {
                                         .append( "text" )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            y: function( d, i ){ return yScale( i ) + label_height +(label_height/2) }, 
+                                            y: function( d, i ){ return yScale( i ) + label_height +(label_height/3) }, 
                                             x: (svgW/2+label_space-6), 
                                             fill: new_bar_types.get_color_text(),
                                             class: "lbl_text_data",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
                     };
 
@@ -1855,11 +2141,11 @@ PUBVIS = function () {
                                         .append( "text" )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            y: function( d, i ){ return yScale( i ) + label_height +(label_height/2)}, 
+                                            y: function( d, i ){ return yScale( i ) + label_height +(label_height/3)}, 
                                             x: (svgW/2 + (label_space/2)), 
                                             fill: "white",
                                             class: "lbl_text_data",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
                     }
 
@@ -1868,12 +2154,12 @@ PUBVIS = function () {
                                         .data( data_selected )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            y: function( d, i ){ return yScale( i ) + label_height + (label_height/2)}, 
+                                            y: function( d, i ){ return yScale( i ) + label_height + (label_height/3)}, 
                                             x: (svgW/2 + (label_space/2)), 
                                             fill: new_bar_types.get_color_text(),
                                             "font-weight": "bold",
                                             class: "lbl_text_data_subset",
-                                            "text-anchor": "middle"
+                                            "text-anchor": "end"
                                         })
                     }
 
@@ -1891,7 +2177,7 @@ PUBVIS = function () {
                                         y2: function( d, i ){ return yScale( i ) + yScale.rangeBand()},
                                         "shape-rendering": "crispEdges",
                                         "stroke": "black",
-                                        "stroke-width": 0.3
+                                        "stroke-width": "0,3"
                                     })
                     };
 
@@ -1958,15 +2244,300 @@ PUBVIS = function () {
                 }
              
                 return { update_selected_amount: update_selected_amount };               
+            }   
+
+        //*****************************CLOUDS******************************// 
+
+            var CLOUD = function ( params ) {
+                //console.log( "cloud aufgerufen" );
+
+                var wordcloud;
+                var size = [450, 340];
+                var fontSize = d3.scale.log().range([10, 50]).clamp(true);
+                var margin = 10;
+                var update = false;
+
+                var dataset_words = params.words;
+                var xPos = params.xPos;
+                var yPos = params.yPos;
+                var id_name = params.id_name;
+                var selection = params.selection;
+                var color_text = params.color_text;
+
+                if ( selection !== undefined ) {
+                    update = true;
+                }
+
+                var keywords = d3.select( "#clouds" )
+                                .append("g")
+                                .attr( "id", id_name )
+                                .attr("transform", "translate(" + (xPos + margin) + "," + (yPos + margin) + ")")
+                                .attr("width", size[0])
+                                .attr("height", size[1])
+                                //.attr( "fill", "black" )
+                                .append("g")
+                                .attr("transform", "translate(" + (size[0]/2) + "," + (size[1]/2) + ")");
+              
+                d3.layout.cloud()
+                    .size(size)
+                    .words( dataset_words )
+                    .fontSize(function(d) { return fontSize( +d.size ); })
+                    .rotate(function() { return ~~(Math.random() ) * 90; })
+                    .on("end", draw)
+                    .start();
+
+
+                function draw( words ) {
+                    //console.log( "draw aufgerufen" );
+
+                    if ( !update ){
+                        //console.log("its no update");
+
+                        wordcloud = keywords.selectAll("text")
+                                    .data( words )
+                                    .enter()
+                                    .append("text")
+                                    .style("font-size", function(d) { return d.size + "px"; })
+                                    .style("fill", color_text )//function(d) { return "black"; })
+                                    .on("click", function(){
+                                                        d3.select(this).style("fill", selection_color);
+                                                })
+                                    .attr("text-anchor", "middle")
+                                    .attr("transform", function(d) {
+                                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                                    })
+                                    .text(function(d) { return d.text; });
+
+                    }else {
+                        //console.log("its an update");
+                        //console.dir( selection );
+
+                        //remove the old keywords
+                        $("#"+id_name).remove();
+
+                        wordcloud = keywords.selectAll("text")
+                                .data( words )
+                                .enter()
+                                .append("text")
+                                .text(function(d) { return d.text; })
+                                .style("font-size", function(d) { return d.size + "px"; })
+                                .style("fill", function(d) { return ( item_already_selected({ array:selection, key:"text", value:d.text }) ? selection_color : color_text); })
+                                .on("click", function(){
+                                                    d3.select(this).style("fill", selection_color);
+                                            })
+                                .attr("text-anchor", "middle")
+                                .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; });
+                                
+                    }
+                }
+            }    
+
+        //*****************************LIST******************************// 
+            var LIST = function( params ) {
+                var t;
+                var y;
+                var data = params.data;
+                var update = params.update;
+                //var update;
+                //location
+                if ( !update ){ 
+                    $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
+                    generate(0);
+                } else {
+                    $('#list').replaceWith("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
+                    generate(0);
+                }
+
+                $("#year").click(function() {
+                    if(y) {
+                        y = false;
+                        $("#year").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        generate(0);
+                    } else {
+                        y = true;
+                        t = false;
+                        $("#year").css({
+                            "border-right": "5px solid #ffc200"
+                        });
+                        $("#type").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        generate(1);
+                    }
+                    //console.log("year = " + y);
+                    //console.log("type = " + t);
+                });
+                $("#type").click(function() {
+                    if(t) {
+                        t = false;
+                        $("#type").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        generate(0);
+                    } else {
+                        t = true;
+                        y = false;
+                        $("#type").css({
+                            "border-right": "5px solid #ffc200"
+                        });
+                        $("#year").css({
+                            "border-right": "5px solid #d9d9d9"
+                        })
+                        $(".accordion").html('');
+                        generate(2);
+                    }
+                    //console.log("year = " + y);
+                    //console.log("type = " + t);
+                });
+
+                function generate(sortBy) {
+
+                    this.sortBy = sortBy;
+                    //console.log(sortBy);
+
+                    function subgenerate() {
+
+                        var type;
+                        var url;
+                        var abs;
+                        var title;
+                        var author;
+
+                        if(data[j].entryTags['author'] != undefined) {
+                            author = "<span style='font-weight: bold;'>" + data[j].entryTags['author'] + "</span>";
+                        } else {
+                            author = "<i style='font-weight: bold; font-style: italic;'>Unknown Author</i>";
+                        }
+
+                        if(data[j].entryTags['title'] != undefined) {
+                            title = data[j].entryTags['title'];
+                        } else {
+                            title = '<i>Unknown Title</i>';
+                        }
+
+                        if(data[j].entryTags['url'] != undefined) {
+                            url = "     <a style='float: right;' href='" + data[j].entryTags['url'] + "'>►</a>";
+                        } else {
+                            url = "";
+                        }
+
+                        type = cap(data[j].entryType);
+
+                        $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3>");
+
+                        if(data[j].entryTags['abstract'] != undefined) {
+                            abs = data[j].entryTags['abstract'] + "<br>  &nbsp; </p><p>" + data[j].entryTags['note'];
+                            $(".accordion").append("<div class='pane'>" + "<p style='text-align: justify;'>" + abs + "</p>" + "</div>");
+                        } else {
+                            abs = "";
+                        }
+
+                    }
+                    var key, count = 0;
+
+                    for(key in data) {
+                        if(data.hasOwnProperty(key)) {
+                            count++;
+                        }
+                    }
+
+                    function cap(string) {
+                        return string.charAt(0).toUpperCase() + string.slice(1);
+                    }
+
+                    if(sortBy == 0) {
+
+                        for(var j = 0; j < count; j++) {
+                            subgenerate();
+                        }
+
+                    } else if(sortBy == 1) {
+
+
+                        var yeararr = new Array();;
+
+                        for(var n = 0; n < count; n++) {
+
+                            yeararr.push(data[n].entryTags['year']);
+
+                        }
+                        var uniqueYear = [];
+                        $.each(yeararr, function(i, el) {
+                            if($.inArray(el, uniqueYear) === -1) uniqueYear.push(el);
+                        });
+                        uniqueYear.sort(function(a, b) {
+                            return b - a
+                        });
+                        //console.log(uniqueYear);
+
+                        for(i = 0; i < uniqueYear.length; i++) {
+
+                            $(".accordion").append("<h1>" + uniqueYear[i] + "</h1>");
+                            for(var j = 0; j < count; j++) {
+
+                                if(uniqueYear[i] == data[j].entryTags['year']) {
+                                    subgenerate();
+                                }
+                            }
+
+                        }
+
+                    } else if(sortBy == 2) {
+
+                        var typearr = new Array();
+
+                        for(var n = 0; n < count; n++) {
+
+                            typearr.push(data[n].entryType);
+
+                        }
+                        var uniqueType = [];
+                        $.each(typearr, function(i, el) {
+                            if($.inArray(el, uniqueType) === -1) uniqueType.push(el);
+                        });
+                        uniqueType.sort();
+                        //console.log(uniqueType);
+
+                        for(i = 0; i < uniqueType.length; i++) {
+
+                            $(".accordion").append("<h1>" + cap(uniqueType[i]) + "</h1>");
+                            for(var j = 0; j < count; j++) {
+
+                                if(uniqueType[i] == data[j].entryType) {
+                                    subgenerate();
+                                }
+                            }
+
+                        }
+
+
+                    }
+                    $(".accordion h3").click(function() {
+                        $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
+                        $(this).toggleClass("current");
+                        $(this).siblings("h3").removeClass("current");
+
+                    });
+
+                }
             }
 
-           
-
         //*****************************CALL**************************//
+            
+
+            //***build html structure
             setup_layout();
 
-            var show_header = HEADER();
+            //***display header
+            show_header = HEADER();
+            show_btn_clearAll = CLEAR_ALL();
 
+            //***display bar-chart with years
             chart_years = BAR_YEARS.create_bar_years({
                 data_years_all: dataset_years, 
                 data_amount_all: dataset_amount, 
@@ -1977,9 +2548,9 @@ PUBVIS = function () {
                 margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
                 view_width: 1024,
             });
-
             chart_years.render();
 
+            //***display bar-cahrt with types
             chart_type = BAR_TYPE.create_bar_type({
                 all_entry_types: dataset_types, 
                 entry_types_text: dataset_types_text, 
@@ -1989,17 +2560,22 @@ PUBVIS = function () {
                 margin: {top: 0, right: 200, bottom: 0, left: 0}, 
                 view_width: 1024,
             });
-
             chart_type.render();
 
-
-
-            var show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
+            //***display total number of entries and number of selected entries
+            show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
                                        color_text: "#333333",
                                        text_size: "70px",
                                        total: json.length,
                                        selected: "000"
                                     });
+            //***display tagCloud
+            keywords = get_words(json).words;
+            keywords = limit_words({ words: keywords, max: 85, min: 5 });
+            wordCloud = CLOUD({ id_name:"keywords", words: keywords, xPos: (width/2 + 15), yPos: 0 });
+
+            //***display list
+            list = LIST({ data:json, update:false });
 
             
 
@@ -2007,14 +2583,13 @@ PUBVIS = function () {
 
                 if ( selected_items_changed || timeline_changed ) { 
                     
-                    var filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
+                    filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
 
                     update_views({ changed_data: filtered_json });
 
-                    show_amount.update_selected_amount({ selected_new: filtered_json.length });
-
                     selected_items_changed = false;
                     timeline_changed = false;
+
                 }
 
             });   
