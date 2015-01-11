@@ -65,7 +65,7 @@ PUBVIS = function () {
         var show_header, show_amount, show_btn_clearAll;
         var chart_years = {}, chart_type = {};
         var keywords = [], wordcloud = {}, list = {};
-        var selected_items = { years: [], types: [] };
+        var selected_items = { years: [], types: [], keywords: [] };
         var add_selected_item, remove_selected_item, item_already_selected;
         var count_key_in_entryTags, get_years, get_types;
         var entryTypes_grouped_text = [ "Article", "Book", "Part of a Book", "Conference", "Thesis", "Report", "Misc" ];
@@ -228,7 +228,7 @@ PUBVIS = function () {
             //@params.types = Stirng ( eg "article" )
             //@params.authors && @params.words planed >> currently not implemented
             add_selected_item = function ( params ) {           
-                //console.log( "add_selected_item aufgerufen" );
+                //console.log( "call: add_selected_item" );
                 var value = params.value;
                 var key = params.key;
 
@@ -244,6 +244,14 @@ PUBVIS = function () {
                     last_selected_item = value;
                 }
 
+                if ( key === "keywords" ){
+                    selected_items.keywords.push( value );
+                    selected_items_changed = true;
+                    last_selected_item = value;
+                    //console.log("keywords added");
+
+                }
+
             }
 
             //search the array and retruns a boolean "true" if the item is contained
@@ -251,11 +259,14 @@ PUBVIS = function () {
             //@params.key = String (eg "year")
             //@params.value = String (eg "2011")
             item_already_selected = function ( params ) {
+                //console.log( "call: item_already_selected" );
                 var array = params.array;
                 var key = params.key;
                 var value = params.value;
                 var list = params.list;
                 var item_contained = false;
+
+                //console.log( "key: " + key + " value: " + value + " list: " + list );
 
                 if ( key === undefined && list !== undefined ) { 
 
@@ -287,6 +298,7 @@ PUBVIS = function () {
                     }
                 }
 
+                //console.log( "item contained: " + item_contained );
                 return item_contained;
             }
 
@@ -294,8 +306,11 @@ PUBVIS = function () {
             //@params.value = String (eg. "2011", "article")
             //@params.key = String ( "years" or "types")
             remove_selected_item = function ( params ) {
+                //console.log( "call remove_selected_item" );
                 var key = params.key;
                 var value = params.value;
+
+                //console.log( "key: " + key + " value: " + value );
 
                 for ( var i = 0; i < selected_items[key].length; i++)  {
 
@@ -303,6 +318,7 @@ PUBVIS = function () {
                         selected_items_changed = true;
                         last_removed_item = params.value;
                         selected_items[key].splice(i, 1);
+                        //console.log( "item removed: " + selected_items[key][ i ] );
                         break;
                     }
                 }
@@ -587,6 +603,7 @@ PUBVIS = function () {
             //update the views of the years-chart, type-chart, wordCloud and according to the given entry list
             //@params.canged_data = a list with etries
             var update_views = function( params ){
+                //console.log( "call: update_views" );
                 var dataset = params.changed_data;
                 var selected_words;
 
@@ -733,10 +750,16 @@ PUBVIS = function () {
                 var result = [];
                 var filter_criteria = params.filter_criteria;
                 var shorter_list, longer_list;
+                var str = "", n;
 
                 for ( var i = 0; i < json.length; i++ ){
+                    
+                    //only years are selected
+                    if (     (filter_criteria.years.length >= 1) 
+                          && (filter_criteria.types.length === 0)
+                          && (filter_criteria.keywords.length === 0)   ){
 
-                    if ( (filter_criteria.years.length >= 1) && (filter_criteria.types.length === 0) ){
+                        //console.log( "only years are selected" );
                     
                        for ( var y = 0; y < filter_criteria.years.length; y++ ){
 
@@ -750,7 +773,43 @@ PUBVIS = function () {
                         }
                     } 
 
-                    if ( (filter_criteria.types.length >= 1) &&  (filter_criteria.years.length === 0) ){ 
+                    
+                    //only keywords are selected
+                    if (     (filter_criteria.keywords.length >= 1) 
+                          && (filter_criteria.types.length === 0) 
+                          && (filter_criteria.years.length === 0)   ){
+                    
+                        //console.log( "only keywords are selected" );
+                        
+                        for ( var k = 0; k < filter_criteria.keywords.length; k++ ){
+                            
+                            //console.log( "i: " + i );
+                            //console.log( "json[i].entryTags.keywords: " + json[i].entryTags.keywords );
+                            if ( json[i].entryTags.keywords !== undefined ) { 
+                                //fetch keyword from json
+                                str = json[i].entryTags.keywords;
+                                //start every word with upper case
+                                str = to_title_case( json[i].entryTags.keywords );
+                                //lookup if filtered word match in the keywords of this entry
+                                n = str.search( filter_criteria.keywords[k] ); //if not contained n = -1 else it retruns the index
+
+                                if ( n !== (-1) ) {
+                                    //if match was found add this entry
+                                    result.push(json[i]);
+                                } else { 
+                                    //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                }
+                            }
+                        }
+                    } 
+
+
+                    //only types are selected
+                    if (   (filter_criteria.types.length >= 1) 
+                        && (filter_criteria.years.length === 0) 
+                        && (filter_criteria.keywords.length === 0) ){ 
+
+                        //console.log( "only types are selected" );
 
                         for ( var z = 0; z < filter_criteria.types.length; z++ ){
 
@@ -826,88 +885,483 @@ PUBVIS = function () {
                         }
                     } 
 
-                    if ( (filter_criteria.types.length >= 1) &&  (filter_criteria.years.length >= 1) ){ 
-                        
+                    //years and types are selected
+                    if (    (filter_criteria.types.length >= 1) 
+                        &&  (filter_criteria.years.length >= 1)
+                        &&  (filter_criteria.keywords.length === 0) ){ 
+
+                        //console.log( "years and types are selected" );
 
                         for ( var x = 0; x < filter_criteria.years.length; x++ ){
                             
                             for ( var v = 0; v < filter_criteria.types.length; v++ ){
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Article") ) { 
+                                //for ( var w = 0; w < filter_criteria.types.length; w++ ){
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Article") ) { 
+
+                                        if ( json[i].entryType === "article" ) {
+
+                                            result.push(json[i]);
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Book") ) { 
+
+                                        if (   ( json[i].entryType === "book") 
+                                            || ( json[i].entryType === "booklet" ) ) {
+
+                                            result.push(json[i]);
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Part of a Book") ) { 
+
+                                        if (   ( json[i].entryType === "inbook")  
+                                            || ( json[i].entryType === "incollection" ) ) {
+
+                                            result.push(json[i]);
+                                                
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Conference") ) { 
+
+                                        if (   ( json[i].entryType === "conference") 
+                                            || ( json[i].entryType === "proceedings" )
+                                            || ( json[i].entryType === "inproceedings" ) ) {
+
+                                            result.push(json[i]);
+
+                                        }
+                                    }
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Thesis") ) { 
+
+                                        if (   ( json[i].entryType === "thesis") 
+                                            || ( json[i].entryType === "mastersthesis" )
+                                            || ( json[i].entryType === "phdthesis" ) ) {
+
+                                            result.push(json[i]);
+
+                                        } 
+                                    }    
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Misc") ) { 
+
+                                        if ( json[i].entryType === "misc" ) {
+                                                result.push(json[i]);
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.year === filter_criteria.years[x]) 
+                                        && (filter_criteria.types[v] === "Report") ) { 
+
+                                        if (   ( json[i].entryType === "manual") 
+                                            || ( json[i].entryType === "techreport" ) ) {
+
+                                            result.push(json[i]);
+
+                                        } 
+                                    } 
+                               // }                           
+                            }
+                        }
+                    }
+
+                    //years and keywords are selected
+                    if (   (filter_criteria.types.length === 0) 
+                        && (filter_criteria.years.length >= 1)
+                        && (filter_criteria.keywords.length >= 1) ){ 
+
+                        //console.log( "years and keywords are selected" );
+
+                        for ( var a = 0; a < filter_criteria.years.length; a++ ){
+                            
+                            for ( var b = 0; b < filter_criteria.keywords.length; b++ ){
+
+                                if (   (json[i].entryTags.year === filter_criteria.years[a]) 
+                                    && (json[i].entryTags.keywords !== undefined) ) { 
+
+                                    //fetch keyword from json
+                                    str = json[i].entryTags.keywords;
+                                    //start every word with upper case
+                                    str = to_title_case( json[i].entryTags.keywords );
+                                    //lookup if filtered word match in the keywords of this entry
+                                    n = str.search( filter_criteria.keywords[b] ); //if not contained n = -1 else it retruns the index
+
+                                    if ( n !== (-1) ) {
+                                        //if match was found add this entry
+                                        result.push(json[i]);
+                                    } else { 
+                                        //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                    }
+                                }                        
+                            }
+                        }
+                    } 
+
+                    //types and keywords are selected
+                    if (    (filter_criteria.types.length >= 1) 
+                        &&  (filter_criteria.years.length === 0)
+                        &&  (filter_criteria.keywords.length >= 1) ){ 
+
+                        //console.log( "types and keywords are selected" );
+
+                        for ( var c = 0; c < filter_criteria.keywords.length; c++ ){
+                            
+                            for ( var d = 0; d < filter_criteria.types.length; d++ ){
+
+                                if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (filter_criteria.types[d] === "Article") ) { 
 
                                     if ( json[i].entryType === "article" ) {
+
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
                                             result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
                                     } 
                                 }
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Book") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined) 
+                                    && (filter_criteria.types[d] === "Book") ) { 
 
                                     if (   ( json[i].entryType === "book") 
                                         || ( json[i].entryType === "booklet" ) ) {
 
-                                        result.push(json[i]);
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
+                                            result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
                                     } 
                                 }
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Part of a Book") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined) 
+                                    && (filter_criteria.types[d] === "Part of a Book") ) { 
 
                                     if (   ( json[i].entryType === "inbook")  
                                         || ( json[i].entryType === "incollection" ) ) {
 
-                                        result.push(json[i]);
-                                            
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
+                                            result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
+                                                
                                     } 
                                 }
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Conference") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined)
+                                    && (filter_criteria.types[d] === "Conference") ) { 
 
                                     if (   ( json[i].entryType === "conference") 
                                         || ( json[i].entryType === "proceedings" )
                                         || ( json[i].entryType === "inproceedings" ) ) {
 
-                                        result.push(json[i]);
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
+                                            result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
 
                                     }
                                 }
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Thesis") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined)
+                                    && (filter_criteria.types[d] === "Thesis") ) { 
 
                                     if (   ( json[i].entryType === "thesis") 
                                         || ( json[i].entryType === "mastersthesis" )
                                         || ( json[i].entryType === "phdthesis" ) ) {
 
-                                        result.push(json[i]);
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
+                                            result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
 
                                     } 
                                 }    
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Misc") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined)
+                                    && (filter_criteria.types[d] === "Misc") ) { 
 
                                     if ( json[i].entryType === "misc" ) {
+                                            
+                                            //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
                                             result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
                                     } 
                                 }
 
-                                if (   (json[i].entryTags.year === filter_criteria.years[x]) 
-                                    && (filter_criteria.types[v] === "Report") ) { 
+                                if (   (json[i].entryTags.keywords !== undefined)
+                                    && (filter_criteria.types[d] === "Report") ) { 
 
                                     if (   ( json[i].entryType === "manual") 
                                         || ( json[i].entryType === "techreport" ) ) {
 
-                                        result.push(json[i]);
+                                        //fetch keyword from json
+                                        str = json[i].entryTags.keywords;
+                                        //start every word with upper case
+                                        str = to_title_case( json[i].entryTags.keywords );
+                                        //lookup if filtered word match in the keywords of this entry
+                                        n = str.search( filter_criteria.keywords[c] ); //if not contained n = -1 else it retruns the index
+
+                                        if ( n !== (-1) ) {
+                                            //if match was found add this entry
+                                            result.push(json[i]);
+                                        } else { 
+                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                        }
 
                                     } 
                                 }                            
                             }
                         }
-                    }             
+                    }
+
+                    //years, types and keywords are selected 
+                    if (    (filter_criteria.types.length >= 1) 
+                        &&  (filter_criteria.years.length >= 1)
+                        &&  (filter_criteria.keywords.length >= 1) ){ 
+
+                        console.log( "years, types and keywords are selected" );
+
+                        for ( var e = 0; e < filter_criteria.keywords.length; e++ ){
+
+                            for ( var f = 0; f < filter_criteria.years.length; f++ ){
+                            
+                                for ( var g = 0; g < filter_criteria.types.length; g++ ){
+
+                                    if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Article") ) { 
+
+                                        if ( json[i].entryType === "article" ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Book") ) { 
+
+                                        if (   ( json[i].entryType === "book") 
+                                            || ( json[i].entryType === "booklet" ) ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Part of a Book") ) { 
+
+                                        if (   ( json[i].entryType === "inbook")  
+                                            || ( json[i].entryType === "incollection" ) ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+                                                    
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Conference") ) { 
+
+                                        if (   ( json[i].entryType === "conference") 
+                                            || ( json[i].entryType === "proceedings" )
+                                            || ( json[i].entryType === "inproceedings" ) ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+
+                                        }
+                                    }
+
+                                    if (   (json[i].entryTags.keywords !== undefined) 
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Thesis") ) { 
+
+                                        if (   ( json[i].entryType === "thesis") 
+                                            || ( json[i].entryType === "mastersthesis" )
+                                            || ( json[i].entryType === "phdthesis" ) ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+
+                                        } 
+                                    }    
+
+                                    if (   (json[i].entryTags.keywords !== undefined)
+                                        && (json[i].entryTags.year === filter_criteria.years[f]) 
+                                        && (filter_criteria.types[g] === "Misc") ) { 
+
+                                        if ( json[i].entryType === "misc" ) {
+                                                
+                                                //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+                                        } 
+                                    }
+
+                                    if (   (json[i].entryTags.keywords !== undefined)
+                                        && (json[i].entryTags.year === filter_criteria.years[f])
+                                        && (filter_criteria.types[g] === "Report") ) { 
+
+                                        if (   ( json[i].entryType === "manual") 
+                                            || ( json[i].entryType === "techreport" ) ) {
+
+                                            //fetch keyword from json
+                                            str = json[i].entryTags.keywords;
+                                            //start every word with upper case
+                                            str = to_title_case( json[i].entryTags.keywords );
+                                            //lookup if filtered word match in the keywords of this entry
+                                            n = str.search( filter_criteria.keywords[e] ); //if not contained n = -1 else it retruns the index
+
+                                            if ( n !== (-1) ) {
+                                                //if match was found add this entry
+                                                result.push(json[i]);
+                                            } else { 
+                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                            }
+                                        } 
+                                    }
+                                }                            
+                            }
+                        }
+                    }            
                 }
+                //console.log( "result: " )
+                //console.dir( result );
                 return { entries: result };
             }
 
@@ -915,7 +1369,7 @@ PUBVIS = function () {
             //returns string
             //source: http://stackoverflow.com/questions/4878756/javascript-how-to-capitalize-first-letter-of-each-word-like-a-2-word-city
             var to_title_case = function (str) {
-
+                //console.log( "to_title_case: str: " + str );
                 return str.replace(/\w\S*/g, function(txt) {
                                                     //console.log( "txt.charAt(0): " + txt.charAt(0) );
                                                     //console.log( "txt.substr(1): " + txt.substr(1) );
@@ -932,27 +1386,39 @@ PUBVIS = function () {
                 var all_words = [];
                 var all_words_str;
                 var all_words_single;
+                var all_words_single_upperCase = [];
                 //var all_words_trimed = [];
-                var words = [];
+                var result = [];
                 //var item;
                 var count = 1;
                 var current, next;
+                var short_text, long_text
 
                 //fetch all words from json
                 all_words = collect_key_in_entryTags( { json: json, key: "keywords", value: "" } ).values;
                 //console.dir( all_words );
                 
                 all_words_str = all_words.toString();
-                //cleanup commas
+
+                //cleanup commas - only needed if the split will take place at any whitespace
                 //all_words_str = all_words_str.replace (/,/g, "");
-                all_words_str = all_words_str.replace (/,|\[|\]|\(|\)/g, "");
+                
+                //only needed if the split will take place at any whitespace
+                //all_words_str = all_words_str.replace (/,|\[|\]|\(|\)/g, "");
+
+                all_words_str = all_words_str.replace (/_/g, " ");
 
                 //split string at every whitspace
-                all_words_single = all_words_str.split( " " );
+                all_words_single = all_words_str.split( "," );
                 //console.dir( all_words_single );
+
+                for (var y = 0; y < all_words_single.length; y++) {   
+                    //change all words to start with upper case and trim them
+                    all_words_single_upperCase.push( to_title_case( $.trim( all_words_single[y] ) ) );
+                }             
                 
                 //sort the array ignoring upper and lower case
-                all_words_single.sort(
+                all_words_single_upperCase.sort(
                     function(a, b) {
                         var a_lowerCase = a.toLowerCase();
                         var b_lowerCase = b.toLowerCase();
@@ -963,27 +1429,45 @@ PUBVIS = function () {
                         return 0;
                     }
                 );
-                //console.dir( all_words_single );
+                //console.dir( all_words_single_upperCase );
 
 
-                for (var i = 0; i < all_words_single.length; i++) {
 
-                    current = to_title_case( all_words_single[i] );
+                //compare words and count their occurance
+                for (var i = 0; i < all_words_single_upperCase.length; i++) {
+                    //all words have to start with upper case 
+                    //current = to_title_case( all_words_single[i] );
+                    current = all_words_single_upperCase[i];
+                    long_text = all_words_single_upperCase[i];
                     
-                    if ( i < all_words_single.length-1 ) { 
-                        next = to_title_case( all_words_single[( i + 1 )] );
+                    if ( i < all_words_single_upperCase.length-1 ) { 
+                        //next = to_title_case( all_words_single[( i + 1 )] );
+                        next = all_words_single_upperCase[( i + 1 )];
                     } else {
                         next = "";  
-                    }
-                    
+                    } 
+
+                                     
 
                     if ( current === next ){ 
-
-                        count += 1;
                         
-                    } else {
-                        //console.log( "current: " + current + " next: " + next );
-                        if (    (current !== "") 
+                        count += 1;
+                        //console.log( "current: " + current + " next: " + next + " count: "+ count); 
+                        
+                    } 
+                     else {
+
+                        if ( current.length > 30 ){ 
+
+                            //console.log( "bin zu lang: " + current );
+                            short_text = current.substring( 0, 30 ) + "..." ;
+                            //console.log( "shortText: " + shor_text );
+                            long_text = current;
+                            current = short_text;
+
+                        } 
+                        
+                        /*if (    (current !== "") 
                              && (current !== "And") 
                              && (current !== "&")
                              && (current !== "+")
@@ -996,73 +1480,95 @@ PUBVIS = function () {
                              && (current !== "Of")
                              && (current !== "E.g.") 
                              && (current !== "I.e.") 
-                             && (current !== "The") ) { 
+                             && (current !== "The") ) { */
 
-                            words.push( {text: current, size: count} );
+                            //console.log( "PUSH: current: " + current + " count: "+ count);
+                            result.push( {text: current, size: count, long_text: long_text} );
+                            //console.dir( result );
                             count = 1;
-                        } else {
+                        //} else {
                             //console.log( "current: " + current );
-                        }
+                        //}
                     }
                     
                 }
-                //console.log( "words" );
-                //console.dir( words );  
-                return{ words: words };             
+                //console.log( "result" );
+                //console.dir( result );  
+                return{ words: result };             
             }
 
+            //reduce the length of the given object
+            //lookup the size of the element at the given optimum length. Count up till the size change
+            //if the size changes before the absolut max value is reached the object will be cut
+            //if the maximum size is exceeded and the size of the ojects hasn't changed the function will
+            //go back to the optimum object and count down till the size of the object changes and then cut
+            //@params.words = json
+            //@params.optimum_size = number
+            //@params.min = absolut minimum
             var limit_words = function ( params ) {
                 var words = params.words;
-                var max = params.max;
+                var optimum_length = params.optimum_size;
                 var min = params.min;
-                var absolut_max = 85;
+                var absolut_max = 100;
+                var optimum_size;
+                var new_length;
+                var number_to_remove;
 
-                //console.log( "words.length: " + words.length );
+                //sort the array descend according to the size of the elements
                 words.sort( function ( a, b ) {
                     //console.log( "a[1]: " + a[1] ); 
                     return b.size - a.size;
                 });
 
                 //console.dir( words );
+                //console.log( "words.length: " + words.length );
+                //console.log( "optimum_length: " + optimum_length );
 
-                if (words.length >= max) {
-                    //console.log( "max exceeded" );
-                    //console.log( "words[max].size: " + words[max].size )
-                    var max_size = words[max].size;
-                    //console.log( "max_size" + max_size );
-                    var new_length;
-                    var number_to_remove;
+                //check if the length of the given array exceeds the given optimum size
+                if (words.length >= optimum_length) {
+                    optimum_size = words[optimum_length].size;
+                    //console.log( "optimum_size: " + optimum_size );
+                    //console.log( "optimum_text: " + words[optimum_length].text );
 
-                    for ( var i = max; i >= 0; i-- ) {
-                        //console.log( "i: " + i );
-                        //console.log( "max_size: " + max_size + " words[i].size: " + words[i].size);
-                        if ( max_size < words[i].size ){ 
-                            //console.log( "max_size: " + max_size + " < " + " words[i].size: " + words[i].size);
+                    //look downward if to the element where the size get smaller
+                    for ( var i = optimum_length; i >= 0; i-- ) {
 
-                            //console.log( "max_size: " + words[i].text );
-                            //console.log( "i: " + i );
+                        if ( optimum_size < words[i].size ){ 
+                            //console.log( "optimum_size: " + optimum_size + " words[i].size: " + words[i].size);
+                            //remember the new length
                             new_length = i;
 
+                            //check if the new length is not lower than the given minimum length
                             if ( new_length < min ){
-                                //console.log( "new_length: " + new_length + " < " + " min: " + min);
-                                
-                                for ( var i = max; i < words.length; i++ ) {
+                                //console.log( "new length lower than given minimum" );
+
+                                for ( var i = optimum_length; i < words.length; i++ ) {
                                     
-                                    if ( max_size > words[i].size && i < absolut_max ){ 
-                                        //console.log( "max_size: " + max_size + " > " + " words[i].size: " + words[i].size + " && " + " i: " + i + " < " + " absolut_max: " + absolut_max );
-                                        //console.log( "max_size: " + words[i].size );
-                                        //console.log( "i: " + i );
-                                        //console.log( "cut here: " + words[i].text );
-                                        new_length = i;
-                                        break;
+                                    //check at which element the size grows
+                                    if ( optimum_size > words[i].size ){ 
+
+                                        //take care the size don't get bigger than the absolut maximum size
+                                        if ( i < absolut_max ) { 
+
+                                            //console.log( "size of element smaller, new length: " + i );
+                                            new_length = i;
+                                            break;
+
+                                        } else {
+                                            //console.log( "absolut max exceeded" );
+                                        }
+
+                                    } else {
+                                        //console.log( "optimum size not changed" );
                                     }
                                 }    
-
+                            } else { 
+                                //console.log( "size of elements grow, new length: " + new_length )
+                                number_to_remove = words.length - new_length ;
+                                //console.log( "remove: " + remove );
+                                words.splice( (new_length), number_to_remove);
+                                break;
                             }
-                            number_to_remove = words.length - new_length ;
-                            //console.log( "remove: " + remove );
-                            words.splice( (new_length), number_to_remove);
-                            break;
                         }
                     }
                 }
@@ -1073,10 +1579,6 @@ PUBVIS = function () {
                 return words;
             }
 
-            //var words = get_words(json).words;
-            //console.log( "words.length:" + words.length );
-            //console.dir( words );
-            //limit_words({ words: words, max: 17, min: 15 });
 
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
@@ -1206,7 +1708,7 @@ PUBVIS = function () {
                                 .on("click", function( d, i ) {
                                     //console.log( "clearAll" );
                                     //console.dir( selected_items );
-                                    selected_items = { years: [], types: [] };
+                                    selected_items = { years: [], types: [], keywords: [] };
                                     update_views({ changed_data: empty });
                                 }).on("mouseover", function() {
                                         d3.select("#btn_clearAll_line").attr( "stroke", selection_color );
@@ -2258,6 +2760,8 @@ PUBVIS = function () {
                 var update = false;
 
                 var dataset_words = params.words;
+                //console.dir( dataset_words );
+                //console.log( "dataset_words[0].long_text: " + dataset_words[0].long_text );
                 var xPos = params.xPos;
                 var yPos = params.yPos;
                 var id_name = params.id_name;
@@ -2282,7 +2786,7 @@ PUBVIS = function () {
                     .size(size)
                     .words( dataset_words )
                     .fontSize(function(d) { return fontSize( +d.size ); })
-                    .rotate(function() { return ~~(Math.random() ) * 90; })
+                    .rotate(function() { return ~~(Math.random() ) * 90; })                    
                     .on("end", draw)
                     .start();
 
@@ -2299,14 +2803,45 @@ PUBVIS = function () {
                                     .append("text")
                                     .style("font-size", function(d) { return d.size + "px"; })
                                     .style("fill", color_text )//function(d) { return "black"; })
-                                    .on("click", function(){
-                                                        d3.select(this).style("fill", selection_color);
-                                                })
                                     .attr("text-anchor", "middle")
                                     .attr("transform", function(d) {
                                             return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
                                     })
-                                    .text(function(d) { return d.text; });
+                                    .text(function( d ) { return d.text; })
+                                    .on("click", function( d ){
+                                            
+                                            //console.log( "call: clicked keyword" );
+
+
+                                            item_value = d.text;
+                                            item_key = "keywords";
+
+                                            if ( item_already_selected( { array: selected_items, 
+                                                                          list: item_key, 
+                                                                          value: item_value} ) ) {
+
+                                                 //console.log("before remove item");
+                                                 remove_selected_item( {value: item_value, 
+                                                                        key: item_key} ); 
+                                            } else {
+                                                //console.log("before add item");
+                                                add_selected_item( {value: item_value, 
+                                                                    key: item_key} );
+                                            } 
+                                            d3.select(this).style( "text-decoration", "underline" );    
+                                    })
+                                    .append("title") //show text on hover
+                                    .text(function(d) {
+
+                                        for ( var i = 0; i < dataset_words.length; i++ ){ 
+                                            
+                                            if ( dataset_words[i].text === d.text ) { 
+
+                                                return dataset_words[i].long_text;
+                                            }
+                                        }
+                                    });
+                                    
 
                     }else {
                         //console.log("its an update");
@@ -2322,11 +2857,39 @@ PUBVIS = function () {
                                 .text(function(d) { return d.text; })
                                 .style("font-size", function(d) { return d.size + "px"; })
                                 .style("fill", function(d) { return ( item_already_selected({ array:selection, key:"text", value:d.text }) ? selection_color : color_text); })
-                                .on("click", function(){
-                                                    d3.select(this).style("fill", selection_color);
-                                            })
                                 .attr("text-anchor", "middle")
-                                .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; });
+                                .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+                                .on("click", function( d ){
+                                            
+                                            //console.log( "call: clicked keyword" );
+
+                                            item_value = d.text;
+                                            item_key = "keywords";
+
+                                            if ( item_already_selected( { array: selected_items, 
+                                                                          list: item_key, 
+                                                                          value: item_value} ) ) {
+
+                                                 //console.log("before remove item");
+                                                 remove_selected_item( {value: item_value, 
+                                                                        key: item_key} ); 
+                                            } else {
+                                                //console.log("before add item");
+                                                add_selected_item( {value: item_value, 
+                                                                    key: item_key} );
+                                            }           
+                                })
+                                .append("title")//show text on hover
+                                .text(function(d) {
+
+                                    for ( var i = 0; i < dataset_words.length; i++ ){ 
+                                        
+                                        if ( dataset_words[i].text === d.text ) { 
+
+                                            return dataset_words[i].long_text;
+                                        }
+                                    }
+                                });
                                 
                     }
                 }
@@ -2571,7 +3134,9 @@ PUBVIS = function () {
                                     });
             //***display tagCloud
             keywords = get_words(json).words;
-            keywords = limit_words({ words: keywords, max: 85, min: 5 });
+            //console.log( "keywords" );
+            //console.dir( keywords );
+            keywords = limit_words({ words: keywords, optimum_size: 85, min: 1 });
             wordCloud = CLOUD({ id_name:"keywords", words: keywords, xPos: (width/2 + 15), yPos: 0 });
 
             //***display list
@@ -2581,6 +3146,10 @@ PUBVIS = function () {
 
             $( "svg" ).click(function(event) {
 
+                console.log( "selected_items" );
+                console.dir( selected_items );
+
+                //actions if sth was selected or the time period changed
                 if ( selected_items_changed || timeline_changed ) { 
                     
                     filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
@@ -2590,6 +3159,12 @@ PUBVIS = function () {
                     selected_items_changed = false;
                     timeline_changed = false;
 
+                   /* var string = "Data Mining, Visual Analytics, timorient";
+                    var number;
+                    number = string.search("Mining"); 
+                    console.log( "number: " + number );
+                    */
+                
                 }
 
             });   
