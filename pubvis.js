@@ -69,8 +69,8 @@ PUBVIS = function () {
         var add_selected_item, remove_selected_item, item_already_selected;
         var count_key_in_entryTags, get_years, get_types;
         var entryTypes_grouped_text = [ "Article", "Book", "Part of a Book", "Conference", "Thesis", "Report", "Misc" ];
-        var selected_items_changed = false;
-        var timeline_changed = false;
+        var selected_items_changed = false, last_selected_view, last_selected_item;
+        var current_timeline, timeline_changed = false;
         var setup_layout;
         var window_width = $(document).width();
         var max_width = 1024;
@@ -236,18 +236,21 @@ PUBVIS = function () {
                     selected_items.years.push( value );
                     selected_items_changed = true;
                     last_selected_item = value;
+                    last_selected_view = key;
                 }
 
                 if ( key === "types" ){
                     selected_items.types.push( value );
                     selected_items_changed = true;
                     last_selected_item = value;
+                    last_selected_view = key;
                 }
 
                 if ( key === "keywords" ){
                     selected_items.keywords.push( value );
                     selected_items_changed = true;
                     last_selected_item = value;
+                    last_selected_view = key;
                     //console.log("keywords added");
 
                 }
@@ -322,6 +325,7 @@ PUBVIS = function () {
                         break;
                     }
                 }
+                last_selected_item = value;
             }
 
             /*
@@ -338,6 +342,7 @@ PUBVIS = function () {
                 }
             }
             */
+            
 
             //if the width of an text element is needed before the text element can be drawn (e.g because of the order of svg elements)
             //creates the elements based on the given data, returns the width and height
@@ -660,6 +665,167 @@ PUBVIS = function () {
                 return { //id_normal: tooltip_id_normal,
                          //id_subset: tooltip_id_subset 
                          ids: ids};
+            }
+
+            var remove_highlight_selection_items_years = function(){
+                //console.log( "CALL: remove_highlight_selection_items_years" );
+                var id_txt_label, id_background_div;
+
+                //console.dir(current_timeline);
+                //console.log("current_timeline.length: " + current_timeline.length);
+
+                for ( var ct = 0; ct < current_timeline.length; ct++ ){ 
+
+                    var id_txt_label, id_background_div;
+
+                    id_txt_label = "#label_year_" + current_timeline[ct];
+                    //console.log( "id_txt_label: " + id_txt_label );
+
+                    id_background_div = "#background_div_" + current_timeline[ct];
+                    //console.log( "id_background_div: " + id_background_div );
+
+                    d3.select(id_background_div).attr('fill', "#333333");
+                    d3.select(id_background_div).attr('stroke', "");
+                    d3.select(id_txt_label).attr('fill', "#f5f5f5");
+                    d3.select(id_txt_label).attr('font-weight', "regular");
+
+                }
+                //console.log( "cleaning ended" );
+            }
+
+            var remove_highlight_selection_items_types = function () {
+                //console.log( "CALL: remove_highlight_selection_items_types" );
+                var id_txt_label, id_background_div;
+                
+                for ( var i = 0; i < entryTypes_grouped_text.length; i++ ){ 
+
+                    if ( entryTypes_grouped_text[i] === "Part of a Book") { 
+                        id_background_div = "#background_div_type_Part_of_a_Book"; 
+                    } else {
+                        id_background_div = "#background_div_type_" + entryTypes_grouped_text[i];
+                    }
+                    //console.log( "id_background_div: " + id_background_div );
+
+                    if ( entryTypes_grouped_text[i] === "Part of a Book") { 
+                        id_txt_label = "#lbl_type_Part_of_a_Book"; 
+                    } else {
+                        id_txt_label = "#lbl_type_" + entryTypes_grouped_text[i];
+                    }
+                    //console.log( "id_txt_label: " + id_txt_label );
+
+                    d3.select(id_background_div).attr('opacity', "0");
+                    d3.select(id_txt_label).attr('font-weight', "regular");
+
+                }
+                //console.log( "clean end" );
+            }
+
+            //lookup the selected_itmes list and highlight, 
+            //or rather remove the highlight of selected/decelected items
+            var highlight_selection_items = function(){
+                //console.log( "CALL: highlight_selection_items " );
+
+                var item_value = last_selected_item;
+                var item_key;
+                var id_txt_label, id_background_div;
+
+                if (   (selected_items.years.length > 0)
+                    && (selected_items.types.length >= 0)
+                    && (selected_items.keywords.length >= 0)  ) { 
+
+                    item_key = "years";
+
+                    remove_highlight_selection_items_years();
+
+                    for ( var i = 0; i < selected_items.years.length; i++ ){ 
+
+                        item_value = selected_items.years[i];
+
+                        id_txt_label = "#label_year_" + item_value;
+                        //console.log( "id_txt_label: " + id_txt_label );
+
+                        id_background_div = "#background_div_" + item_value;
+                        //console.log( "id_background_div: " + id_background_div );
+                         
+                        if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) 
+                            && item_already_selected( {array: current_timeline, value: item_value } ) ) { 
+
+                            //console.log( "item contained > highlight" );
+                            //console.log( "id_txt_label: " + id_txt_label );
+                            //console.log( "id_background_div: " + id_background_div );
+                            d3.select(id_background_div).attr('fill', selection_color);
+                            d3.select(id_background_div).attr('stroke', "#333333");
+                            d3.select(id_txt_label).attr('fill', "#333333");
+                            d3.select(id_txt_label).attr('font-weight', "bold");
+
+                        } else {
+                            //console.log( "item NOT contained > remove highlight" );
+                            //console.log( "id_txt_label: " + id_txt_label );
+                            //console.log( "id_background_div: " + id_background_div );
+                            d3.select(id_background_div).attr('fill', "#333333");
+                            d3.select(id_background_div).attr('stroke', "");
+                            d3.select(id_txt_label).attr('fill', "#f5f5f5");
+                            d3.select(id_txt_label).attr('font-weight', "regular");
+                        }
+                    }
+                }else {
+                    remove_highlight_selection_items_years();
+                }
+
+                //if ( last_selected_view === "types"  ) {
+                if (   (selected_items.types.length > 0)  
+                    && (selected_items.years.length >= 0) 
+                    && (selected_items.keywords.length >= 0) ) { 
+
+                    item_key = "types";
+
+                    remove_highlight_selection_items_types();
+                    
+                    for ( var x = 0; x < selected_items.types.length; x++ ){ 
+
+                        item_value = selected_items.types[x];
+
+                        if ( item_value === "Part of a Book") { 
+                            id_background_div = "#background_div_type_Part_of_a_Book"; 
+                        } else {
+                            id_background_div = "#background_div_type_" + item_value;
+                        }
+                        //console.log( "id_background_div: " + id_background_div );
+
+                        if ( item_value === "Part of a Book") { 
+                            id_txt_label = "#lbl_type_Part_of_a_Book"; 
+                        } else {
+                            id_txt_label = "#lbl_type_" + item_value;
+                        }
+                        //console.log( "id_txt_label: " + id_txt_label );
+
+                         
+                        if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) { 
+
+                            //console.log( "item contained > highlight" );
+                            //console.log( "id_txt_label: " + id_txt_label );
+                            //console.log( "id_background_div: " + id_background_div );
+                            d3.select(id_background_div).attr('opacity', '1');
+                            d3.select(id_txt_label).attr('font-weight', "bold");
+
+                        } else {
+                            //console.log( "item NOT contained > remove highlight" );
+                            //console.log( "id_txt_label: " + id_txt_label );
+                            //console.log( "id_background_div: " + id_background_div );
+                            d3.select(id_background_div).attr('opacity', "0");
+                            d3.select(id_txt_label).attr('font-weight', "regular");
+                        }
+                    }
+                } else {
+                    remove_highlight_selection_items_types();
+                }
+
+                if (   (selected_items.keywords.length > 0) 
+                    && (selected_items.types.length >= 0) 
+                    && (selected_items.years.length >= 0)  ){ 
+                   //work in progress...
+                   //troubles to append divs to words in wordcloud 
+                }
             }
 
         //*************************SEARCH JSON******************************//
@@ -1579,7 +1745,6 @@ PUBVIS = function () {
                 return words;
             }
 
-
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
@@ -1710,6 +1875,9 @@ PUBVIS = function () {
                                     //console.dir( selected_items );
                                     selected_items = { years: [], types: [], keywords: [] };
                                     update_views({ changed_data: empty });
+                                    remove_highlight_selection_items_years();
+                                    remove_highlight_selection_items_types();
+
                                 }).on("mouseover", function() {
                                         d3.select("#btn_clearAll_line").attr( "stroke", selection_color );
 
@@ -1841,6 +2009,7 @@ PUBVIS = function () {
                     var data_years, data_amount;
                     var xScale, yScale;
                     var item_value, item_key;
+                    var label_width, label_height;
 
                     var data_years_all = params.data_years_all; 
                     var data_amount_all = params.data_amount_all;  
@@ -1875,11 +2044,14 @@ PUBVIS = function () {
 
                         data_amount = set_data_period( data_amount_all, 0, steps, max_number_of_bars, number_of_periods);
                         data_years = set_data_period( data_years_all, 0, steps, max_number_of_bars, number_of_periods);
+                        current_timeline = data_years;
+                        //console.dir( data_years );
 
                     } else {
 
                         data_amount = data_amount_all;
                         data_years = data_years_all;
+                        current_timeline = data_years;
                             
                     }
 
@@ -2041,7 +2213,7 @@ PUBVIS = function () {
                                         })
 
                         if ( selected_dataset === undefined ){
-                            console.log( "selected_dataset undefined" );
+                            //console.log( "selected_dataset undefined" );
                             selected_dataset = [];
                             for( var i = 0; i < data_amount.length; i++ ){
                                 selected_dataset.push(0);
@@ -2230,10 +2402,12 @@ PUBVIS = function () {
                     };
 
                     var create_background_divs = function () {
-                        var background_div, label_width, label_height;
+                        //console.log( "create_background_divs" );
+                        var background_div;
 
                         label_width = get_width_of_text_element({ svg: svg, group: label_group, data: data_years }).width;
                         label_height = get_width_of_text_element({ svg: svg, group: label_group, data: data_years }).height;
+
 
                         background_div = label_group.selectAll( "rect" )
                                         .data( data_years )
@@ -2243,7 +2417,7 @@ PUBVIS = function () {
                                         .attr({
                                             x: function( d, i ){ return xScale( i ) - ( (label_width * overlap / 2) ) },
                                             y: 0 - label_height-4,  
-                                            id: function( d, i ){ return d },
+                                            id: function( d, i ){ return "background_div_" + d },
                                             width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
                                             height: label_height ,
                                             fill: color_background_div
@@ -2256,7 +2430,57 @@ PUBVIS = function () {
                                         //add selected item to selectionArray
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                              
-                                             console.log( "arleady sel" );
+                                             //console.log( "arleady sel" );
+                                             remove_selected_item( {value: item_value, key: item_key} ); 
+                                        } else {
+                                            
+                                            add_selected_item( {value: item_value, key: item_key} );
+
+                                        }
+                                        
+                                     });  
+                    };
+
+                    var update_background_divs = function ( dataset_years ) {
+                        //console.log( "update_background_divs" );
+                        var background_div;
+
+                        console.dir( dataset_years );
+
+                        //label_width = //get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).width;
+                        //label_height = //get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
+
+                        console.log( "label_width" + label_width );
+                        console.log( "label_height" + label_height );
+
+                        /*label_group.on( "click", function( d, j ) { 
+                                        console.log( "click label_group" );
+                                        console.log( "d3.select(this).attr('id'): " + d3.select(this).attr('class') );
+                                        console.dir( d3.select(this) );
+                                    })*/
+
+                        background_div = label_group.selectAll( "rect" )
+                                        .data( dataset_years )
+                                        //.enter()
+                                        //.append( "rect" )
+                                        .text ( function( d ) { return d; } )
+                                        .attr({
+                                            x: function( d, i ){ console.log( "xxx: " + xScale( i ) - ( (label_width * overlap / 2) ) ); return xScale( i ) - ( (label_width * overlap / 2) ) },
+                                            y: 0 - label_height-4,  
+                                            id: function( d, i ){ return "background_div_" + d },
+                                            width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
+                                            height: label_height ,
+                                            fill: color_background_div
+                                        })
+                                        .on( "click", function( d, j ) {
+
+                                        item_value = dataset_years[ j ].toString();
+                                        item_key = "years";
+
+                                        //add selected item to selectionArray
+                                        if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
+                                             
+                                             //console.log( "arleady sel" );
                                              remove_selected_item( {value: item_value, key: item_key} ); 
                                         } else {
                                             
@@ -2408,10 +2632,16 @@ PUBVIS = function () {
                                         data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods); 
 
                                         update_bars( data_amount, data_years );
+                                        update_background_divs( data_years );
                                         update_labels( data_years );
+                                        
                                         update_tooltip({ data_amount: data_amount, data_years: data_years });
 
                                         timeline_changed = true;
+                                        current_timeline = data_years;
+
+                                        remove_highlight_selection_items_years();
+                                        highlight_selection_items;
 
                                             
                                     }); 
@@ -2576,7 +2806,7 @@ PUBVIS = function () {
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                             
-                                            console.log( "arleady sel" );
+                                            //console.log( "arleady sel" );
                                             remove_selected_item( {value: item_value, key: item_key} ); 
                                         
                                         } else {
@@ -2587,6 +2817,50 @@ PUBVIS = function () {
 
                                     highlight_data_lbl_subset( data_selected );
                     }; 
+
+                    var create_selection_divs = function () {
+                        var selection_div, label_width, label_height;
+
+                        //label_width = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).width;
+                        label_height = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).height;
+
+                        selection_div = label_group.selectAll( "rect" )
+                                        .data( entry_types_text )
+                                        .enter()
+                                        .append( "rect" )
+                                        .text ( function( d ) { return d; } )
+                                        .attr({
+                                            y: function( d, i ){ return yScale( i ) + label_height +(label_height/2) * (-1)}, 
+                                            x: function( d, i ){ return (d.length * 6 - distance_label_to_bars)* (-1) },  
+                                            id: function( d, i ){ 
+                                                    if ( d === "Part of a Book") { 
+                                                        return "background_div_type_Part_of_a_Book"; 
+                                                    } else {
+                                                        return "background_div_type_" + d; 
+                                                    }
+                                                },
+                                            width: function( d, i ){ return d.length*6 } ,//label_width,
+                                            height: label_height ,
+                                            fill: selection_color,
+                                            opacity: 0
+                                        })
+                                        .on( "click", function( d, i ) {
+
+                                            item_value = entry_types_text[ i ].toString();
+                                            item_key = "types";
+
+
+                                            if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
+                                                
+                                                //console.log( "arleady sel" );
+                                                remove_selected_item( {value: item_value, key: item_key} ); 
+                                            
+                                            } else {
+                                                
+                                                add_selected_item( {value: item_value, key: item_key} );
+                                            }
+                                         }); 
+                    };
 
                     var create_labels = function () {
                         var labels, data_lbl;
@@ -2602,7 +2876,13 @@ PUBVIS = function () {
                                         fill: new_bar_types.get_color_text(),
                                         class: "label_type",
                                         "text-anchor": "end",
-                                        id: function ( d, i ) { return "lbl_type_" + i; }
+                                        id: function ( d, i ) { 
+                                                if ( d === "Part of a Book") { 
+                                                    return "lbl_type_Part_of_a_Book"; 
+                                                } else {
+                                                    return "lbl_type_" + d; 
+                                                }
+                                            }
                                     })
                                     .on( "click", function( d, i ) {
 
@@ -2612,7 +2892,7 @@ PUBVIS = function () {
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                             
-                                            console.log( "arleady sel" );
+                                            //console.log( "arleady sel" );
                                             remove_selected_item( {value: item_value, key: item_key} ); 
                                         
                                         } else {
@@ -2687,7 +2967,8 @@ PUBVIS = function () {
                     new_bar_types.render = function () {
                             create_bars_total();
                             create_bars_subset();
-                            create_data_lbl_subset(); 
+                            create_data_lbl_subset();
+                            create_selection_divs(); 
                             create_labels();
                             create_lines();
                     }
@@ -2810,8 +3091,14 @@ PUBVIS = function () {
                                     .text(function( d ) { return d.text; })
                                     .on("click", function( d ){
                                             
-                                            //console.log( "call: clicked keyword" );
+                                            console.log( "call: clicked keyword" );
 
+                                            //console.log( "d3.select(this)" + d3.select(this).text);
+                                            //console.dir( d3.select(this) );
+                                            //d3.select(this).style( "text-decoration", "underline" );
+                                            //d3.select(this).style("fill", "red");
+                                            
+                                            d3.select(this).attr( "class", "selected" );
 
                                             item_value = d.text;
                                             item_key = "keywords";
@@ -2828,7 +3115,7 @@ PUBVIS = function () {
                                                 add_selected_item( {value: item_value, 
                                                                     key: item_key} );
                                             } 
-                                            d3.select(this).style( "text-decoration", "underline" );    
+                                               
                                     })
                                     .append("title") //show text on hover
                                     .text(function(d) {
@@ -2857,11 +3144,18 @@ PUBVIS = function () {
                                 .text(function(d) { return d.text; })
                                 .style("font-size", function(d) { return d.size + "px"; })
                                 .style("fill", function(d) { return ( item_already_selected({ array:selection, key:"text", value:d.text }) ? selection_color : color_text); })
+                                .style( "text-decoration", function(d) { 
+                                                    return ( item_already_selected({ array:selected_items, list:"keywords", value:d.text }) ? "underline" : "none"); 
+                                }) 
+                                .attr("id", function( d, i ){ return "txt_" + d.text })
                                 .attr("text-anchor", "middle")
                                 .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
-                                .on("click", function( d ){
+                                .on("click", function( d,i ){
                                             
                                             //console.log( "call: clicked keyword" );
+                                            //console.log( "d.x: " + d.x + " d.y: " + d.y );
+
+                                            d3.select(this).style( "text-decoration", "underline" );
 
                                             item_value = d.text;
                                             item_key = "keywords";
@@ -2877,7 +3171,9 @@ PUBVIS = function () {
                                                 //console.log("before add item");
                                                 add_selected_item( {value: item_value, 
                                                                     key: item_key} );
-                                            }           
+                                            }    
+
+                                                  
                                 })
                                 .append("title")//show text on hover
                                 .text(function(d) {
@@ -2889,8 +3185,7 @@ PUBVIS = function () {
                                             return dataset_words[i].long_text;
                                         }
                                     }
-                                });
-                                
+                                });   
                     }
                 }
             }    
@@ -3146,24 +3441,24 @@ PUBVIS = function () {
 
             $( "svg" ).click(function(event) {
 
-                console.log( "selected_items" );
-                console.dir( selected_items );
+                //console.log( "selected_items" );
+                //console.dir( selected_items );
 
                 //actions if sth was selected or the time period changed
                 if ( selected_items_changed || timeline_changed ) { 
+                    //console.log( "selected_items_changed || timeline_changed" );
                     
                     filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
 
                     update_views({ changed_data: filtered_json });
 
+                    highlight_selection_items();
+                    
+
                     selected_items_changed = false;
                     timeline_changed = false;
 
-                   /* var string = "Data Mining, Visual Analytics, timorient";
-                    var number;
-                    number = string.search("Mining"); 
-                    console.log( "number: " + number );
-                    */
+                   
                 
                 }
 
