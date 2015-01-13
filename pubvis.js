@@ -1675,7 +1675,7 @@ PUBVIS = function () {
                 var words = params.words;
                 var optimum_length = params.optimum_size;
                 var min = params.min;
-                var absolut_max = 100;
+                var absolut_max = 40;
                 var optimum_size;
                 var new_length;
                 var number_to_remove;
@@ -3036,7 +3036,11 @@ PUBVIS = function () {
 
                 var wordcloud;
                 var size = [450, 340];
-                var fontSize = d3.scale.log().range([10, 50]).clamp(true);
+
+                var fontSize = d3.scale.log().domain([params.words[(params.words.length-1)].size ,params.words[0].size])
+                                             .range( [15, 50] )
+                                             .clamp( true );
+                
                 var margin = 10;
                 var update = false;
 
@@ -3224,10 +3228,11 @@ PUBVIS = function () {
                             "border-right": "5px solid #d9d9d9"
                         });
                         $(".accordion").html('');
+                        $(".accordion").css({"margin-top": "-20px"});
                         generate(1);
                     }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
+                    console.log("year = " + y);
+                    console.log("type = " + t);
                 });
                 $("#type").click(function() {
                     if(t) {
@@ -3247,16 +3252,17 @@ PUBVIS = function () {
                             "border-right": "5px solid #d9d9d9"
                         })
                         $(".accordion").html('');
+                        $(".accordion").css({"margin-top": "-20px"});
                         generate(2);
                     }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
+                    console.log("year = " + y);
+                    console.log("type = " + t);
                 });
 
                 function generate(sortBy) {
 
                     this.sortBy = sortBy;
-                    //console.log(sortBy);
+                    console.log(sortBy);
 
                     function subgenerate() {
 
@@ -3265,31 +3271,42 @@ PUBVIS = function () {
                         var abs;
                         var title;
                         var author;
+                        var notes;
 
                         if(data[j].entryTags['author'] != undefined) {
-                            author = "<span style='font-weight: bold;'>" + data[j].entryTags['author'] + "</span>";
+                            author = data[j].entryTags['author'];
                         } else {
-                            author = "<i style='font-weight: bold; font-style: italic;'>Unknown Author</i>";
+                            author = "<i style='font-style: italic;'>Unknown Author</i>";
                         }
 
                         if(data[j].entryTags['title'] != undefined) {
-                            title = data[j].entryTags['title'];
+                            title = "<span style='font-weight: bold;'>" + data[j].entryTags['title'] + "</span>";
                         } else {
                             title = '<i>Unknown Title</i>';
                         }
-
+                        
                         if(data[j].entryTags['url'] != undefined) {
-                            url = "     <a style='float: right;' href='" + data[j].entryTags['url'] + "'>►</a>";
+                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg class='download' version='1.1' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><text transform='matrix(1 0 0 1 -1.0986 14.1514)' font-family=''ArialMT'' font-size='20.0545'>▼</text><rect x='1.811' y='14.471' width='14.05' height='1.454'/></a>'";
                         } else {
-                            url = "";
+                            url = '';
                         }
 
                         type = cap(data[j].entryType);
 
+                        if(data[j].entryTags['notes'] != undefined){
+
+                            notes = "<br>&nbsp" + data[j].entryTags['notes'];
+
+                        }else{
+
+                            notes = "";
+
+                        }
+
                         $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3>");
 
                         if(data[j].entryTags['abstract'] != undefined) {
-                            abs = data[j].entryTags['abstract'] + "<br>  &nbsp; </p><p>" + data[j].entryTags['note'];
+                            abs = data[j].entryTags['abstract'];
                             $(".accordion").append("<div class='pane'>" + "<p style='text-align: justify;'>" + abs + "</p>" + "</div>");
                         } else {
                             abs = "";
@@ -3316,7 +3333,6 @@ PUBVIS = function () {
 
                     } else if(sortBy == 1) {
 
-
                         var yeararr = new Array();;
 
                         for(var n = 0; n < count; n++) {
@@ -3331,10 +3347,10 @@ PUBVIS = function () {
                         uniqueYear.sort(function(a, b) {
                             return b - a
                         });
-                        //console.log(uniqueYear);
+                        console.log(uniqueYear);
 
                         for(i = 0; i < uniqueYear.length; i++) {
-
+                       
                             $(".accordion").append("<h1>" + uniqueYear[i] + "</h1>");
                             for(var j = 0; j < count; j++) {
 
@@ -3342,46 +3358,43 @@ PUBVIS = function () {
                                     subgenerate();
                                 }
                             }
-
                         }
-
                     } else if(sortBy == 2) {
-
                         var typearr = new Array();
-
                         for(var n = 0; n < count; n++) {
-
                             typearr.push(data[n].entryType);
-
                         }
-                        var uniqueType = [];
-                        $.each(typearr, function(i, el) {
-                            if($.inArray(el, uniqueType) === -1) uniqueType.push(el);
-                        });
-                        uniqueType.sort();
-                        //console.log(uniqueType);
-
-                        for(i = 0; i < uniqueType.length; i++) {
-
-                            $(".accordion").append("<h1>" + cap(uniqueType[i]) + "</h1>");
-                            for(var j = 0; j < count; j++) {
-
-                                if(uniqueType[i] == data[j].entryType) {
+                        var TypeArray = ["article", "book", "conference", "miscellaneous","part of book", "report", "thesis"];
+                        for(i = 0; i < TypeArray.length; i++) {
+                            $(".accordion").append("<h1>" + cap(TypeArray[i]) + "</h1>");
+                            for(var j = 0; j < count; j++) {                
+                                var entry = data[j].entryType;
+                                if(TypeArray[i] == entry) {
+                                    subgenerate();
+                                }else if((TypeArray[i] == "book") && ((entry == "booklet") || (entry == "buch")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "conference") && ((entry == "inproceedings") || (entry == "proceedings")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "part of book") && ((entry == "inbook") || (entry == "incollection")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "report") && ((entry == "manual") || (entry == "techreport")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "thesis") && ((entry == "mastersthesis") || (entry == "phdthesis")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "miscellaneous") && (entry != "article") && (entry != "book") && (entry != "conference") && (entry != "part of book") && (entry != "report") && (entry != "thesis") &&((entry != "booklet") && (entry != "buch")) && ((entry != "inproceedings") && (entry != "proceedings")) && ((entry != "inbook") && (entry != "incollection")) && ((entry != "manual") && (entry != "techreport")) && ((entry != "mastersthesis") && (entry != "phdthesis"))){
                                     subgenerate();
                                 }
                             }
-
                         }
-
-
                     }
-                    $(".accordion h3").click(function() {
+                      //  Accordion Panels
+                      $(".accordion div").show();
+                      setTimeout("$('.accordion div').slideToggle('slow');", 1);
+                      $(".accordion h3").click(function () {
                         $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
                         $(this).toggleClass("current");
                         $(this).siblings("h3").removeClass("current");
-
-                    });
-
+                      });
                 }
             }
 
@@ -3431,7 +3444,7 @@ PUBVIS = function () {
             keywords = get_words(json).words;
             //console.log( "keywords" );
             //console.dir( keywords );
-            keywords = limit_words({ words: keywords, optimum_size: 85, min: 1 });
+            keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
             wordCloud = CLOUD({ id_name:"keywords", words: keywords, xPos: (width/2 + 15), yPos: 0 });
 
             //***display list
