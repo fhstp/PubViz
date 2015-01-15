@@ -76,6 +76,7 @@ PUBVIS = function () {
         var max_width = 1024;
         var width = 1024;
         var space_left = 0;
+        var clearAll_pushed = false;
 
         //set width and calculate how much space of the left is needed to setup the svg in the middle
         if ( window_width > width){
@@ -608,7 +609,7 @@ PUBVIS = function () {
             //update the views of the years-chart, type-chart, wordCloud and according to the given entry list
             //@params.canged_data = a list with etries
             var update_views = function( params ){
-                //console.log( "call: update_views" );
+                console.log( "call: update_views" );
                 var dataset = params.changed_data;
                 var selected_words;
 
@@ -621,7 +622,19 @@ PUBVIS = function () {
 
                 show_amount.update_selected_amount({ selected_new: dataset.length });
 
-                list = LIST({ data:dataset, update:true });
+                if ( clearAll_pushed === true ){ 
+                    console.log("clearAll_pushed");
+                    //console.dir( json );
+                    list = LIST({ data: json, update:true });
+                }else{
+                    console.log("not pushed");
+                    list = LIST({ data:dataset, update:true });
+                }
+
+                //console.dir( json );
+                //console.dir( dataset );
+
+                //list = LIST({ data:json, update:true });
 
                 selected_words = get_words(dataset).words;
                 wordCloud = CLOUD({ id_name:"keywords", 
@@ -1869,6 +1882,7 @@ PUBVIS = function () {
                                 .on("click", function( d, i ) {
                                     //console.log( "clearAll" );
                                     //console.dir( selected_items );
+                                    clearAll_pushed = true;
                                     selected_items = { years: [], types: [], keywords: [] };
                                     update_views({ changed_data: empty });
                                     remove_highlight_selection_items_years();
@@ -3201,6 +3215,7 @@ PUBVIS = function () {
                 if ( !update ){ 
                     $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
+
                 } else {
                     $('#list').replaceWith("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
@@ -3456,6 +3471,7 @@ PUBVIS = function () {
                 //actions if sth was selected or the time period changed
                 if ( selected_items_changed || timeline_changed ) { 
                     //console.log( "selected_items_changed || timeline_changed" );
+                    clearAll_pushed = false;
                     
                     filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
 
@@ -3470,6 +3486,8 @@ PUBVIS = function () {
                    
                 
                 }
+
+                console.log( "clearAll_pushed: " + clearAll_pushed );
 
             });   
     } 
