@@ -3286,7 +3286,7 @@ PUBVIS = function () {
                         }
                         
                         if(data[j].entryTags['url'] != undefined) {
-                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg class='download' version='1.1' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><text transform='matrix(1 0 0 1 -1.0986 14.1514)' font-family=''ArialMT'' font-size='20.0545'>▼</text><rect x='1.811' y='14.471' width='14.05' height='1.454'/></a>'";
+                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg version='1.1' baseProfile='basic' id='Ebene_1'xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' xml:space='preserve' class='download'><g><g><path d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g><rect x='2.928' y='13.591' width='8.433' height='0.943'/></g></svg></a>'";
                         } else {
                             url = '';
                         }
