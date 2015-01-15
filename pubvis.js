@@ -621,11 +621,7 @@ PUBVIS = function () {
 
                 show_amount.update_selected_amount({ selected_new: dataset.length });
 
-                if ( dataset.length === 0 ){ 
-                    list = LIST({ data:json, update:true });
-                }else{
-                    list = LIST({ data:dataset, update:true });
-                }
+                list = LIST({ data:dataset, update:true });
 
                 selected_words = get_words(dataset).words;
                 wordCloud = CLOUD({ id_name:"keywords", 
