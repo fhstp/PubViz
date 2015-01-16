@@ -79,6 +79,7 @@ PUBVIS = function () {
         var empty = [];
         var words_displayed = [];
         var clearAll_pushed = false;
+        var text_color_for_types;
 
         //set width and calculate how much space of the left is needed to setup the svg in the middle
         if ( window_width > width){
@@ -831,8 +832,11 @@ PUBVIS = function () {
                     }
                     //console.log( "id_txt_label: " + id_txt_label );
 
-                    d3.select(id_background_div).attr('opacity', "0");
+                    //hide div
+                    //d3.select(id_background_div).attr('opacity', "0");
+
                     d3.select(id_txt_label).attr('font-weight', "regular");
+                    d3.select(id_txt_label).attr('fill', text_color_for_types);
 
                 }
             }
@@ -863,15 +867,18 @@ PUBVIS = function () {
                         id_txt_label = "#label_year_" + item_value;
                         //console.log( "id_txt_label: " + id_txt_label );
 
-                        id_background_div = "#background_div_" + item_value;
+                        //id_background_div = "#background_div_" + item_value;
                         //console.log( "id_background_div: " + id_background_div );
 
                         if( item_already_selected( {array: current_timeline, value: item_value } ) ){ 
 
-                            d3.select(id_background_div).attr('fill', selection_color);
-                            d3.select(id_background_div).attr('stroke', "#333333");
-                            d3.select(id_txt_label).attr('fill', "#333333");
-                            d3.select(id_txt_label).attr('font-weight', "bold");
+                            //highlight div
+                            //d3.select(id_background_div).attr('fill', selection_color);
+                            //d3.select(id_background_div).attr('stroke', "#333333");
+                            //d3.select(id_txt_label).attr('fill', "#333333");
+                            
+                            d3.select(id_txt_label).attr('fill', selection_color);
+                            d3.select(id_txt_label).attr('font-weight', "900");
 
                         } else {
                             //console.log( "item NOT contained" );
@@ -908,8 +915,11 @@ PUBVIS = function () {
                         }
                         //console.log( "id_txt_label: " + id_txt_label );
 
-                            d3.select(id_background_div).attr('opacity', '1');
-                            d3.select(id_txt_label).attr('font-weight', "bold");
+                            //show yellow div 
+                            //d3.select(id_background_div).attr('opacity', '1');
+                            
+                            d3.select(id_txt_label).attr('fill', selection_color);
+                            d3.select(id_txt_label).attr('font-weight', "900");
                     }
                 } else {
                     remove_highlight_selection_items_types();
@@ -934,7 +944,7 @@ PUBVIS = function () {
                         id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
                         //id_background_div = "#selection_div_keyword_" + item_value;
                  
-                        d3.select(id_txt_label).style('font-weight', 'bold');
+                        d3.select(id_txt_label).style('font-weight', '900');
                         //d3.select(id_txt_label).attr('fill', '#333333');
                         d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
@@ -3058,6 +3068,7 @@ PUBVIS = function () {
                     new_bar_types.set_scale( all_entry_types, (svgW/2), svgH, 0 ); 
                     xScale = new_bar_types.get_linear_scale();
                     yScale = new_bar_types.get_oridinal_scale();
+                    text_color_for_types = new_bar_types.get_color_text();
 
                     //create svg-group
                     bar_group = svg.append( "g" );
@@ -3350,7 +3361,7 @@ PUBVIS = function () {
                 var color_text = params.color_text;
                 var text_size = params.text_size;
                 var svg;
-                var format_nb_total = zeroFilled = ('000' + total_nb).substr(-3);
+                //var format_nb_total = zeroFilled = ('000' + total_nb).substr(-3);
 
                 var amount = d3.select( "#overview" )
                                 .append("g")
@@ -3358,9 +3369,10 @@ PUBVIS = function () {
                                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 var total_amount = amount.append( "text" )
-                                    .text ( format_nb_total )
+                                    //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
+                                    .text ( total_nb )
                                     .attr({
-                                            x: 210,
+                                            x: 180,
                                             y: 125, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -3369,23 +3381,41 @@ PUBVIS = function () {
                                     })
                                     .style("font-size", text_size)
 
+                var slash = amount.append( "text" )
+                                    //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
+                                    .text ( " / " )
+                                    .attr({
+                                            x: 185,
+                                            y: 125, 
+                                            fill: color_text,
+                                            "text-anchor": "start",
+                                            "font-weight": "300",
+                                            opacity: 0,
+                                            id: "lbl_slash_amount"
+                                    })
+                                    .style("font-size", text_size)
+
                 var selected_amount = amount.append( "text" )
                                     .text ( selected_nb )
                                     .attr({
-                                            x: 80,
+                                            x: 180,
                                             y: 125,  
-                                            fill: color_text,
-                                            "text-anchor": "start",
-                                            "font-weight": "bold",
+                                            fill: selection_color, //color_text,
+                                            "text-anchor": "end",
+                                            "font-weight": "900",
+                                            opacity: 0,
                                             id: "lbl_selected_amount"
                                     })
                                     .style("font-size", text_size)
 
                 var update_selected_amount = function( params ) { 
                     var new_selected_nb = params.selected_new;
-                    var format_nb = zeroFilled = ('000' + new_selected_nb).substr(-3);
-
-                    d3.select("#lbl_selected_amount").text(format_nb);
+                    //var format_nb = zeroFilled = ('000' + new_selected_nb).substr(-3); will draw zeros if number has less than three digits
+                    //new_selected_nb += " / ";
+                    d3.select("#lbl_total_amount").attr("x", "210");
+                    d3.select("#lbl_selected_amount").text(new_selected_nb);
+                    d3.select("#lbl_selected_amount").attr("opacity", "1");
+                    d3.select("#lbl_slash_amount").attr("opacity", "1");
 
                 }
              
