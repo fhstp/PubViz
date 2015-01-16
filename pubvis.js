@@ -718,7 +718,11 @@ PUBVIS = function () {
                 show_amount.update_selected_amount({ selected_new: dataset.length });
 
                 //check if clear all was hit, consequently the json data have to be displayed by the list
-                if ( clearAll_pushed === true ){ 
+                if (   (clearAll_pushed === true )
+                    || (dataset.length === 0) 
+                    && ( selected_items.years.length === 0 )
+                    && ( selected_items.types.length === 0 )
+                    && ( selected_items.keywords.length === 0 ) ){ 
                     //console.log("clearAll_pushed");
                     //console.dir( json );
                     list = LIST({ data: json, update:true });
@@ -2434,18 +2438,37 @@ PUBVIS = function () {
 
                     //create group for bars
                     bar_group = svg.append( "g" )
-                                   .attr( "class", "bar_group" ) ;
+                                   .attr( "class", "bar_group" ) 
+                                   .on( "mouseover", function() {
+                                        //console.log( "mouseover bar_subset_group" );
+                                        d3.select(this).style("cursor", "pointer");
+                                    });
 
-                    var bar_highlight = svg.append( "g" );
+                    var bar_highlight = svg.append( "g" )
+                                            .attr( "class", "bar_subset_group" ) 
+                                            .on( "mouseover", function() {
+                                                //console.log( "mouseover bar_subset_group" );
+                                                //element.style.cursor = "pointer";
+                                                //$('#selector').css('cursor', 'pointer');
+                                                d3.select(this).style("cursor", "pointer");
+                                            });
 
                     //create group for labels years and move y to the bottom of the chart-svg
                     label_group = svg.append( "g" )
                                     .attr( "class", "label_group" ) 
-                                    .attr("transform", "translate(0," + (svgH) + ")");
+                                    .attr("transform", "translate(0," + (svgH) + ")")
+                                    .on( "mouseover", function() {
+                                        //console.log( "mouseover bar_subset_group" );
+                                        d3.select(this).style("cursor", "pointer");
+                                    });
 
                     btn_group = svg.append( "g" )
                                     .attr( "class", "btn_group" ) 
-                                    .attr("transform", "translate(-5," + svgH + ")");
+                                    .attr("transform", "translate(-5," + svgH + ")")
+                                    .on( "mouseover", function() {
+                                        //console.log( "mouseover bar_subset_group" );
+                                        d3.select(this).style("cursor", "pointer");
+                                    });
 
                     var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
 
@@ -3071,20 +3094,40 @@ PUBVIS = function () {
                     text_color_for_types = new_bar_types.get_color_text();
 
                     //create svg-group
-                    bar_group = svg.append( "g" );
-                    var bar_highlight = svg.append( "g" );
+                    bar_group = svg.append( "g" )
+                                    .attr( "class", "bar_group" ) 
+                                    .on( "mouseover", function() {
+                                        //console.log( "mouseover bar_group" );
+                                        d3.select(this).style("cursor", "pointer");
+                                    });
+
+                    var bar_highlight = svg.append( "g" )
+                                            .attr( "class", "bar_subset_group" ) 
+                                            .on( "mouseover", function() {
+                                                //console.log( "mouseover bar_subset_group" );
+                                                d3.select(this).style("cursor", "pointer");
+                                            });
 
                     //create group for labels years and move y to the bottom of the chart-svg
-                    label_group = svg.append( "g" );
+                    label_group = svg.append( "g" )
+                                    .attr( "class", "label_group" ) 
+                                    .on( "mouseover", function() {
+                                        //console.log( "mouseover label_group" );
+                                        d3.select(this).style("cursor", "pointer");
+                                    });
 
-                    data_label_group = svg.append( "g" );
+                    data_label_group = svg.append( "g" )
+                                        .attr( "class", "data_label_group" );
 
-                    var data_lbl_subset_group = svg.append( "g" );
+                    var data_lbl_subset_group = svg.append( "g" )
+                                                    .attr( "class", "data_lbl_subset_group" );
                     
-                    line_group = svg.append("g");
+                    line_group = svg.append("g")
+                                    .attr( "class", "line_group" );
 
                     label_height = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).height;
-                    
+                    //var bar_height = get_width_of_text_element({ svg: svg, group: bar_group, data: all_entry_types }).height;
+                    //console.log( "bar_height: " + bar_height );
 
                     var create_bars_total = function () {  
                         //console.log("create_bars_total in BAR_TYP aufgerufen");
@@ -3192,10 +3235,11 @@ PUBVIS = function () {
                     }; 
 
                     var create_selection_divs = function () {
-                        var selection_div, label_width, label_height;
+                        var selection_div, 
+                        //var label_height;
 
                         //label_width = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).width;
-                        label_height = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).height;
+                        //label_height = get_width_of_text_element({ svg: svg, group: label_group, data: entry_types_text }).height;
 
                         selection_div = label_group.selectAll( "rect" )
                                         .data( entry_types_text )
@@ -3319,7 +3363,7 @@ PUBVIS = function () {
                     }
 
                     var create_lines = function() {
-                        var lines;
+                        var lines, vertical_line;
 
                         lines = line_group.selectAll( "line" )
                                     .data( all_entry_types )
@@ -3331,7 +3375,22 @@ PUBVIS = function () {
                                         x2: svgW/2 + label_space,
                                         y2: function( d, i ){ return yScale( i ) + yScale.rangeBand()},
                                         "shape-rendering": "crispEdges",
-                                        "stroke": "black",
+                                        "stroke": "#898989",
+                                        "stroke-width": "0,3"
+                                    })
+
+                        vertical_line = line_group//.selectAll( "line" )
+                                    //.data( all_entry_types )
+                                    //.enter()
+                                    .append( "line" )
+                                    .attr({
+                                        x1: 0,
+                                        y1: 2,//function( d, i ){ return yScale( i ) + yScale.rangeBand() },
+                                        x2: 0,
+                                        y2: yScale.rangeBand() * entryTypes_grouped_text.length,//function( d, i ){ return yScale( i ) + yScale.rangeBand()},
+                                        "class": "vertical_line",
+                                        "shape-rendering": "crispEdges",
+                                        "stroke": "#898989",
                                         "stroke-width": "0,3"
                                     })
                     };
@@ -3386,7 +3445,7 @@ PUBVIS = function () {
                                     .text ( " / " )
                                     .attr({
                                             x: 185,
-                                            y: 125, 
+                                            y: 122, 
                                             fill: color_text,
                                             "text-anchor": "start",
                                             "font-weight": "300",
@@ -3412,6 +3471,11 @@ PUBVIS = function () {
                     var new_selected_nb = params.selected_new;
                     //var format_nb = zeroFilled = ('000' + new_selected_nb).substr(-3); will draw zeros if number has less than three digits
                     //new_selected_nb += " / ";
+                    if ( new_selected_nb === 0 ) {
+                        d3.select("#lbl_selected_amount").attr("fill", color_text);
+                    } else {
+                        d3.select("#lbl_selected_amount").attr("fill", selection_color);
+                    }
                     d3.select("#lbl_total_amount").attr("x", "210");
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
@@ -3454,9 +3518,12 @@ PUBVIS = function () {
                                 .attr("transform", "translate(" + (xPos + margin) + "," + (yPos + margin) + ")")
                                 .attr("width", size[0])
                                 .attr("height", size[1])
-                                //.attr( "fill", "black" )
                                 .append("g")
-                                .attr("transform", "translate(" + (size[0]/2) + "," + (size[1]/2) + ")");
+                                .attr("transform", "translate(" + (size[0]/2) + "," + (size[1]/2) + ")")
+                                .on( "mouseover", function() {
+                                        //console.log( "mouseover keywords" );
+                                        d3.select(this).style("cursor", "pointer");
+                                });
               
                 if ( update === false) {
                     d3.layout.cloud()
