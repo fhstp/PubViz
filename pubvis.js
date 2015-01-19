@@ -6,7 +6,7 @@ PUBVIS = function () {
         target = params.target;
         selection_color = params.color;
 
-        $( target ).append( "<div id='loading'> One moment please, LOADING... </div>" );
+        $( target ).append( "<div id='loading'> LOADING... </div>" );
 
         fetch_bibfile ( filename );        
     };
