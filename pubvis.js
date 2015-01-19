@@ -24,7 +24,7 @@ PUBVIS = function () {
     //return oneBigJson and errors in an object
     //@param.bibfile = bib data
     var bib2json = function ( bibfile ) {
-        var dataArr, bigJson, errors, entry, entryAt, jsonFormat;
+        var dataArr, bigJson, errors, entry, entryAt, jsonFormat, str;
 
         dataArr = bibfile.split("@");
 
@@ -49,7 +49,30 @@ PUBVIS = function () {
                 //combine lists 
                 bigJson = bigJson.concat (jsonFormat);
             }
-        };
+
+        };        
+
+        //fetch all authors and remove all comma and replace 'and' with a comma
+        //needed format to show the authors in the list
+        for ( var i = 0; i < bigJson.length; i++ ){
+
+            str = bigJson[i].entryTags.author;
+            //console.log( "str: " + str );
+
+            //all_authors_str = all_authors.toString();
+            str = str.replace (/,/g, "");
+
+            //split string at every 'and'
+            str = str.replace (/ and /g, ", ");
+
+            bigJson[i].list_authors = str;
+            //console.dir( all_authors_split );
+
+        }
+
+        //console.log ( "bigJson[0].list_authors: "  + bigJson[0].list_authors);
+
+        //console.dir( bigJson );
         //console.log("ende Bib2Json");
         return { json: bigJson,
                  errors: errors }; 
@@ -436,22 +459,6 @@ PUBVIS = function () {
                 }
                 last_selected_item = value;
             }
-
-            /*
-            //@param.clicked_item_id = String (e.g."#bar_2001")
-            //@param.color1 = original color of item (e.g. "balck" or "#xxxxxx" )
-            //@param.color2 = color for selected items (e.g. "balck" or "#xxxxxx" ) 
-            change_color_of_item = function( clicked_item_id, color1, color2 ) {
-                var clicked_class;
-
-                if ( $( clicked_item_id ).attr( "fill" ) === color1 ) { 
-                    $( clicked_item_id ).attr( "fill", color2);
-                } else {
-                    $( clicked_item_id ).attr( "fill", color1);
-                }
-            }
-            */
-            
 
             //if the width of an text element is needed before the text element can be drawn (e.g because of the order of svg elements)
             //creates the elements based on the given data, returns the width and height
@@ -1205,8 +1212,6 @@ PUBVIS = function () {
                 return result;
             }
             //save_wordtext_and_wordid({ array: , id:"" });
-
-
 
         //*************************SEARCH JSON******************************//
             
@@ -5377,8 +5382,9 @@ PUBVIS = function () {
                         var author;
                         var notes;
 
-                        if(data[j].entryTags['author'] != undefined) {
-                            author = data[j].entryTags['author'];
+                        if(data[j].list_authors != undefined) {
+                            author = data[j].list_authors;
+                            //console.log( "author: " + author );
                         } else {
                             author = "<i style='font-style: italic;'>Unknown Author</i>";
                         }
@@ -5390,14 +5396,14 @@ PUBVIS = function () {
                         }
                         
                         if(data[j].entryTags['url'] != undefined) {
-                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg version='1.1' baseProfile='basic' id='Ebene_1'xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' xml:space='preserve' class='download'><g><g><path d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g><rect x='2.928' y='13.591' width='8.433' height='0.943'/></g></svg></a>'";
+                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg version='1.1' baseProfile='basic' id='Ebene_1'xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' xml:space='preserve' class='download'><g><g><path d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g><rect x='2.928' y='13.591' width='8.433' height='0.943'/></g></svg></a>";
                         } else {
                             url = '';
                         }
 
                         type = cap(data[j].entryType);
 
-                        if(data[j].entryTags['notes'] != undefined){
+                        if (data[j].entryTags['notes'] != undefined){
 
                             notes = "<br>&nbsp" + data[j].entryTags['notes'];
 
