@@ -73,30 +73,61 @@ PUBVIS = function () {
         var selected_authors;
         var current_timeline, timeline_changed = false;
         var setup_layout;
-        var window_width = $(document).width();
-        var max_width = 1024;
-        var width = 1024;
+        var window_width;
+        //var max_width = 1024;
+        var width;
         var space_left = 0;
         var empty = [];
         var words_displayed = [], authors_displayed = [];
         var clearAll_pushed = false;
         var text_color_for_types;
+        var space_between_view = 30;
+        var svg;
 
-        //set width and calculate how much space of the left is needed to setup the svg in the middle
-        if ( window_width > width){
-            space_left = (window_width - width) /2;
-            width = max_width;
-        } else { 
-            width = window_width;
-            space_left = 0;
-        }
 
         //*************************HELPER FUNCTIONS***********************//
+            
+            //function in progress...
+            function update_window(){
+                console.log( "updateWindow aufgerufen" );
+
+               // $( "svg" ).remove();
+
+                window_width = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
+                //y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+                //svg.attr("width", x).attr("height", y);
+                calculate_width();
+
+                
+
+               // setup_layout();
+
+               // display_all_views();
+            }
+            //window.onresize = update_window;
+
+
+            //claculates the width
+            var calculate_width = function(){
+                //console.log( "calculate aufgerufen" );
+                var max_width = 1024;
+
+                window_width = $(document).width();
+
+                if ( window_width > max_width){
+                    space_left = (window_width - max_width) /2;
+                    width = max_width;
+                } else { 
+                    width = window_width;
+                    space_left = 0;
+                }
+            }
+
             //builds the necessary svg and svg-groups
             setup_layout = function () { 
                 //console.log( "setup aufgerufen" );
-                //console.log( "window_width: " + window_width );
-                var header;
+                var header, clearAll;
                 var overview;
                 var clouds;
                 var list;
@@ -105,53 +136,67 @@ PUBVIS = function () {
                 var background_cloud_authors;
                 var background_list;
 
+                
+                //determine the height of the views
+                var svg_margin_top = 10;
+                var header_height = 30;
+                var overview_height = 370;
+                var clouds_height = 370; 
+                var button_width = 75; //clearAll button
+                button_height = 28; //clearAll button
 
+                //calculation of the position for the views
+                var clarAll_yPos = svg_margin_top + header_height;
+                var overview_yPos = svg_margin_top + header_height + space_between_view;
+                var clouds_yPos = overview_yPos + overview_height + space_between_view;
+                var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
+
+                
+                //create the svg:
                 svg = d3.select( "#pubvis_container" )
-                  .append( "svg" )
-                  .attr({
-                    id: "pubVis",
-                    width: window_width, //full size of screen for the svg
-                    height: 880
-                  })
-                  .attr("transform", "translate(" + space_left + "," + 30 + ")"); 
+                          .append( "svg" )
+                          //.attr("viewBox", "0 0 1024 890")
+                          //.attr("id", "pubVis")
+                          .attr({
+                            id: "pubVis",
+                            width: window_width, //full size of screen for the svg, otherwise some parts maybe hidden
+                            height: svg_height//880
+                          })
+                          .attr("transform", "translate(" + space_left + "," + svg_margin_top + ")"); 
          
 
-                d3.select( "#pubVis" )
-                                .append( "g" )
-                                .attr("transform", "translate(" + space_left + "," + 30 + ")");
-
+                //create all groups for the views:
                 header = d3.select( "#pubVis" )
                                         .append( "g" )
                                         .attr({
                                             id: "header",
                                             width: width,
-                                            height: 30
+                                            height: header_height
                                         })
                                         //.attr("transform", "translate( 0, 0)")
-                                        .attr("transform", "translate( 0, -10)")
+                                        .attr("transform", "translate( 0, 0)")
 
-                var clearAll = d3.select( "#pubVis" )
+                clearAll = d3.select( "#pubVis" )
                                         .append( "g" )
                                         .attr({
                                             id: "clearAll",
-                                            width: 75,
-                                            height: 28
+                                            width: button_width,
+                                            height: button_height
                                         })
                                         //btn middle: .attr("transform", "translate(" + (width/2 - (75/2)) + "," + 25 + ")");
-                                        .attr("transform", "translate(" + (width - 75) + "," + 25 + ")");
+                                        .attr("transform", "translate(" + (width - button_width) + "," + clarAll_yPos + ")");
                                         
-
-                
-                                    
 
                 overview = d3.select( "#pubVis" )
                                         .append( "g" )
                                         .attr({
                                             id: "overview",
                                             width: width,
-                                            height: 370 //includes space between header and overivew
+                                            height: overview_height //includes space between header and overivew
                                         })
-                                        .attr("transform", "translate( 0, 60)");
+                                        //.attr("transform", "translate( 0, 60)");
+                                        .attr("transform", "translate( 0," + overview_yPos + ")");
+
 
                 background_overview = d3.select( "#overview" )
                                         .append ( "rect" )
@@ -159,21 +204,24 @@ PUBVIS = function () {
                                             x: 0,
                                             y: 0, 
                                             width: width,
-                                            height: 370 ,
+                                            height: overview_height ,
                                             fill: "#FFFFFF",
                                             opacity: 1,
                                             id: "background_overview"
                                         })
                                         .attr("transform", "translate( 0, 0)");
 
+                
+
                 clouds = d3.select( "#pubVis" )
                                         .append( "g" )
                                         .attr({
                                             id: "clouds",
                                             width: width,
-                                            height: 390 //includes space between overivew and cloud
+                                            height: clouds_height //includes space between overivew and cloud
                                         })
-                                        .attr("transform", "translate( 0, 460)");
+                                        //.attr("transform", "translate( 0, 460)");
+                                        .attr("transform", "translate( 0," + clouds_yPos + ")");
 
                 background_clouds_words = d3.select( "#clouds" )
                                         .append ( "rect" )
@@ -187,7 +235,7 @@ PUBVIS = function () {
                                             id: "background_clouds_words"
                                         })
                                         //.attr("transform", "translate( 0, 0)");
-                                        .attr("transform", "translate(" + (width/2 + 15) + "," + 0 + ")");
+                                        .attr("transform", "translate(" + (width/2 + (space_between_view/2)) + "," + 0 + ")");
 
                 background_clouds_authors = d3.select( "#clouds" )
                                         .append ( "rect" )
@@ -203,29 +251,74 @@ PUBVIS = function () {
                                         //.attr("transform", "translate( 0, 0)");
                                         .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
-                /*list = d3.select( "#pubVis" )
-                                        .append( "g" )
-                                        .attr({
-                                            id: "list",
-                                            width: width,
-                                            height: 390 //includes space between overivew and cloud
-                                        })
-                                        .attr("transform", "translate( 0, 850)");
 
-                background_list = d3.select( "#list" )
-                                        .append ( "rect" )
-                                        .attr ({
-                                            x: 0,
-                                            y: 0, 
-                                            width: width,
-                                            height: 360 ,
-                                            fill: "#FFFFFF",
-                                            opacity: 1,
-                                            id: "background_list"
-                                        })
-                                        .attr("transform", "translate( 0, 0)");
-                    */
+            }
 
+            //call all views to display them
+            var display_all_views = function(){
+                //console.log( " display views" );
+                //***display header
+                show_header = HEADER();
+                show_btn_clearAll = CLEAR_ALL();
+
+                //***display bar-chart with years
+                chart_years = BAR_YEARS.create_bar_years({
+                    data_years_all: dataset_years, 
+                    data_amount_all: dataset_amount, 
+                    color_bar: "#D9D9D9", 
+                    color_text: "#f5f5f5", 
+                    color_background_div: "#333333", 
+                    view_height: 157.5, 
+                    margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
+                    //view_width: 1024,
+                    view_width: width
+                });
+                chart_years.render();
+
+                //***display bar-cahrt with types
+                chart_type = BAR_TYPE.create_bar_type({
+                    all_entry_types: dataset_types, 
+                    entry_types_text: dataset_types_text, 
+                    color_bar: "#D9D9D9", 
+                    color_text: "#333333", 
+                    view_height: 162.5, 
+                    margin: {top: 0, right: 200, bottom: 0, left: 0}, 
+                    //view_width: 1024,
+                    view_width: width
+                });
+                chart_type.render();
+
+                //***display total number of entries and number of selected entries
+                show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
+                                           color_text: "#333333",
+                                           text_size: "70px",
+                                           total: json.length,
+                                           selected: "0",
+                                           width: width/2
+                                        });
+                //***display tagCloud
+                keywords = get_words(json).words;
+                //console.log( "keywords" );
+                //console.dir( keywords );
+                keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
+                wordCloud = CLOUD({ type:"keywords", 
+                                    words: keywords, 
+                                    xPos: (width/2 + 15), 
+                                    yPos: 0,
+                                    size: [ (width/2 - 15), 340 ] });
+
+                //***display AuthorsCloud
+                authors = get_authors( json ).authors;
+                //authors = limit_words({ words: authors, optimum_size: 40, min: 1 });
+                //console.dir( authors );
+                wordCloud = CLOUD({ type:"authors", 
+                                    words: authors, 
+                                    xPos: 0, 
+                                    yPos: 0,
+                                    size: [ (width/2 - 15), 340 ] });
+
+                //***display list
+                list = LIST({ data:json, update:false });
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -730,7 +823,7 @@ PUBVIS = function () {
                         d3.select(id_txt_label).attr('fill', selection_color );
 
                     } else {
-                        console.log( "item actually NOT displayed: " + item_value );
+                        //console.log( "item actually NOT displayed: " + item_value );
                     }
                 }
             }
@@ -3661,7 +3754,6 @@ PUBVIS = function () {
                 return{ authors: final_result };
             }
 
-
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
@@ -3856,7 +3948,7 @@ PUBVIS = function () {
                     //*** declare vars
                     var chart = {};
                     var view_width, view_height = 0;
-                    var svg, svgH, svgW;
+                    var group, groupH, groupW;
                     var oridinal_scale, linear_scale;
                     var margin;
                     var number_of_periods, steps, max_number_of_bars;
@@ -3871,18 +3963,18 @@ PUBVIS = function () {
                     color_text = params.color_text;
 
                     //calculate absolut width and height for svg
-                    svgH = view_height - margin.top - margin.bottom;
-                    svgW =  view_width - margin.left - margin.right;
-                    //console.log( "svgH: " + svgH );
+                    groupH = view_height - margin.top - margin.bottom;
+                    groupW =  view_width - margin.left - margin.right;
+                    //console.log( "groupH: " + groupH );
 
                     //public functions
-                    //*** create svg group appends it to the g-overview
+                    //*** create group append it to the overview
                     chart.set_svg_group = function ( params ) { 
                         var id = params.id;
                         var transform_xPos = params.transform_xPos;
                         var transform_yPos = params.transform_yPos;
 
-                        svg = d3.select( "#overview" )
+                        group = d3.select( "#overview" )
                                 .append("g")
                                 .attr( "id", id )
                                 .attr("transform", "translate(" + transform_xPos + "," + transform_yPos + ")"); //move x,y of whole svg.chart
@@ -3899,9 +3991,9 @@ PUBVIS = function () {
                                             .rangeRoundBands([ 0, range_ord ], in_beteween_space); //5% space between bars
                     }
 
-                    chart.get_svg = function() { return svg };
-                    chart.get_svgH = function() { return svgH };
-                    chart.get_svgW = function() { return svgW };
+                    chart.get_group = function() { return group };
+                    chart.get_groupH = function() { return groupH };
+                    chart.get_groupW = function() { return groupW };
                     chart.get_oridinal_scale = function() { return oridinal_scale };
                     chart.get_linear_scale = function() { return linear_scale };
                     chart.get_margins = function() { return margin };
@@ -3941,9 +4033,9 @@ PUBVIS = function () {
                                             transform_xPos: new_bar_years.get_margins().left, 
                                             transform_yPos: (new_bar_years.get_margins().top + 30) //because it don't includes the space between header and overview
                                           });            
-                    var svg = new_bar_years.get_svg();
-                    var svgH = new_bar_years.get_svgH();
-                    var svgW = new_bar_years.get_svgW();  
+                    var svg = new_bar_years.get_group();
+                    var svgH = new_bar_years.get_groupH();
+                    var svgW = new_bar_years.get_groupW();  
                     var get_current_displayed_years;
                     var count_clicks = 0;             
                     
@@ -4627,9 +4719,9 @@ PUBVIS = function () {
                                             transform_xPos: ( width/2 ), 
                                             transform_yPos: (157 + 30) //because it don't includes the space between header and overview
                                           });
-                    svg = new_bar_types.get_svg();
-                    svgH = new_bar_types.get_svgH();
-                    svgW = new_bar_types.get_svgW();
+                    svg = new_bar_types.get_group();
+                    svgH = new_bar_types.get_groupH();
+                    svgW = new_bar_types.get_groupW();
 
                     //new_bar_years.set_scale( data_amount, svgH, svgW, 0.2 ); 
                     new_bar_types.set_scale( all_entry_types, (svgW/2), svgH, 0 ); 
@@ -4963,8 +5055,10 @@ PUBVIS = function () {
                 var margin = params.margin;
                 var color_text = params.color_text;
                 var text_size = params.text_size;
-                var svg;
-                //var format_nb_total = zeroFilled = ('000' + total_nb).substr(-3);
+                var width = params.width;
+
+                var xPos = width/2 - margin.left - (space_between_view) - 20; //20 because of the space for the types_labels
+                //console.log( "xPos: " + xPos );
 
                 var amount = d3.select( "#overview" )
                                 .append("g")
@@ -4975,7 +5069,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( total_nb )
                                     .attr({
-                                            x: 180,
+                                            x: xPos,
                                             y: 125, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -4988,7 +5082,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( " / " )
                                     .attr({
-                                            x: 185,
+                                            x: (xPos + 13),
                                             y: 122, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -4998,10 +5092,11 @@ PUBVIS = function () {
                                     })
                                     .style("font-size", text_size)
 
+
                 var selected_amount = amount.append( "text" )
                                     .text ( selected_nb )
                                     .attr({
-                                            x: 180,
+                                            x: xPos,
                                             y: 125,  
                                             fill: selection_color, //color_text,
                                             "text-anchor": "end",
@@ -5020,7 +5115,7 @@ PUBVIS = function () {
                     } else {
                         d3.select("#lbl_selected_amount").attr("fill", selection_color);
                     }
-                    d3.select("#lbl_total_amount").attr("x", "210");
+                    d3.select("#lbl_total_amount").attr("x", (xPos + 50));
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
                     d3.select("#lbl_slash_amount").attr("opacity", "1");
@@ -5037,7 +5132,8 @@ PUBVIS = function () {
                 //console.log( "cloud aufgerufen" );
                 var type = params.type //to distinguish if a keyword was clicked or an author
                 var wordcloud;
-                var size = [450, 340];
+                //var size = [450, 340];
+                var size = params.size;
                 var fontSize = d3.scale.log().domain([params.words[(params.words.length-1)].size ,params.words[0].size])
                                              .range( [15, 50] )
                                              .clamp( true );
@@ -5407,70 +5503,24 @@ PUBVIS = function () {
             }
 
         //*****************************CALL**************************//
-            
+        
 
-            //***build html structure
+            calculate_width();
+            
+            //build html structure
             setup_layout();
 
-            //***display header
-            show_header = HEADER();
-            show_btn_clearAll = CLEAR_ALL();
+            //display the view
+            display_all_views();
 
-            //***display bar-chart with years
-            chart_years = BAR_YEARS.create_bar_years({
-                data_years_all: dataset_years, 
-                data_amount_all: dataset_amount, 
-                color_bar: "#D9D9D9", 
-                color_text: "#f5f5f5", 
-                color_background_div: "#333333", 
-                view_height: 157.5, 
-                margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
-                view_width: 1024,
-            });
-            chart_years.render();
-
-            //***display bar-cahrt with types
-            chart_type = BAR_TYPE.create_bar_type({
-                all_entry_types: dataset_types, 
-                entry_types_text: dataset_types_text, 
-                color_bar: "#D9D9D9", 
-                color_text: "#333333", 
-                view_height: 162.5, 
-                margin: {top: 0, right: 200, bottom: 0, left: 0}, 
-                view_width: 1024,
-            });
-            chart_type.render();
-
-            //***display total number of entries and number of selected entries
-            show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
-                                       color_text: "#333333",
-                                       text_size: "70px",
-                                       total: json.length,
-                                       selected: "000"
-                                    });
-            //***display tagCloud
-            keywords = get_words(json).words;
-            //console.log( "keywords" );
-            //console.dir( keywords );
-            keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
-            wordCloud = CLOUD({ type:"keywords", words: keywords, xPos: (width/2 + 15), yPos: 0 });
-
-            //***display AuthorsCloud
-            authors = get_authors( json ).authors;
-            //authors = limit_words({ words: authors, optimum_size: 40, min: 1 });
-            //console.dir( authors );
-            wordCloud = CLOUD({ type:"authors", words: authors, xPos: 0, yPos: 0 });
-
-            //***display list
-            list = LIST({ data:json, update:false });
-
+            window.onresize = update_window;
+            //console.log( "parseInt(d3.select('#pubVis')...?: " + parseInt(d3.select('#pubVis').attr('width')) );
             
 
             $( "svg" ).click(function(event) {
 
                 //console.log( "selected_items" );
                 //console.dir( selected_items );
-
 
                 //actions if sth was selected or the time period changed
                 if ( selected_items_changed || timeline_changed ) { 
@@ -5486,10 +5536,6 @@ PUBVIS = function () {
 
                     selected_items_changed = false;
                     timeline_changed = false;
-
-                    //console.log( "clicked" );
-                    //d3.select("#txt_authors_Bgl").attr('fill', "red" );
-
                    
                 
                 } else {
