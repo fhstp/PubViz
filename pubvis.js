@@ -1,6 +1,4 @@
 PUBVIS = function () {
-    var state = document.readyState;
-    console.log( "document.readyState: " + document.readyState );
     var make_it_all = function (params) {
         filename = params.filename;
         target = params.target;
@@ -5604,10 +5602,19 @@ PUBVIS = function () {
 
     //@param.errors = list with entries that were not able to parst into a json
     var display_error = function ( errors ) {
-        //draw errors
+        var text;
         //console.dir ( errors ); 
-        //console.log("errors.length: " + Object.keys(errors).length)
-        //alert( JSON.stringify(errors) );        
+        //console.log("errors.errorEntry.length: " + errors.errorEntry.length);
+
+        text = "DATA ERROR!\nThe following " + errors.errorEntry.length + " listed entries of the file '" + filename + "' do not come up with the common bibTeX syntax and won't be contained in the PubVIZ visalization. \n\n";
+
+        for ( var i = 0; i < errors.errorEntry.length; i++ ){
+            
+            text += errors.errorEntry[i] + "\n" + "\n";
+        }
+
+        //console.log( "text:" + text ); 
+        alert( text );     
     }
 
     return { make_it_all : make_it_all };
