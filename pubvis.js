@@ -1,8 +1,12 @@
 PUBVIS = function () {
+    var state = document.readyState;
+    console.log( "document.readyState: " + document.readyState );
     var make_it_all = function (params) {
         filename = params.filename;
         target = params.target;
         selection_color = params.color;
+
+        $( target ).append( "<div id='loading'> One moment please, LOADING... </div>" );
 
         fetch_bibfile ( filename );        
     };
@@ -56,17 +60,21 @@ PUBVIS = function () {
         //needed format to show the authors in the list
         for ( var i = 0; i < bigJson.length; i++ ){
 
-            str = bigJson[i].entryTags.author;
-            //console.log( "str: " + str );
+            if ( bigJson[i].entryTags.author !== undefined ) { 
 
-            //all_authors_str = all_authors.toString();
-            str = str.replace (/,/g, "");
+                str = bigJson[i].entryTags.author;
+                //console.log( "str: " + str );
 
-            //split string at every 'and'
-            str = str.replace (/ and /g, ", ");
+                //all_authors_str = all_authors.toString();
+                str = str.replace (/,/g, "");
 
-            bigJson[i].list_authors = str;
-            //console.dir( all_authors_split );
+                //split string at every 'and'
+                str = str.replace (/ and /g, ", ");
+
+                bigJson[i].list_authors = str;
+                //console.dir( all_authors_split );
+
+            }
 
         }
 
@@ -273,8 +281,29 @@ PUBVIS = function () {
                                         })
                                         //.attr("transform", "translate( 0, 0)");
                                         .attr("transform", "translate(" + 0 + "," + 0 + ")");
+            }
 
+            //set the display of the element with the given id to the given bool
+            //true = element will be shown
+            //false = element will be hidden
+            var show = function( id, value ) {
 
+                document.getElementById(id).style.display = value ? 'block' : 'none';
+            }
+
+            //check after the intervall is past if the body was loaded.
+            //if the body is defined the interval will be cleared and 
+            //the onReady function will be executed
+            //source: http://stackoverflow.com/questions/25253391/javascript-loading-screen-while-page-loads
+            var onReady = function( callback ) {
+                var intervalID = window.setInterval(checkReady, 1000);
+
+                function checkReady() {
+                    if (document.getElementsByTagName('body')[0] !== undefined) {
+                        window.clearInterval(intervalID);
+                        callback.call(this);
+                    }
+                }
             }
 
             //call all views to display them
@@ -1022,7 +1051,6 @@ PUBVIS = function () {
             //or rather remove the highlight of selected/decelected items
             var highlight_selection_items = function(){
                 //console.log( "CALL: highlight_selection_items " );
-
                 var item_value = last_selected_item;
                 var item_key;
                 var id_txt_label, id_background_div;
@@ -5519,11 +5547,24 @@ PUBVIS = function () {
             //display the view
             display_all_views();
 
-            window.onresize = update_window;
+           //window.onresize = update_window;
             //console.log( "parseInt(d3.select('#pubVis')...?: " + parseInt(d3.select('#pubVis').attr('width')) );
             
+            
+            //hide the loading-div after successfully loaded
+            onReady(function () {
+                show('loading', false);
+            });
+
+
+
+
+
+
 
             $( "svg" ).click(function(event) {
+
+                console.log( "document.readyState: " + document.readyState );
 
                 //console.log( "selected_items" );
                 //console.dir( selected_items );
