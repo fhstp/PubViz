@@ -3816,10 +3816,11 @@ PUBVIS = function () {
             var HEADER = function(){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
+                var home_link = "http://www.w3schools.com"; //will be replaced with our 'about page'
 
                 var logo = d3.select( "#header" )
                                 .append("g")
-                                .attr( "id", "logo_div" );
+                                .attr( "id", "logo_div" )
 
 
                 var logo_div = logo.append( "rect" )
@@ -3832,8 +3833,15 @@ PUBVIS = function () {
                                             id: "div_logo"
                                     })
 
+                var txt_logo = d3.select( "#header" )
+                                .append("g")
+                                .attr( "id", "txt_logo" ) 
+                                
 
-                var text_bold = logo.append( "text" )
+
+                var text_bold = txt_logo.append("a")
+                                    .attr("xlink:href", home_link)
+                                    .append( "text" )
                                     .text( "PUB" )
                                     .attr({
                                             x: 35, 
@@ -3849,7 +3857,10 @@ PUBVIS = function () {
                                     })
                                     .style("font-size", "22px")
 
-                var text_regular = logo.append( "text" )
+
+                var text_regular = txt_logo.append("a")
+                                    .attr("xlink:href", home_link)
+                                    .append( "text" )
                                     .text( "VIZ" )
                                     .attr({
                                             x: 81, 
@@ -3864,10 +3875,56 @@ PUBVIS = function () {
 
                                     })
                                     .style("font-size", "22px")
+
+
+                txt_logo.on( "mouseover", function() {
+                            //console.log( "mouseover About" );
+                            d3.select("#text_regular").style("text-decoration", "underline");
+                            d3.select("#text_bold").style("text-decoration", "underline");
+                            d3.select(this).style("cursor", "pointer");
+                        })
+                        .on( "mouseout", function() {
+                            //console.log( "mouseover out About" );
+                            d3.select("#text_regular").style("text-decoration", "none");
+                            d3.select("#text_bold").style("text-decoration", "none");
+                        })
+                        .append("title") //show text on hover
+                        .text( "go to PubVIZ website" )
+
+
+
+                var about = logo.append("a")
+                                    .attr("xlink:href", home_link)
+                                    .append( "text" )
+                                    .text( "About PubVIZ" )
+                                    .attr({
+                                            x: logo_div_width - 20, 
+                                            y: 20, 
+                                            id: "txt_about",
+                                            fill: "#f5f5f5",
+                                            "text-anchor": "end",
+                                            "font-weight": "lighter"
+
+                                    })
+                                    .style("font-size", "11px")
+                                    .on( "mouseover", function() {
+                                        //console.log( "mouseover About" );
+                                        d3.select(this).style("cursor", "pointer");
+                                        d3.select("#txt_about").style("text-decoration", "underline");
+                                    })
+                                    .on( "mouseout", function() {
+                                        //console.log( "mouseover out About" );
+                                        //d3.select(this).style("cursor", "pointer");
+                                        d3.select("#txt_about").style("text-decoration", "none");
+                                    })
+                                    .append("title") //show text on hover
+                                    .text( "go to PubVIZ website" )
+
                 
+                //show warn-triangle only if error occured
                 if ( error_text !== "" ){ 
 
-                    point_1 = logo_div_width - 45;
+                    point_1 = logo_div_width - 120;
                     point_2 = point_1 + 10;
                     point_3 = point_2 + 10;
 
@@ -3877,11 +3934,9 @@ PUBVIS = function () {
                                     .attr( "id", "warning_sign" )
                                     
 
-
-
                     var polygon = warining.append( "polygon" )
                                             .attr({
-                                                points: point_1 + ",25 "+ " " + point_2 + ",5 "+ " " + point_3 + ",25 ",
+                                                points: point_1 + ",22 "+ " " + point_2 + ",9 "+ " " + point_3 + ",22 ",
                                                 fill: selection_color,
                                             })
                                             
@@ -3892,14 +3947,14 @@ PUBVIS = function () {
                                         .text( "!" )
                                         .attr({
                                                 x: point_2, 
-                                                y: 23, 
+                                                y: 21, 
                                                 fill: "#333333",
                                                 id: "call_sign",
                                                 "text-anchor": "middle",
                                                 "font-weight": "600"
 
                                         })
-                                        .style("font-size", "18px")
+                                        .style("font-size", "12px")
 
 
                     warining.on("click", function() {
@@ -4020,7 +4075,7 @@ PUBVIS = function () {
                                     .text( "ClearAll" )
                                     .attr({
                                             x: 20, 
-                                            y: 18, 
+                                            y: 20, 
                                             id: "txt_clearAll",
                                             fill: "#f5f5f5",
                                             "text-anchor": "start",
