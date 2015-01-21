@@ -107,17 +107,17 @@ PUBVIS = function () {
         var current_timeline, timeline_changed = false;
         var setup_layout;
         var window_width;
-        //var max_width = 1024;
         var width;
         var space_left = 0;
         var button_width = 75; //clearAll button
         var button_height = 30; //clearAll button
         var empty = [];
-        var words_displayed = [], authors_displayed = [];
+        var words_displayed = [], authors_displayed = []; //contain words/authors that are really displayed
         var clearAll_pushed = false;
         var text_color_for_types;
         var space_between_view = 30;
         var svg;
+        var highligth_color = "black";
 
 
         //*************************HELPER FUNCTIONS***********************//
@@ -809,8 +809,6 @@ PUBVIS = function () {
                 return { new_id: new_id,
                          exist_id: exist_id };
             }
-            //generate_words_id({ text: "Vis]ual Analy$°^[tics Vi$&(sual Ana*'lytics &%$§", group: "keywords", element: "text" }).new_id;
-            //generate_words_id({ text: "Vis]ual Analy$°^[tics Vi$&(sual Ana*'lytics &%$§", group: "keywords", element: "text" }).exist_id;
 
             //change color of the given words into the selection_color
             //@params.data = word Array containing min a "text" element ( data.text ) 
@@ -821,6 +819,7 @@ PUBVIS = function () {
                // console.log( " amount words to be highlight: " + data.length );
                // console.dir( data );
                 //console.dir( words_displayed );
+                remove_highlight_selection_items_keywords();
 
                 for( var i = 0; i < data.length; i++ ){
 
@@ -829,14 +828,11 @@ PUBVIS = function () {
                     id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
 
                     if ( item_already_selected( {array:words_displayed, key:"id", value:id_txt_label } ) ) {
-                        
-                        if ( d3.select(id_background_div).attr("opacity") === "0" ) { 
 
-                            d3.select(id_txt_label).attr('fill', selection_color );
+                        //d3.select(id_txt_label).attr('fill', selection_color );
+                        //d3.select(id_txt_label).attr('fill', highligth_color );
+                        d3.select(id_txt_label).style("font-weight", "900");
 
-                        } else {
-                            //console.log("selection item > color not changed: " + d3.select(id_txt_label).text );
-                        }
                     } else {
                         //console.log( "item actually NOT displayed: " + item_value );
                     }
@@ -849,6 +845,7 @@ PUBVIS = function () {
 
                 //console.log( " amount words to be highlight: " + data.length );
                 //console.dir( data );
+                remove_highlight_selection_items_authors();
 
                 for( var i = 0; i < data.length; i++ ){
 
@@ -859,13 +856,8 @@ PUBVIS = function () {
                     id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                     //console.log( "id_background_div: " + id_background_div );
 
-                    if ( item_already_selected( {array:authors_displayed, key:"id", value:id_txt_label } ) ) {
+                    d3.select(id_txt_label).style("font-weight", "900");
 
-                        d3.select(id_txt_label).attr('fill', selection_color );
-
-                    } else {
-                        //console.log( "item actually NOT displayed: " + item_value );
-                    }
                 }
             }
 
@@ -985,10 +977,10 @@ PUBVIS = function () {
                     id_txt_label = generate_words_id({ text: item_value, group: "keywords", element: "text" }).exist_id;
                     //console.log( "id_txt_label: " + id_txt_label );
 
-                    id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
+                    //id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
                     //console.log( "id_background_div: " + id_background_div );
 
-                    d3.select(id_background_div).attr('opacity', "0");
+                    //d3.select(id_background_div).attr('opacity', "0");
                     //d3.select(id_background_div).attr('stroke', "");
                     d3.select(id_txt_label).attr('fill', "#33333");
                     d3.select(id_txt_label).style('font-weight', "300");
@@ -1006,18 +998,21 @@ PUBVIS = function () {
 
                 for ( var ct = 0; ct < current_timeline.length; ct++ ){ 
 
-                    var id_txt_label, id_background_div;
-
                     id_txt_label = "#label_year_" + current_timeline[ct];
                     //console.log( "id_txt_label: " + id_txt_label );
+                    id_bar = "#bar_subset" + current_timeline[ct];
 
-                    id_background_div = "#background_div_" + current_timeline[ct];
+                    //id_background_div = "#background_div_" + current_timeline[ct];
                     //console.log( "id_background_div: " + id_background_div );
 
-                    d3.select(id_background_div).attr('fill', "#333333");
-                    d3.select(id_background_div).attr('stroke', "");
+                    //d3.select(id_background_div).attr('fill', "#333333");
+                    //d3.select(id_background_div).attr('stroke', "");
+                    
                     d3.select(id_txt_label).attr('fill', "#f5f5f5");
-                    d3.select(id_txt_label).attr('font-weight', "regular");
+                    //d3.select(id_txt_label).style('font-weight', 300);
+
+                    //change the bar
+                    //d3.select(id_bar).attr('fill', '#D9D9D9');
 
                 }
             }
@@ -1029,24 +1024,12 @@ PUBVIS = function () {
                 
                 for ( var i = 0; i < entryTypes_grouped_text.length; i++ ){ 
 
-                    if ( entryTypes_grouped_text[i] === "Part of a Book") { 
-                        id_background_div = "#background_div_type_Part_of_a_Book"; 
-                    } else {
-                        id_background_div = "#background_div_type_" + entryTypes_grouped_text[i];
-                    }
-                    //console.log( "id_background_div: " + id_background_div );
-
-                    if ( entryTypes_grouped_text[i] === "Part of a Book") { 
-                        id_txt_label = "#lbl_type_Part_of_a_Book"; 
-                    } else {
-                        id_txt_label = "#lbl_type_" + entryTypes_grouped_text[i];
-                    }
-                    //console.log( "id_txt_label: " + id_txt_label );
+                    id_txt_label = generate_words_id({ text: entryTypes_grouped_text[i], group: "type", element: "text" }).exist_id;
 
                     //hide div
                     //d3.select(id_background_div).attr('opacity', "0");
 
-                    d3.select(id_txt_label).attr('font-weight', "regular");
+                    //d3.select(id_txt_label).attr('font-weight', "regular");
                     d3.select(id_txt_label).attr('fill', text_color_for_types);
 
                 }
@@ -1077,6 +1060,8 @@ PUBVIS = function () {
 
                         id_txt_label = "#label_year_" + item_value;
                         //console.log( "id_txt_label: " + id_txt_label );
+                        var id_bar = "#bar_subset" + item_value;
+                        //console.log( "id_bar: " + id_bar );
 
                         //id_background_div = "#background_div_" + item_value;
                         //console.log( "id_background_div: " + id_background_div );
@@ -1088,8 +1073,12 @@ PUBVIS = function () {
                             //d3.select(id_background_div).attr('stroke', "#333333");
                             //d3.select(id_txt_label).attr('fill', "#333333");
                             
+                            //change text
                             d3.select(id_txt_label).attr('fill', selection_color);
-                            d3.select(id_txt_label).attr('font-weight', "900");
+                            d3.select(id_txt_label).style('font-weight', "900");
+
+                            //change the bar
+                            d3.select(id_bar).attr('fill', selection_color);
 
                         } else {
                             //console.log( "item NOT contained" );
@@ -1113,25 +1102,19 @@ PUBVIS = function () {
 
                         item_value = selected_items.types[x];
 
-                        if ( item_value === "Part of a Book") { 
-                            id_background_div = "#background_div_type_Part_of_a_Book"; 
-                        } else {
-                            id_background_div = "#background_div_type_" + item_value;
-                        }
-                        //console.log( "id_background_div: " + id_background_div );
+                        id_txt_label = generate_words_id({ text: item_value, group: "type", element: "text" }).exist_id;
+                        id_bar = generate_words_id({ text: item_value, group: "type", element: "div" }).exist_id;
 
-                        if ( item_value === "Part of a Book") { 
-                            id_txt_label = "#lbl_type_Part_of_a_Book"; 
-                        } else {
-                            id_txt_label = "#lbl_type_" + item_value;
-                        }
                         //console.log( "id_txt_label: " + id_txt_label );
 
-                            //show yellow div 
-                            //d3.select(id_background_div).attr('opacity', '1');
+                        //show yellow div 
+                        //d3.select(id_background_div).attr('opacity', '1');
                             
-                            d3.select(id_txt_label).attr('fill', selection_color);
-                            d3.select(id_txt_label).attr('font-weight', "900");
+                        d3.select(id_txt_label).attr('fill', selection_color);
+                        d3.select(id_txt_label).style('font-weight', "900");
+
+                        //change the bar
+                        d3.select(id_bar).attr('fill', selection_color);
                     }
                 } else {
                     remove_highlight_selection_items_types();
@@ -1145,7 +1128,7 @@ PUBVIS = function () {
 
                     item_key = "keywords";
                     
-                    remove_highlight_selection_items_keywords();
+                    //remove_highlight_selection_items_keywords();
 
                     for ( var k = 0; k < selected_items.keywords.length; k++ ){ 
 
@@ -1157,7 +1140,7 @@ PUBVIS = function () {
                         id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
                         //id_background_div = "#selection_div_keyword_" + item_value;
                  
-                        d3.select(id_txt_label).style('font-weight', '900');
+                    //    d3.select(id_txt_label).style('font-weight', '900');
                         //d3.select(id_txt_label).attr('fill', '#333333');
                         d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
@@ -1166,7 +1149,7 @@ PUBVIS = function () {
            
                     }
                 } else {
-                    remove_highlight_selection_items_keywords();
+                    //remove_highlight_selection_items_keywords();
                 }
 
                 //console.log( "selected_items.authors.length: " + selected_items.authors.length );
@@ -1180,7 +1163,7 @@ PUBVIS = function () {
 
                     item_key = "authors";
 
-                    remove_highlight_selection_items_authors();
+                    //remove_highlight_selection_items_authors();
 
                     for ( var a = 0; a < selected_items.authors.length; a++ ){
 
@@ -1192,7 +1175,7 @@ PUBVIS = function () {
                         id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                         //id_background_div = "#selection_div_keyword_" + item_value;
                  
-                        d3.select(id_txt_label).style('font-weight', '900');
+                        //d3.select(id_txt_label).style('font-weight', '900');
                         //d3.select(id_txt_label).attr('fill', '#333333');
                         d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
@@ -1202,7 +1185,7 @@ PUBVIS = function () {
                     
                 } else {
 
-                    remove_highlight_selection_items_authors();
+                    //remove_highlight_selection_items_authors();
 
                 }
             }
@@ -1618,7 +1601,7 @@ PUBVIS = function () {
                         && (filter_criteria.keywords.length >= 1) 
                         && (filter_criteria.authors.length === 0) ){ 
 
-                        console.log( "years and keywords are selected" );
+                        //console.log( "years and keywords are selected" );
 
                         for ( var a = 0; a < filter_criteria.years.length; a++ ){
                             
@@ -4390,7 +4373,7 @@ PUBVIS = function () {
 
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
-                                             console.log( "arleady sel" );
+                                             //console.log( "arleady sel" );
                                              remove_selected_item( {value: item_value, key: item_key} ); 
 
                                         } else {
@@ -4436,19 +4419,26 @@ PUBVIS = function () {
                                         width: xScale.rangeBand(),
                                         height: function( d, i ) { 
                                                     ids = get_tooltip_ids( data_years[i] ).ids;
+                                                    var item_label = "#label_year_" + data_years[ i ];
+                                                    
                                                     if ( yScale( d ) > 0 ){
                                                         tooltip_change_visibility( data_years[i], true );
                                                         d3.select(ids[0]).attr( "class", "permanent" );
                                                         d3.select(ids[1]).attr( "class", "permanent" );
+                                                        d3.select( item_label ).style( "font-weight", "900" );
+                                                        //console.log( "item_label fett: " + item_label );
 
                                                     }else{
                                                         d3.select(ids[0]).attr( "class", "" );
                                                         d3.select(ids[1]).attr( "class", "" );
-
+                                                        d3.select( item_label ).style( "font-weight", "300" );
+                                                        //console.log( "item_label nicht fett: " + item_label );
                                                     }
                                                     return yScale( d ); 
                                                 },
-                                        fill: selection_color,
+                                        fill: highligth_color, //selection_color,
+                                        
+
                                         opacity: 1,
                                         class: function( d,i ) { return "bar subset highlight " + data_years[i]; },
                                         id: function( d,i ) { 
@@ -4459,6 +4449,7 @@ PUBVIS = function () {
                                         
                                         item_value = data_years[ j ].toString();
                                         item_key = "years";
+                                        //var item_label = "#label_year_" + data_years[ j ].toString();
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                              
@@ -4469,7 +4460,7 @@ PUBVIS = function () {
                                             add_selected_item( {value: item_value, key: item_key} );  
                                             tooltip_change_visibility( item_value, true );                                    
                                         }                                       
-                                    })              
+                                    })             
                     };
 
                     var create_background_divs = function () {
@@ -4877,18 +4868,36 @@ PUBVIS = function () {
 
                     new_bar_types.highlight_subset = function ( data_selected ) { 
                         //console.log( "types: highlight_subset aufgerufen" );
+                        var type_lable_id, id;
 
                         bar = bar_highlight.selectAll( "rect" )
                                     .data( data_selected )
                                     .attr ({
                                         x: 0,
                                         y: function( d, i ){ return yScale( i ) },
-                                        width: function( d ){ return xScale( d ); },
+                                        //width: function( d ){ return xScale( d ); },
+                                        width: function( d, i ) { 
+                                                
+                                                type_label_id = generate_words_id({ text: entry_types_text[i], group: "type", element: "text" }).exist_id;
+                                                
+                                                if ( xScale( d ) > 0 ){
+                                                    d3.select( type_label_id ).style( "font-weight", "900" );
+
+                                                }else{
+                                                    d3.select( type_label_id ).style( "font-weight", "300" );
+                                                }
+                                                return xScale( d ); 
+                                            },
+                                
                                         height: yScale.rangeBand(),
-                                        fill: selection_color,
+                                        fill: highligth_color, //selection_color,
                                         class: "bar_type_highlight",
                                         id: function( d,i ) { 
-                                            return "bar_type_highlight" + i; }
+                                            id = generate_words_id({ text: entry_types_text[i], group: "type", element: "div" }).new_id;
+                                            //console.log( "id: " + id );
+                                            return id;
+                                            //return "bar_type_highlight" + i; 
+                                        }
                                     }) 
                                     .on( "click", function( d, i ) {
 
@@ -4956,7 +4965,7 @@ PUBVIS = function () {
                     };
 
                     var create_labels = function () {
-                        var labels, data_lbl;
+                        var labels, data_lbl, id;
 
                         labels = label_group.selectAll( "text" )
                                     .data( entry_types_text )
@@ -4970,11 +4979,14 @@ PUBVIS = function () {
                                         class: "label_type",
                                         "text-anchor": "end",
                                         id: function ( d, i ) { 
-                                                if ( d === "Part of a Book") { 
+                                                id = generate_words_id({ text: d, group: "type", element: "text" }).new_id;
+                                                //console.log( "id: " + id );
+                                                return id;
+                                                /*if ( d === "Part of a Book") { 
                                                     return "lbl_type_Part_of_a_Book"; 
                                                 } else {
                                                     return "lbl_type_" + d; 
-                                                }
+                                                }*/
                                             }
                                     })
                                     .on( "click", function( d, i ) {
@@ -5138,7 +5150,7 @@ PUBVIS = function () {
                                     .attr({
                                             x: xPos,
                                             y: 125,  
-                                            fill: selection_color, //color_text,
+                                            fill: color_text, //selection_color,
                                             "text-anchor": "end",
                                             "font-weight": "900",
                                             opacity: 0,
@@ -5150,11 +5162,13 @@ PUBVIS = function () {
                     var new_selected_nb = params.selected_new;
                     //var format_nb = zeroFilled = ('000' + new_selected_nb).substr(-3); will draw zeros if number has less than three digits
                     //new_selected_nb += " / ";
+                   /*
                     if ( new_selected_nb === 0 ) {
                         d3.select("#lbl_selected_amount").attr("fill", color_text);
                     } else {
                         d3.select("#lbl_selected_amount").attr("fill", selection_color);
                     }
+                    */
                     d3.select("#lbl_total_amount").attr("x", (xPos + 50));
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
@@ -5567,8 +5581,6 @@ PUBVIS = function () {
 
 
 
-
-
             $( "svg" ).click(function(event) {
 
                 //console.log( "selected_items" );
@@ -5582,9 +5594,11 @@ PUBVIS = function () {
                     
                     filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
 
-                    highlight_selection_items();
+                    //highlight_selection_items();
 
                     update_views({ changed_data: filtered_json });
+
+                    highlight_selection_items();
 
                     selected_items_changed = false;
                     timeline_changed = false;
