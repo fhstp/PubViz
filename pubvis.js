@@ -4,11 +4,15 @@ PUBVIS = function () {
         target = params.target;
         selection_color = params.color;
 
+        //inform the user about loading
         $( target ).append( "<div id='loading'> LOADING... </div>" );
 
+        //access the bibfile, convert and display 
         fetch_bibfile ( filename );        
     };
 
+    //access the bib.file, start the conversion into a json 
+    //and start the representation of the data
     //@param.filename = String (e.g "file.bib")
     var fetch_bibfile = function ( filename ) {
         var result; 
@@ -106,6 +110,8 @@ PUBVIS = function () {
         //var max_width = 1024;
         var width;
         var space_left = 0;
+        var button_width = 75; //clearAll button
+        var button_height = 30; //clearAll button
         var empty = [];
         var words_displayed = [], authors_displayed = [];
         var clearAll_pushed = false;
@@ -171,12 +177,12 @@ PUBVIS = function () {
                 var header_height = 30;
                 var overview_height = 370;
                 var clouds_height = 370; 
-                var button_width = 75; //clearAll button
-                button_height = 28; //clearAll button
+                //var button_width = 75; //clearAll button
+                //var button_height = 30; //clearAll button
 
                 //calculation of the position for the views
-                var clarAll_yPos = svg_margin_top + header_height;
-                var overview_yPos = svg_margin_top + header_height + space_between_view;
+               // var clarAll_yPos = header_height; //svg_margin_top + header_height;
+                var overview_yPos = header_height + space_between_view;
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
@@ -213,7 +219,8 @@ PUBVIS = function () {
                                             height: button_height
                                         })
                                         //btn middle: .attr("transform", "translate(" + (width/2 - (75/2)) + "," + 25 + ")");
-                                        .attr("transform", "translate(" + (width - button_width) + "," + clarAll_yPos + ")");
+                                        //.attr("transform", "translate(" + (width - button_width) + "," + clarAll_yPos + ")");
+                                        .attr("transform", "translate(" + (width - button_width) + ", 0 )");
                                         
 
                 overview = d3.select( "#pubVis" )
@@ -3688,6 +3695,7 @@ PUBVIS = function () {
                 //console.dir( all_authors );
 
                 all_authors_str = all_authors.toString();
+                //console.log( all_authors_str );
 
                 //split string at every whitspace
                 all_authors_split = all_authors_str.split( " and " );
@@ -3698,7 +3706,7 @@ PUBVIS = function () {
                 //split at comma only if there is no whitespace before or after the comma
                 all_authors_single = all_authors_split_str.split( /,(?!\s)/ );
 
-                //if comma the last name is before the comma
+                //the last name is before the comma
                 for ( var i = 0; i < all_authors_single.length; i++ ){ 
                     
                     str = all_authors_single[i];
@@ -3878,13 +3886,13 @@ PUBVIS = function () {
                                     .attr({
                                             x: 514, 
                                             y: 0, 
-                                            width: 480,
+                                            width: (width/2 - button_width - 11),//480,
                                             height: 30,
                                             fill: "white",
                                             id: "div_search"
                                     })
 
-                var deco = d3.select( "#header" )
+            /*  var deco = d3.select( "#header" )
                                     .append("g")
                                     .attr( "id", "deco" );
 
@@ -3897,6 +3905,7 @@ PUBVIS = function () {
                                             fill: "#333333",
                                             id: "div_search"
                                     })
+            */
             }
 
         //***************************CLEAR ALL******************************//
@@ -3937,8 +3946,8 @@ PUBVIS = function () {
                                         .attr({
                                             x: 0, 
                                             y: 0, 
-                                            width: 75,
-                                            height: 28,
+                                            width: button_width,
+                                            height: button_height,
                                             fill: "#333333",
                                             id: "clearAll_div"
                                     });
@@ -3948,7 +3957,7 @@ PUBVIS = function () {
                                         x1: 0,
                                         y1: 0,
                                         x2: 0,
-                                        y2: 28,
+                                        y2: button_height,
                                         id: "btn_clearAll_line",
                                         "shape-rendering": "crispEdges",
                                         "stroke": "#333333",
@@ -5561,8 +5570,6 @@ PUBVIS = function () {
 
 
             $( "svg" ).click(function(event) {
-
-                console.log( "document.readyState: " + document.readyState );
 
                 //console.log( "selected_items" );
                 //console.dir( selected_items );
