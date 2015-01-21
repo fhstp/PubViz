@@ -20,10 +20,12 @@ PUBVIS = function () {
         $.get( filename, function( data ) {
 
             result = bib2json( data );
-        
-            display_data( result.json ) ;
 
-            display_error( result.errors ) ;
+            //display_error( result.errors ).error_text ;
+            //console.log( "error_text: " + display_error( result.errors ).error_text );
+        
+            display_data( result.json, display_error( result.errors ).error_text ) ;
+
         });    
     }
 
@@ -90,7 +92,7 @@ PUBVIS = function () {
 
     //draw data
     //@param.json = bib entries in json format
-    var display_data = function ( json ) {
+    var display_data = function ( json, error_text ) {
         //console.dir( json );
         var real_life_data, generated_data, dataset_years, dataset_amount, dataset_types, dataset_types_text;
         var filtered_json;
@@ -3812,28 +3814,30 @@ PUBVIS = function () {
 
         //***************************HEADER******************************//
             var HEADER = function(){
+                var point_1 = "", point_2 = "", point_3 = "";
+                var logo_div_width = (width - button_width - 11);
 
                 var logo = d3.select( "#header" )
                                 .append("g")
                                 .attr( "id", "logo_div" );
-                                //.attr("transform", "translate(" + 0 + "," + 0 + ")");
-                                //new_bar_years.get_margins().left, new_bar_years.get_margins().top 
+
 
                 var logo_div = logo.append( "rect" )
                                     .attr({
                                             x: 0, 
                                             y: 0, 
-                                            width: 509,
+                                            width: logo_div_width,//(width - button_width - 11),//509,
                                             height: 30,
                                             fill: "#333333",
                                             id: "div_logo"
                                     })
 
+
                 var text_bold = logo.append( "text" )
                                     .text( "PUB" )
                                     .attr({
                                             x: 35, 
-                                            y: 24, 
+                                            y: 23, 
                                             width: 509,
                                             height: 30,
                                             fill: "#333333",
@@ -3849,7 +3853,7 @@ PUBVIS = function () {
                                     .text( "VIZ" )
                                     .attr({
                                             x: 81, 
-                                            y: 24, 
+                                            y: 23, 
                                             width: 509,
                                             height: 30,
                                             fill: "#333333",
@@ -3860,35 +3864,96 @@ PUBVIS = function () {
 
                                     })
                                     .style("font-size", "22px")
+                
+                if ( error_text !== "" ){ 
 
-                var search = d3.select( "#header" )
+                    point_1 = logo_div_width - 45;
+                    point_2 = point_1 + 10;
+                    point_3 = point_2 + 10;
+
+
+                    var warining = d3.select( "#header" )
+                                    .append("g")
+                                    .attr( "id", "warning_sign" )
+                                    
+
+
+
+                    var polygon = warining.append( "polygon" )
+                                            .attr({
+                                                points: point_1 + ",25 "+ " " + point_2 + ",5 "+ " " + point_3 + ",25 ",
+                                                fill: selection_color,
+                                            })
+                                            
+                                            
+
+
+                    var call_sign = warining.append( "text" )
+                                        .text( "!" )
+                                        .attr({
+                                                x: point_2, 
+                                                y: 23, 
+                                                fill: "#333333",
+                                                id: "call_sign",
+                                                "text-anchor": "middle",
+                                                "font-weight": "600"
+
+                                        })
+                                        .style("font-size", "18px")
+
+
+                    warining.on("click", function() {
+                                                //alert( error_text );
+                                                console.log( "clicked!" );
+
+                                                if ($("#error_text").length > 0){
+                                                    show('error_text', true);
+                                                } else { 
+
+                                                    $( target ).append( "<div id='error_text'> " + error_text + " </div>" );
+                                                    $( '#error_text' ).append( '<input id="btn_cancel" type="button" value="Quit"/>' );
+                                                    $( '#btn_cancel' ).on('click', function(){ show('error_text', false); })
+                                                }
+
+                                            })
+                                            .on( "mouseover", function() {
+                                                //console.log( "mouseover bar_subset_group" );
+                                                d3.select(this).style("cursor", "pointer");
+                                            })
+                                            .append("title") //show text on hover
+                                            .text( "Warning: data errors. Click for more info" )
+                }
+                
+
+                /*//old header  
+                    var search = d3.select( "#header" )
                                     .append("g")
                                     .attr( "id", "search_div" );
 
-                var search_div = search.append( "rect" )
-                                    .attr({
-                                            x: 514, 
-                                            y: 0, 
-                                            width: (width/2 - button_width - 11),//480,
-                                            height: 30,
-                                            fill: "white",
-                                            id: "div_search"
-                                    })
+                    var search_div = search.append( "rect" )
+                                        .attr({
+                                                x: 514, 
+                                                y: 0, 
+                                                width: (width/2 - button_width - 11),//480,
+                                                height: 30,
+                                                fill: "white",
+                                                id: "div_search"
+                                        })
 
-            /*  var deco = d3.select( "#header" )
-                                    .append("g")
-                                    .attr( "id", "deco" );
+                    var deco = d3.select( "#header" )
+                                        .append("g")
+                                        .attr( "id", "deco" );
 
-                var deci_div = deco.append( "rect" )
-                                    .attr({
-                                            x: 999, 
-                                            y: 0, 
-                                            width: 25,
-                                            height: 30,
-                                            fill: "#333333",
-                                            id: "div_search"
-                                    })
-            */
+                    var deci_div = deco.append( "rect" )
+                                        .attr({
+                                                x: 999, 
+                                                y: 0, 
+                                                width: 25,
+                                                height: 30,
+                                                fill: "#333333",
+                                                id: "div_search"
+                                        })
+                */
             }
 
         //***************************CLEAR ALL******************************//
@@ -3915,6 +3980,7 @@ PUBVIS = function () {
 
                                 }).on("mouseover", function() {
                                         d3.select("#btn_clearAll_line").attr( "stroke", selection_color );
+                                        d3.select(this).style("cursor", "pointer");
 
                                 }).on("mouseout", function() {
                                         d3.select("#btn_clearAll_line").attr( "stroke", "#333333" );
@@ -3924,6 +3990,8 @@ PUBVIS = function () {
                                 }).on("mouseup", function() {
                                         d3.select("#txt_clearAll").attr( "fill", "#f5f5f5" );
                                 });
+
+                                
 
                 clearAll = btn_clearAll.append ( "rect" )
                                         .attr({
@@ -5627,15 +5695,20 @@ PUBVIS = function () {
         //console.dir ( errors ); 
         //console.log("errors.errorEntry.length: " + errors.errorEntry.length);
 
-        text = "DATA ERROR!\nThe following " + errors.errorEntry.length + " listed entries of the file '" + filename + "' do not come up with the common bibTeX syntax and won't be contained in the PubVIZ visalization. \n\n";
+        if( errors.errorEntry.length > 0 ) { 
+            text = "<h1>DATA ERROR! </h1></br>The following " + errors.errorEntry.length + " listed entries of the file '" + filename + "' do not come up with the common bibTeX syntax and won't be contained in the PubVIZ visalization. </br></br> If you would like those entries to be contained, please correct the syntax in the '" + filename + "' and reload the page. </br></br>";
 
-        for ( var i = 0; i < errors.errorEntry.length; i++ ){
-            
-            text += errors.errorEntry[i] + "\n" + "\n";
+            for ( var i = 0; i < errors.errorEntry.length; i++ ){
+                
+                text += errors.errorEntry[i] + "</br>" + "</br>";
+            }
+        }else {
+            text = ""
         }
 
         //console.log( "text:" + text ); 
-        alert( text );     
+        //alert( text );
+        return { error_text: text };     
     }
 
     return { make_it_all : make_it_all };
