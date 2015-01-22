@@ -474,7 +474,7 @@ PUBVIS = function () {
                     }
                 }
 
-                //console.log( "item contained: " + item_contained );
+                //console.log( "item contained?: " + item_contained );
                 return item_contained;
             }
 
@@ -1386,13 +1386,23 @@ PUBVIS = function () {
                                 n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
                                 if ( n !== (-1) ) {
-                                    //if match was found add this entry
-                                    result.push(json[i]);
-                                } else { 
-                                    //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                }
-                            } else {
-                                //console.log( "keyword is undefiened?: " + json[i].entryTags.keywords + " or is not containde?: " + item_already_selected( {array:words_displayed , value:filter_criteria.keywords[k] } ) );
+                                    
+                                    //if match was found check if the result list has already entries
+                                    if ( result.length > 0 ) { 
+                                        
+                                        for ( var r = 0; r < result.length; r++ ){
+                                            
+                                            //check if this entry already exists in the result list.
+                                            if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                
+                                                result.push(json[i]);
+                                            } 
+                                        }
+                                    } else { 
+                                        //is the first entry in the result list
+                                        result.push(json[i]);
+                                    }
+                                } 
                             }
                         }
                     }
@@ -1427,15 +1437,28 @@ PUBVIS = function () {
                                 n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
                                 if ( n !== (-1) ) {
-                                    //if match was found add this entry
-                                    result.push(json[i]);
-                                } else { 
-                                    //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                }
+                                    //console.log( "match found: " + json[i].citationKey );
+                                    //if match was found check if it already excists in the result list.
+                                    if ( result.length > 0 ) { 
+                                        //console.log( "restult.length: " + result.length );
+                                        
+                                        for ( var r = 0; r < result.length; r++ ){
+                                            //console.log( "r: " + r );
+                                            //console.log( "result[r].citationKey: " + result[r].citationKey );
+                                            //console.log( "json[i].citationKey: " + json[i].citationKey );
+                                            //console.log( 'item_already_selected?: ' + item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey} ) );
 
-                            } else {
-
-                            }
+                                            if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                result.push(json[i]);
+                                                //console.log( "result[r].citationKey" + result[r].citationKey );
+                                            } 
+                                        }
+                                    } else { 
+                                        //console.log( "war das erste im result: " + json[i].citationKey );
+                                        result.push(json[i]);
+                                    }
+                                } 
+                            } 
                         }
                     }
 
@@ -1637,15 +1660,26 @@ PUBVIS = function () {
                                     str = to_title_case( str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
+                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index     
 
                                     if ( n !== (-1) ) {
-                                        //if match was found add this entry
-                                        result.push(json[i]);
-                                        //console.log( "pushed!" );
-                                    } else { 
-                                        //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                    }
+                                    
+                                        //if match was found check if the result list has already entries
+                                        if ( result.length > 0 ) { 
+                                            
+                                            for ( var r = 0; r < result.length; r++ ){
+                                                
+                                                //check if this entry already exists in the result list.
+                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                    
+                                                    result.push(json[i]);
+                                                } 
+                                            }
+                                        } else { 
+                                            //is the first entry in the result list
+                                            result.push(json[i]);
+                                        }
+                                    } 
                                 }                        
                             }
                         }
@@ -1706,23 +1740,28 @@ PUBVIS = function () {
 
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                        
                                             if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                //console.log( "author found: " + json[i].entryTags.author );
-                                                //console.dir( json[i] );
-                                                result.push(json[i]);
-                                                //console.log( "pushed!" );
-                                            } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                    
+                                                //if match was found check if the result list has already entries
+                                                if ( result.length > 0 ) { 
+                                                    
+                                                    for ( var r = 0; r < result.length; r++ ){
+                                                        
+                                                        //check if this entry already exists in the result list.
+                                                        if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                            
+                                                            result.push(json[i]);
+                                                        } 
+                                                    }
+                                                } else { 
+                                                    //is the first entry in the result list
+                                                    result.push(json[i]);
+                                                }
                                             }
                                         }
-
-                                    } else { 
-                                        //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                    }
+                                    } 
                                 } 
-
                             }
                         }
                     }
@@ -1756,13 +1795,25 @@ PUBVIS = function () {
                                     str = to_title_case( str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
+                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index                               
 
                                     if ( n !== (-1) ) {
-                                        //if match was found add this entry
-                                        result.push(json[i]);
-                                    } else { 
-                                        //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
+                                    
+                                        //if match was found check if the result list has already entries
+                                        if ( result.length > 0 ) { 
+                                            
+                                            for ( var r = 0; r < result.length; r++ ){
+                                                
+                                                //check if this entry already exists in the result list.
+                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                    
+                                                    result.push(json[i]);
+                                                } 
+                                            }
+                                        } else { 
+                                            //is the first entry in the result list
+                                            result.push(json[i]);
+                                        }
                                     }
                                 } 
                             }
@@ -1800,14 +1851,25 @@ PUBVIS = function () {
 
                                         //lookup if filtered word match in the keywords of this entry
                                         n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                      
                                         if ( n !== (-1) ) {
-                                            //if match was found add this entry
-                                            result.push(json[i]);
-                                            //console.log( "pushed!" );
-                                        } else { 
-                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                        }
+                                    
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
+                                            } else { 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
+                                            }
+                                        }                                      
                                     } 
                                 }
 
@@ -2000,7 +2062,7 @@ PUBVIS = function () {
                         &&  (filter_criteria.keywords.length === 0) 
                         &&  (filter_criteria.authors.length >= 1) ){ 
 
-                        //console.log( "types and authors are selected" );
+                        console.log( "types and authors are selected" );
 
                         for ( var q = 0; q < filter_criteria.authors.length; q++ ){
 
@@ -2037,12 +2099,24 @@ PUBVIS = function () {
 
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                  
                                             if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
-                                            } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                    
+                                                //if match was found check if the result list has already entries
+                                                if ( result.length > 0 ) { 
+                                                    
+                                                    for ( var r = 0; r < result.length; r++ ){
+                                                        
+                                                        //check if this entry already exists in the result list.
+                                                        if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                            
+                                                            result.push(json[i]);
+                                                        } 
+                                                    }
+                                                } else { 
+                                                    //is the first entry in the result list
+                                                    result.push(json[i]);
+                                                }
                                             }
                                         }  
                                     }
@@ -2069,14 +2143,22 @@ PUBVIS = function () {
 
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+         
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
-
                                         }
                                     }
 
@@ -2103,11 +2185,20 @@ PUBVIS = function () {
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
 
                                         }
@@ -2138,11 +2229,20 @@ PUBVIS = function () {
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
 
                                         }
@@ -2172,11 +2272,20 @@ PUBVIS = function () {
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
 
                                         }
@@ -2205,11 +2314,20 @@ PUBVIS = function () {
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
 
                                         }
@@ -2237,11 +2355,20 @@ PUBVIS = function () {
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
-                                            if ( n !== (-1) ) {
-                                                //if match was found add this entry
-                                                result.push(json[i]);
+                                            //if match was found check if the result list has already entries
+                                            if ( result.length > 0 ) { 
+                                                
+                                                for ( var r = 0; r < result.length; r++ ){
+                                                    
+                                                    //check if this entry already exists in the result list.
+                                                    if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
+                                                        
+                                                        result.push(json[i]);
+                                                    } 
+                                                }
                                             } else { 
-                                                //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
+                                                //is the first entry in the result list
+                                                result.push(json[i]);
                                             }
 
                                         }
@@ -3460,7 +3587,7 @@ PUBVIS = function () {
                 }
 
 
-                //console.log( "length of filterd_json: " + result.length );
+                console.log( "length of filterd_json: " + result.length );
                 //console.log( "result: " )
                 //console.dir( result );
                 return { entries: result };
