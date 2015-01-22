@@ -119,7 +119,7 @@ PUBVIS = function () {
         var text_color_for_types;
         var space_between_view = 30;
         var svg;
-        var highligth_color = "black";
+        var highligth_color = selection_color;
 
 
         //*************************HELPER FUNCTIONS***********************//
@@ -150,7 +150,9 @@ PUBVIS = function () {
                 //console.log( "calculate aufgerufen" );
                 var max_width = 1024;
 
-                window_width = $(document).width();
+                //window_width = $(document).width();
+                //window_width = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
+                window_width = $( window ).width();
 
                 if ( window_width > max_width){
                     space_left = (window_width - max_width) /2;
@@ -159,6 +161,8 @@ PUBVIS = function () {
                     width = window_width;
                     space_left = 0;
                 }
+                //console.log( "window_width: " + window_width );
+                //console.log( "space_left: " + space_left );
             }
 
             //builds the necessary svg and svg-groups
@@ -188,7 +192,8 @@ PUBVIS = function () {
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
-                
+                $( target ).css("marginLeft", "auto");
+                $( target ).css("margin-right", "auto");
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
                           .append( "svg" )
@@ -831,9 +836,9 @@ PUBVIS = function () {
 
                     if ( item_already_selected( {array:words_displayed, key:"id", value:id_txt_label } ) ) {
 
-                        //d3.select(id_txt_label).attr('fill', selection_color );
+                        d3.select(id_txt_label).attr('fill', selection_color );
                         //d3.select(id_txt_label).attr('fill', highligth_color );
-                        d3.select(id_txt_label).style("font-weight", "900");
+                        //d3.select(id_txt_label).style("font-weight", "900");
 
                     } else {
                         //console.log( "item actually NOT displayed: " + item_value );
@@ -858,7 +863,8 @@ PUBVIS = function () {
                     id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                     //console.log( "id_background_div: " + id_background_div );
 
-                    d3.select(id_txt_label).style("font-weight", "900");
+                    //d3.select(id_txt_label).style("font-weight", "900");
+                    d3.select(id_txt_label).attr('fill', selection_color );
 
                 }
             }
@@ -1011,7 +1017,7 @@ PUBVIS = function () {
                     //d3.select(id_background_div).attr('stroke', "");
                     
                     d3.select(id_txt_label).attr('fill', "#f5f5f5");
-                    //d3.select(id_txt_label).style('font-weight', 300);
+                    d3.select(id_txt_label).style('font-weight', 300);
 
                     //change the bar
                     //d3.select(id_bar).attr('fill', '#D9D9D9');
@@ -1080,7 +1086,7 @@ PUBVIS = function () {
                             d3.select(id_txt_label).style('font-weight', "900");
 
                             //change the bar
-                            d3.select(id_bar).attr('fill', selection_color);
+                            //d3.select(id_bar).attr('fill', selection_color);
 
                         } else {
                             //console.log( "item NOT contained" );
@@ -1111,12 +1117,13 @@ PUBVIS = function () {
 
                         //show yellow div 
                         //d3.select(id_background_div).attr('opacity', '1');
-                            
+                        
+                        //change the color and the weight of the clicked items    
                         d3.select(id_txt_label).attr('fill', selection_color);
                         d3.select(id_txt_label).style('font-weight', "900");
 
                         //change the bar
-                        d3.select(id_bar).attr('fill', selection_color);
+                        //d3.select(id_bar).attr('fill', selection_color);
                     }
                 } else {
                     remove_highlight_selection_items_types();
@@ -1142,9 +1149,11 @@ PUBVIS = function () {
                         id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
                         //id_background_div = "#selection_div_keyword_" + item_value;
                  
-                    //    d3.select(id_txt_label).style('font-weight', '900');
+                        //change the weight of the clicked item
+                        d3.select(id_txt_label).style('font-weight', '900');
+                        
                         //d3.select(id_txt_label).attr('fill', '#333333');
-                        d3.select(id_txt_label).attr('fill', selection_color);
+                        //d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
                         //d3.select(id_background_div).attr('opacity', '0.5');
 
@@ -1177,9 +1186,12 @@ PUBVIS = function () {
                         id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                         //id_background_div = "#selection_div_keyword_" + item_value;
                  
+                        //change the weight of the clicked item
+                        d3.select(id_txt_label).style('font-weight', '900');
+
                         //d3.select(id_txt_label).style('font-weight', '900');
                         //d3.select(id_txt_label).attr('fill', '#333333');
-                        d3.select(id_txt_label).attr('fill', selection_color);
+                        //d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
                         //d3.select(id_background_div).attr('opacity', '0.5');
 
@@ -4548,13 +4560,13 @@ PUBVIS = function () {
                                                         tooltip_change_visibility( data_years[i], true );
                                                         d3.select(ids[0]).attr( "class", "permanent" );
                                                         d3.select(ids[1]).attr( "class", "permanent" );
-                                                        d3.select( item_label ).style( "font-weight", "900" );
+                                                        //d3.select( item_label ).style( "font-weight", "900" );
                                                         //console.log( "item_label fett: " + item_label );
 
                                                     }else{
                                                         d3.select(ids[0]).attr( "class", "" );
                                                         d3.select(ids[1]).attr( "class", "" );
-                                                        d3.select( item_label ).style( "font-weight", "300" );
+                                                        //d3.select( item_label ).style( "font-weight", "300" );
                                                         //console.log( "item_label nicht fett: " + item_label );
                                                     }
                                                     return yScale( d ); 
@@ -5000,7 +5012,7 @@ PUBVIS = function () {
                                         y: function( d, i ){ return yScale( i ) },
                                         //width: function( d ){ return xScale( d ); },
                                         width: function( d, i ) { 
-                                                
+                                               /* needed if labels of matching typs should be bold
                                                 type_label_id = generate_words_id({ text: entry_types_text[i], group: "type", element: "text" }).exist_id;
                                                 
                                                 if ( xScale( d ) > 0 ){
@@ -5008,7 +5020,7 @@ PUBVIS = function () {
 
                                                 }else{
                                                     d3.select( type_label_id ).style( "font-weight", "300" );
-                                                }
+                                                }*/
                                                 return xScale( d ); 
                                             },
                                 
@@ -5273,7 +5285,7 @@ PUBVIS = function () {
                                     .attr({
                                             x: xPos,
                                             y: 125,  
-                                            fill: color_text, //selection_color,
+                                            fill: selection_color,//color_text, 
                                             "text-anchor": "end",
                                             "font-weight": "900",
                                             opacity: 0,
@@ -5285,13 +5297,13 @@ PUBVIS = function () {
                     var new_selected_nb = params.selected_new;
                     //var format_nb = zeroFilled = ('000' + new_selected_nb).substr(-3); will draw zeros if number has less than three digits
                     //new_selected_nb += " / ";
-                   /*
+                   
                     if ( new_selected_nb === 0 ) {
                         d3.select("#lbl_selected_amount").attr("fill", color_text);
                     } else {
                         d3.select("#lbl_selected_amount").attr("fill", selection_color);
                     }
-                    */
+                    
                     d3.select("#lbl_total_amount").attr("x", (xPos + 50));
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
@@ -5698,6 +5710,7 @@ PUBVIS = function () {
             //hide the loading-div after successfully loaded
             onReady(function () {
                 show('loading', false);
+                $( ".target" ).show();
             });
 
 
