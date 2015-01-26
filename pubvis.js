@@ -145,7 +145,9 @@ PUBVIS = function () {
             //window.onresize = update_window;
 
 
-            //claculates the width
+            //claculates the width and the space left for the maring
+            //which will be used in the setup_layout() for the svg and 
+            //in the LIST() for the margin of the list
             var calculate_width = function(){
                 //console.log( "calculate aufgerufen" );
                 var max_width = 1024;
@@ -161,6 +163,8 @@ PUBVIS = function () {
                     width = window_width;
                     space_left = 0;
                 }
+
+                //console.log( "space_left: " + space_left );
                 //console.log( "document width: " + $( document ).width() );
                 //console.log( "window_width: " + $( window ).width() );
                 //console.log( "target: " + $( target ).width() );
@@ -194,8 +198,9 @@ PUBVIS = function () {
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
-                $( target ).css("marginLeft", "auto");
-                $( target ).css("margin-right", "auto");
+                //$( target ).css("marginLeft", "auto");
+                //$( target ).css("margin-right", "auto");
+
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
                           .append( "svg" )
@@ -206,8 +211,9 @@ PUBVIS = function () {
                             width: window_width, //full size of screen for the svg, otherwise some parts maybe hidden
                             height: svg_height//880
                           })
-                          .attr("transform", "translate(" + space_left + "," + svg_margin_top + ")"); 
-         
+                          .attr("transform", "translate(0," + svg_margin_top + ")"); 
+                
+                $( "#pubVis" ).css("margin-left", space_left);
 
                 //create all groups for the views:
                 header = d3.select( "#pubVis" )
@@ -4230,6 +4236,7 @@ PUBVIS = function () {
                 var y;
                 var data = params.data;
                 var update = params.update;
+                var offset;
                 //var update;
                 //location
                 if ( !update ){ 
@@ -4239,6 +4246,12 @@ PUBVIS = function () {
                     $('#list').replaceWith("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
                 }
+
+
+                //set the same margin-left as the svg do
+                offset = $( "#pubVis" ).offset();
+                $( "#list" ).css("margin-left", offset.left);
+
 
                 $("#year").click(function() {
                     if(y) {
