@@ -94,7 +94,6 @@ body{
   color:#141414;
   padding-left:40px;
   width:100%;
-  min-height: 100%;
   float:left;
   clear:both;
 }
@@ -102,11 +101,10 @@ body{
 .accordion div.subpane{
 	text-align:justify;
 	float:left;
-  background-color:#eeeeee;
-  color:#141414;
-  height: 100%;
-  padding: 10px;
-    width:100%;
+	background-color:#eeeeee;
+	color:#141414;
+	padding: 10px;
+	width:100%;
 }
 
 #s_acc{
@@ -214,7 +212,6 @@ a{
 	position: relative;
 	float:left;
 	width: 50px;
-	height:100%;
 }
 .arrow svg{
 
