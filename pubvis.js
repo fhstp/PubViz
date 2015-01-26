@@ -161,7 +161,9 @@ PUBVIS = function () {
                     width = window_width;
                     space_left = 0;
                 }
-                //console.log( "window_width: " + window_width );
+                //console.log( "document width: " + $( document ).width() );
+                //console.log( "window_width: " + $( window ).width() );
+                //console.log( "target: " + $( target ).width() );
                 //console.log( "space_left: " + space_left );
             }
 
@@ -325,6 +327,12 @@ PUBVIS = function () {
                 show_header = HEADER();
                 show_btn_clearAll = CLEAR_ALL();
 
+                //fetch years from json
+                dataset_years = get_years( {json: json} ).time_list;
+                //dataset_years = generated_data.years;
+                dataset_amount = get_years( {json: json} ).amount_list;
+                //dataset_amount = generated_data.amount;
+
                 //***display bar-chart with years
                 chart_years = BAR_YEARS.create_bar_years({
                     data_years_all: dataset_years, 
@@ -338,6 +346,10 @@ PUBVIS = function () {
                     view_width: width
                 });
                 chart_years.render();
+
+                //fetch types from json
+                dataset_types = get_types( json ).type_list;
+                dataset_types_text = get_types( json ).types_text;
 
                 //***display bar-cahrt with types
                 chart_type = BAR_TYPE.create_bar_type({
@@ -818,7 +830,7 @@ PUBVIS = function () {
             }
 
             //change color of the given words into the selection_color
-            //@params.data = word Array containing min a "text" element ( data.text ) 
+            //@params.data = word Array containing at least a "text" element ( data.text ) 
             var highlight_words = function( data ){
                 //console.log( "highlight words" );
                 var item_value, id_txt_label, id_background_div;
@@ -846,6 +858,8 @@ PUBVIS = function () {
                 }
             }
 
+            //change color of the given authors into the selection_color
+            //@params.data = word Array containing at least a "text" element ( data.text )
             var highlight_authors = function( data ){
                 //console.log( "highlight authors" );
                 var item_value, id_txt_label, id_background_div;
@@ -860,7 +874,7 @@ PUBVIS = function () {
                     id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
                     //console.log( "id_txt_label: " + id_txt_label );
                     
-                    id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
+                    //id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                     //console.log( "id_background_div: " + id_background_div );
 
                     //d3.select(id_txt_label).style("font-weight", "900");
@@ -933,6 +947,8 @@ PUBVIS = function () {
                 //console.log( "opacity subset: " + d3.select( tooltip_id_subset ).attr( "opacity" ) );                
             }
 
+            //creates with the given year ids for the norml and the subset toolbar 
+            //returns an array containing both created ids. 
             var get_tooltip_ids = function( year ){
                 var ids = [];
 
@@ -960,10 +976,10 @@ PUBVIS = function () {
                     id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
                     //console.log( "id_txt_label: " + id_txt_label );
 
-                    id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
+                    //id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
                     //console.log( "id_background_div: " + id_background_div );
 
-                    d3.select(id_background_div).attr('opacity', "0");
+                    //d3.select(id_background_div).attr('opacity', "0");
                     d3.select(id_txt_label).attr('fill', "#33333");
                     d3.select(id_txt_label).style('font-weight', "300");
 
@@ -1037,7 +1053,7 @@ PUBVIS = function () {
                     //hide div
                     //d3.select(id_background_div).attr('opacity', "0");
 
-                    //d3.select(id_txt_label).attr('font-weight', "regular");
+                    d3.select(id_txt_label).style('font-weight', "300");
                     d3.select(id_txt_label).attr('fill', text_color_for_types);
 
                 }
@@ -1071,12 +1087,14 @@ PUBVIS = function () {
                         var id_bar = "#bar_subset" + item_value;
                         //console.log( "id_bar: " + id_bar );
 
-                        //id_background_div = "#background_div_" + item_value;
+                        id_background_div = "#background_div_" + item_value;
                         //console.log( "id_background_div: " + id_background_div );
 
                         if( item_already_selected( {array: current_timeline, value: item_value } ) ){ 
 
                             //highlight div
+                            //d3.select(id_background_div).attr('stroke', selection_color);
+                            //d3.select(id_background_div).attr('stroke-width', "3");
                             //d3.select(id_background_div).attr('fill', selection_color);
                             //d3.select(id_background_div).attr('stroke', "#333333");
                             //d3.select(id_txt_label).attr('fill', "#333333");
@@ -1153,7 +1171,7 @@ PUBVIS = function () {
                         d3.select(id_txt_label).style('font-weight', '900');
                         
                         //d3.select(id_txt_label).attr('fill', '#333333');
-                        //d3.select(id_txt_label).attr('fill', selection_color);
+                        d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
                         //d3.select(id_background_div).attr('opacity', '0.5');
 
@@ -1191,7 +1209,7 @@ PUBVIS = function () {
 
                         //d3.select(id_txt_label).style('font-weight', '900');
                         //d3.select(id_txt_label).attr('fill', '#333333');
-                        //d3.select(id_txt_label).attr('fill', selection_color);
+                        d3.select(id_txt_label).attr('fill', selection_color);
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
                         //d3.select(id_background_div).attr('opacity', '0.5');
 
@@ -1243,6 +1261,10 @@ PUBVIS = function () {
             }
             //save_wordtext_and_wordid({ array: , id:"" });
 
+            //verify if the given entyType belong to the given type category (Artikle, Book, Part of a Book....) 
+            //and returns a boolean if true or false
+            //params.type = String (e.g "Book") one of the seven categories
+            //params.entryType = String (e.g. "inbook") the type of the target entry
             var is_entry_type_of_catagory = function( params ){
                 var type = params.type;
                 var entryType = params.entryType;
@@ -2521,17 +2543,17 @@ PUBVIS = function () {
             }
 
             //*** datasets
-            real_life_data = get_years( {json: json} );
+            //real_life_data = get_years( {json: json} );
             //generated_data = generate_testData( 1959 );
 
-            dataset_years = real_life_data.time_list;
+            //dataset_years = real_life_data.time_list;
             //dataset_years = generated_data.years;
-            dataset_amount = real_life_data.amount_list;
+            //dataset_amount = real_life_data.amount_list;
             //dataset_amount = generated_data.amount;
 
-            var real_life_data_types = get_types( json );
-            dataset_types = real_life_data_types.type_list;
-            dataset_types_text = real_life_data_types.types_text;
+            //var real_life_data_types = get_types( json );
+            //dataset_types = real_life_data_types.type_list;
+            //dataset_types_text = real_life_data_types.types_text;
             //var testdata = generate_testData( 2008 );
             //dataset_types = testdata.amount;
 
@@ -3346,7 +3368,7 @@ PUBVIS = function () {
 
                                         }
                                         
-                                     });  
+                                     })
                     };
 
                     var update_background_divs = function ( dataset_years ) {
@@ -3833,7 +3855,7 @@ PUBVIS = function () {
                                                 } else {
                                                     return "lbl_type_" + d; 
                                                 }*/
-                                            }
+                                            } 
                                     })
                                     .on( "click", function( d, i ) {
 
@@ -4199,6 +4221,10 @@ PUBVIS = function () {
             }    
 
         //*****************************LIST******************************// 
+            
+            
+           
+            //changes Pauli button abstract           
             var LIST = function( params ) {
                 var t;
                 var y;
@@ -4276,6 +4302,424 @@ PUBVIS = function () {
                         var title;
                         var author;
                         var notes;
+                        var journal;
+                        var conf_title;
+                        var book_title;
+                        var article_details = "";
+                        var conf_details = "";
+                        var book_details = "";
+                        var thesis_details = "";
+                        var first = true;
+                        var thesis_type;
+                        var details = ""; //all information that will be contained in the folding box
+
+
+                        if(data[j].entryTags['author'] != undefined) {
+                            author = data[j].entryTags['author'];
+                        } else {
+                            author = "<i style='font-style: italic;'>Unknown Author</i>";
+                        }
+
+                        if(data[j].entryTags['title'] != undefined) {
+                            title = "<span style='font-weight: bold;'>" + data[j].entryTags['title'] + "</span>";
+                        } else {
+                            title = '<i>Unknown Title</i>';
+                        }
+                        
+                        if(data[j].entryTags['url'] != undefined) {
+                            url = "     <a target='_blank' style='float: right;' href='" + data[j].entryTags['url'] + "'><svg version='1.1' baseProfile='basic' id='Ebene_1'xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' xml:space='preserve' class='download'><g><g><path d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g><rect x='2.928' y='13.591' width='8.433' height='0.943'/></g></svg></a>";
+                        } else {
+                            url = '';
+                        }
+
+                        type = cap(data[j].entryType);
+
+                        if(data[j].entryTags['notes'] != undefined){
+
+                            notes = "<br>&nbsp" + data[j].entryTags['notes'];
+
+                        }else{
+
+                            notes = "";
+
+                        }
+
+
+                        
+
+                        //prepare additional data for the detail view (folding box) in the list
+                        //details are depending on the types
+                        //article: [VOLUME(NUMBER):PAGEFROM-PAGETO]
+                        if ( data[j].entryType === "article" ) {
+
+                            if ( data[j].entryTags['volume'] !== undefined ){
+
+                                article_details = data[j].entryTags['volume'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['number'] !== undefined ){
+
+                                article_details = data[j].entryTags['volume'] + "(" + data[j].entryTags['number'] + ")";
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['pages'] !== undefined ) {  
+
+                                article_details = first ? "" : article_details += ":";
+                                article_details += data[j].entryTags['pages'];
+                                first = false;
+                            }
+
+                            details = article_details;
+                            //console.log( "article_details: " + article_details );
+
+                        //conference: ['p.' PAGEFROM-PAGETO, LOCATION, PUBLISHER]    
+                        } else if ( (data[j].entryType === "conference") 
+                            || (data[j].entryType === "inproceedings")
+                            || (data[j].entryType === "proceedings") ){
+
+                            if ( data[j].entryTags['pages'] !== undefined ){
+
+                                conf_details = "p. " + data[j].entryTags['pages'];
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                conf_details = !first ? conf_details += ", " : "";
+                                conf_details += data[j].entryTags['address'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['publisher'] !== undefined ){
+
+                                conf_details = first ? "" : conf_details += ", ";
+                                conf_details += data[j].entryTags['publisher'];
+                                first = false;
+                            }
+                            details = conf_details;
+                            //console.log( "conf_details: " + conf_details );
+
+                        //book: ['Edition': EDITION, PUBLISHER, ADDRESS]
+                        } else if ( (data[j].entryType === "book") 
+                            || (data[j].entryType === "booklet") ) {
+
+                            if ( data[j].entryTags['edition'] !== undefined ){
+
+                                book_details = "Edition: " + data[j].entryTags['edition'];
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['publisher'] !== undefined ){
+
+                                book_details = first ? "" : book_details += ", ";
+                                book_details += data[j].entryTags['publisher'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                book_details = first ? "" : book_details += ", ";
+                                book_details += data[j].entryTags['address'];
+                                first = false;
+                            }
+                            details = book_details;
+                            //console.log( "book details: " + book_details );
+                        
+                        }//thesis: [TYPE, UNIVERSITY, ADDRESS]
+
+                        else if ( (data[j].entryType === "thesis") 
+                            || (data[j].entryType === "mastersthesis")
+                            || (data[j].entryType === "phdthesis") ){ 
+
+                            thesis_type = (data[j].entryType) === "thesis" ? "Thesis" : (data[j].entryType === "mastersthesis") ? "Master's thesis" : (data[j].entryType === "phdthesis") ? "Ph.D. thesis" : undefined;
+                            //console.log( "thesis_type: " + thesis_type );
+                            
+                            if ( thesis_type !== undefined ){
+                                thesis_details = thesis_type;
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['school'] !== undefined ){
+
+                                first ? "" : thesis_details += ", ";
+                                thesis_details += data[j].entryTags['school'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                first ? "" : thesis_details += ", ";
+                                thesis_details += data[j].entryTags['address'] + ", " ;
+                                first = false;
+                            }
+                            details = thesis_details;
+                            //console.log( "thesis_details: " + thesis_details ); 
+                        } 
+                        
+                        //depending if abstract is availabel an arrow will be added
+                        if(data[j].entryTags['abstract'] != undefined 
+                            || details !== ""){
+
+                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M2.992,5.232l8.315,4.161l-8.315,4.16V5.232z'/></g></g></svg>";
+
+                        }else{
+
+                            arrow = "&nbsp";
+
+                        }
+
+                        
+                      //  <svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g></g></svg>
+
+                        $(".headl").click(function(){
+
+                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g></g></svg>";
+
+                        });
+
+                       
+                        //check the type and according to the type, add different information
+                        //aritcle: list journal name
+                        //conferene: list conference name
+                        //Part of a Book: list the title
+                        if (   (data[j].entryType === "article") 
+                            || (data[j].entryType === "proceedings")
+                            && (data[j].entryTags['journal'] !== undefined) ){
+
+                            //Additional data in header
+                            journal = data[j].entryTags['journal'];
+                            //$(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + ", " + journal + "</h3>");
+                            $(".accordion").append("<div class='headl' style='float:left; padding: 5px 0px;'><div class='arrow'>" + arrow + "</div><div class='subheadl' style=' width:90%; float:left; margin-bottom: 5px;'><h3>" + author + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type +  ", " + journal +  "</h3></div><div style='width:3%; float:left;'>"+url+"</div></div>");
+
+                        } else if ( (data[j].entryType === "conference") 
+                            || (data[j].entryType === "inproceedings") 
+                            || (data[j].entryType === "inbook") 
+                            || ( data[j].entryType === "incollection" )
+                            && (data[j].entryTags['booktitle'] !== undefined) ) {
+
+                            conf_titel = data[j].entryTags['booktitle'];
+                            //$(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + ", " + conf_titel + "</h3>");
+                            $(".accordion").append("<div class='headl' style='float:left; padding: 5px 0px;'><div class='arrow'>" + arrow + "</div><div class='subheadl' style=' width:90%; float:left; margin-bottom: 5px;'><h3>" + author + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type +  ", " + conf_titel +  "</h3></div><div style='width:3%; float:left;'>"+url+"</div></div>");
+
+
+                        } else { 
+
+                            //$(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3>");
+                            $(".accordion").append("<div class='headl' style='float:left; padding: 5px 0px;'><div class='arrow'>" + arrow + "</div><div class='subheadl' style=' width:90%; float:left; margin-bottom: 5px;'><h3>" + author + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3></div><div style='width:3%; float:left;'>"+url+"</div></div>");
+
+                        }
+
+                        //check if details and/or abstract exists and append them to the foldng div
+                        if (   (data[j].entryTags['abstract'] !== undefined) 
+                            && (details !== "") ) {
+                            
+                            //(details !== "") ? "" : thesis_details += "<br>&nbsp";
+                            abs = data[j].entryTags['abstract'];
+                            $(".accordion").append("<div class='pane'>" + "<div class='subpane' style='width: 75%;'>" + "<p>" + details + "</p>" + "<br>&nbsp" + "<p>" + abs + "</p>" + "</div>" + "<div class='subpane' style='width: 15%;'><span style='font-style: italic; color: #898989; font-weight:bold;'>Notes:<br></span>" + notes + "</div>" + "</div>");
+            
+
+                        } else if ( (data[j].entryTags['abstract'] === undefined) 
+                            && (details !== "") ) {
+                            
+                            //abs = "";
+                            $(".accordion").append("<div class='pane'>" + "<div class='subpane' style='width: 75%;'>" + "<p>" + details + "</p>" + "</div>" + "<div class='subpane' style='width: 15%;'><span style='font-style: italic; color: #898989; font-weight:bold;'>Notes:<br></span>" + notes + "</div>" + "</div>");
+                        
+                        } else if ( (data[j].entryTags['abstract'] !== undefined) 
+                            && (details === "") ) {
+                            
+                            abs = "";
+                            $(".accordion").append("<div class='pane'>" + "<div class='subpane' style='width: 75%;'>" + "<p>" + abs + "</p>" + "</div>" + "<div class='subpane' style='width: 15%;'><span style='font-style: italic; color: #898989; font-weight:bold;'>Notes:<br></span>" + notes + "</div>" + "</div>");
+                        }
+
+                    }
+                    var key, count = 0;
+
+                    for(key in data) {
+                        if(data.hasOwnProperty(key)) {
+                            count++;
+                        }
+                    }
+
+                    function cap(string) {
+                        return string.charAt(0).toUpperCase() + string.slice(1);
+                    }
+
+                    if(sortBy == 0) {
+
+                        for(var j = 0; j < count; j++) {
+                            subgenerate();
+                        }
+
+                    } else if(sortBy == 1) {
+
+                        var yeararr = new Array();;
+
+                        for(var n = 0; n < count; n++) {
+
+                            yeararr.push(data[n].entryTags['year']);
+
+                        }
+                        var uniqueYear = [];
+                        $.each(yeararr, function(i, el) {
+                            if($.inArray(el, uniqueYear) === -1) uniqueYear.push(el);
+                        });
+                        uniqueYear.sort(function(a, b) {
+                            return b - a
+                        });
+                        //console.log(uniqueYear);
+
+                        for(i = 0; i < uniqueYear.length; i++) {
+                       
+                            $(".accordion").append("<h1>" + uniqueYear[i] + "</h1>");
+                            for(var j = 0; j < count; j++) {
+
+                                if(uniqueYear[i] == data[j].entryTags['year']) {
+                                    subgenerate();
+                                }
+                            }
+                        }
+                    } else if(sortBy == 2) {
+                        var typearr = new Array();
+                        for(var n = 0; n < count; n++) {
+                            typearr.push(data[n].entryType);
+                        }
+                        var TypeArray = ["article", "book", "conference", "miscellaneous","part of book", "report", "thesis"];
+                        for(i = 0; i < TypeArray.length; i++) {
+                            $(".accordion").append("<h1>" + cap(TypeArray[i]) + "</h1>");
+                            for(var j = 0; j < count; j++) {                
+                                var entry = data[j].entryType;
+                                if(TypeArray[i] == entry) {
+                                    subgenerate();
+                                }else if((TypeArray[i] == "book") && ((entry == "booklet") || (entry == "buch")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "conference") && ((entry == "inproceedings") || (entry == "proceedings")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "part of book") && ((entry == "inbook") || (entry == "incollection")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "report") && ((entry == "manual") || (entry == "techreport")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "thesis") && ((entry == "mastersthesis") || (entry == "phdthesis")) ){
+                                    subgenerate();
+                                }else if((TypeArray[i] == "miscellaneous") && (entry != "article") && (entry != "book") && (entry != "conference") && (entry != "part of book") && (entry != "report") && (entry != "thesis") &&((entry != "booklet") && (entry != "buch")) && ((entry != "inproceedings") && (entry != "proceedings")) && ((entry != "inbook") && (entry != "incollection")) && ((entry != "manual") && (entry != "techreport")) && ((entry != "mastersthesis") && (entry != "phdthesis"))){
+                                    subgenerate();
+                                }
+                            }
+                        }
+                    }
+                      //  Accordion Panels
+                      $(".accordion .pane").show();
+                      setTimeout("$('.accordion .pane').slideToggle('slow');", 1);
+                      $(".accordion .headl").click(function () {
+                        $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
+                        $(this).toggleClass("current");
+                        $(this).siblings(".headl").removeClass("current");
+                        $(".subpane").css({"display": "block"});
+                      });
+
+
+                }
+            }
+            
+
+        
+            
+
+        
+            //old list with no button for abstract
+            /*var LIST = function( params ) {
+                var t;
+                var y;
+                var data = params.data;
+                var update = params.update;
+                
+                //console.dir( data );
+
+
+                //location
+                if ( !update ){ 
+                    $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
+                    generate(0);
+                } else {
+                    $('#list').replaceWith("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
+                    generate(0);
+                }
+
+                $("#year").click(function() {
+                    if(y) {
+                        y = false;
+                        $("#year").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        generate(0);
+                    } else {
+                        y = true;
+                        t = false;
+                        $("#year").css({
+                            "border-right": "5px solid #ffc200"
+                        });
+                        $("#type").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        $(".accordion").css({"margin-top": "-20px"});
+                        generate(1);
+                    }
+                    //console.log("year = " + y);
+                    //console.log("type = " + t);
+                });
+                $("#type").click(function() {
+                    if(t) {
+                        t = false;
+                        $("#type").css({
+                            "border-right": "5px solid #d9d9d9"
+                        });
+                        $(".accordion").html('');
+                        generate(0);
+                    } else {
+                        t = true;
+                        y = false;
+                        $("#type").css({
+                            "border-right": "5px solid #ffc200"
+                        });
+                        $("#year").css({
+                            "border-right": "5px solid #d9d9d9"
+                        })
+                        $(".accordion").html('');
+                        $(".accordion").css({"margin-top": "-20px"});
+                        generate(2);
+                    }
+                    //console.log("year = " + y);
+                    //console.log("type = " + t);
+                });
+
+                function generate(sortBy) {
+
+                    this.sortBy = sortBy;
+                    //console.log(sortBy);
+
+                    function subgenerate() {
+
+                        var type;
+                        var url;
+                        var abs;
+                        var title;
+                        var author;
+                        var notes;
+                        var journal;
+                        var conf_title;
+                        var book_title;
+                        var article_details = "";
+                        var conf_details = "";
+                        var book_details = "";
+                        var thesis_details = "";
+                        var first = true;
+                        var thesis_type;
 
                         if(data[j].list_authors != undefined) {
                             author = data[j].list_authors;
@@ -4308,9 +4752,149 @@ PUBVIS = function () {
 
                         }
 
-                        $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3>");
+                        //check the type and according to the type, add different information
+                        //aritcle: list journal name
+                        //conferene: list conference name
+                        //Part of a Book: list the title
+                        if (   (data[j].entryType === "article") 
+                            || (data[j].entryType === "proceedings")
+                            && (data[j].entryTags['journal'] !== undefined) ){
 
-                        if(data[j].entryTags['abstract'] != undefined) {
+                            //Additional data in header
+                            journal = data[j].entryTags['journal'];
+                            $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + ", " + journal + "</h3>");
+                        
+
+                        } else if ( (data[j].entryType === "conference") 
+                            || (data[j].entryType === "inproceedings") 
+                            || (data[j].entryType === "inbook") 
+                            || ( data[j].entryType === "incollection" )
+                            && (data[j].entryTags['booktitle'] !== undefined) ) {
+
+                            conf_titel = data[j].entryTags['booktitle'];
+                            $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + ", " + conf_titel + "</h3>");
+
+
+                        } else { 
+
+                            $(".accordion").append("<h3>" + author + url + "<br>" + title + "<br>" + data[j].entryTags['year'] + ", " + type + "</h3>");
+
+                        }
+
+                        //prepare additional data for the detail view in the list
+                        //details are depending on the types
+                        //article: [VOLUME(NUMBER):PAGEFROM-PAGETO]
+                        if ( data[j].entryType === "article" ) {
+
+                            if ( data[j].entryTags['volume'] !== undefined ){
+
+                                article_details = data[j].entryTags['volume'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['number'] !== undefined ){
+
+                                article_details = data[j].entryTags['volume'] + "(" + data[j].entryTags['number'] + ")";
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['pages'] !== undefined ) {  
+
+                                article_details = first ? "" : article_details += ":";
+                                article_details += data[j].entryTags['pages'];
+                                first = false;
+                            }
+
+                            //console.log( "article_details: " + article_details );
+
+                        //conference: ['p.' PAGEFROM-PAGETO, LOCATION, PUBLISHER]    
+                        } else if ( (data[j].entryType === "conference") 
+                            || (data[j].entryType === "inproceedings")
+                            || (data[j].entryType === "proceedings") ){
+
+                            if ( data[j].entryTags['pages'] !== undefined ){
+
+                                conf_details = "p. " + data[j].entryTags['pages'];
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                conf_details = !first ? conf_details += ", " : "";
+                                conf_details += data[j].entryTags['address'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['publisher'] !== undefined ){
+
+                                conf_details = first ? "" : conf_details += ", ";
+                                conf_details += data[j].entryTags['publisher'];
+                                first = false;
+                            }
+                            //console.log( "conf_details: " + conf_details );
+
+                        //book: ['Edition': EDITION, PUBLISHER, ADDRESS]
+                        } else if ( (data[j].entryType === "book") 
+                            || (data[j].entryType === "booklet") ) {
+
+                            if ( data[j].entryTags['edition'] !== undefined ){
+
+                                book_details = "Edition: " + data[j].entryTags['edition'];
+                                first = false;
+
+                            }
+
+                            if ( data[j].entryTags['publisher'] !== undefined ){
+
+                                book_details = first ? "" : book_details += ", ";
+                                book_details += data[j].entryTags['publisher'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                book_details = first ? "" : book_details += ", ";
+                                book_details += data[j].entryTags['address'];
+                                first = false;
+                            }
+
+                            //console.log( "book details: " + book_details );
+                        
+                        }//thesis: [TYPE, UNIVERSITY, ADDRESS]
+
+                        else if ( (data[j].entryType === "thesis") 
+                            || (data[j].entryType === "mastersthesis")
+                            || (data[j].entryType === "phdthesis") ){ 
+
+                            thesis_type = (data[j].entryType) === "thesis" ? "Thesis" : (data[j].entryType === "mastersthesis") ? "Master's thesis" : (data[j].entryType === "phdthesis") ? "Ph.D. thesis" : undefined;
+                            //console.log( "thesis_type: " + thesis_type );
+                            
+                            if ( thesis_type !== undefined ){
+                                thesis_details = thesis_type;
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['school'] !== undefined ){
+
+                                first ? "" : thesis_details += ", ";
+                                thesis_details += data[j].entryTags['school'];
+                                first = false;
+                            }
+
+                            if ( data[j].entryTags['address'] !== undefined ){
+
+                                first ? "" : thesis_details += ", ";
+                                thesis_details += data[j].entryTags['address'] + ", " ;
+                                first = false;
+                            }
+
+                        } 
+                        //console.log( "thesis_details: " + thesis_details ); 
+
+
+                        if ( data[j].entryTags['abstract'] !== undefined ) {
                             abs = data[j].entryTags['abstract'];
                             $(".accordion").append("<div class='pane'>" + "<p style='text-align: justify;'>" + abs + "</p>" + "</div>");
                         } else {
@@ -4318,6 +4902,11 @@ PUBVIS = function () {
                         }
 
                     }
+
+
+
+
+
                     var key, count = 0;
 
                     for(key in data) {
@@ -4401,8 +4990,8 @@ PUBVIS = function () {
                         $(this).siblings("h3").removeClass("current");
                       });
                 }
-            }
-
+            }*/
+        
         //*****************************CALL**************************//
         
 
@@ -4423,9 +5012,6 @@ PUBVIS = function () {
                 show('loading', false);
                 $( ".target" ).show();
             });
-
-
-
 
 
             $( "svg" ).click(function(event) {
