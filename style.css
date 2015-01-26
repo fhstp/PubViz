@@ -63,8 +63,7 @@ body{
 	max-width: 1024px;
 	height: 360px;
 	background-color: white;
-	margin-left: auto;
-    margin-right: auto;
+	margin-left: 100px;
 }
 
 .accordion {
@@ -273,5 +272,6 @@ a{
 	margin: auto;
 
 }
+
 
 
