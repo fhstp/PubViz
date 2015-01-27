@@ -20,11 +20,8 @@ PUBVIS = function () {
         $.get( filename, function( data ) {
 
             result = bib2json( data );
-
-            //display_error( result.errors ).error_text ;
-            //console.log( "error_text: " + display_error( result.errors ).error_text );
         
-            display_data( result.json, display_error( result.errors ).error_text ) ;
+            display_data( result.json, prepare_errors( result.errors ).error_text ) ;
 
         });    
     }
@@ -135,12 +132,6 @@ PUBVIS = function () {
 
                 //svg.attr("width", x).attr("height", y);
                 calculate_width();
-
-                
-
-               // setup_layout();
-
-               // display_all_views();
             }
             //window.onresize = update_window;
 
@@ -190,18 +181,15 @@ PUBVIS = function () {
                 //var button_height = 30; //clearAll button
 
                 //calculation of the position for the views
-               // var clarAll_yPos = header_height; //svg_margin_top + header_height;
+                //var clarAll_yPos = header_height; //svg_margin_top + header_height;
                 var overview_yPos = header_height + space_between_view;
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
                 
-
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
                           .append( "svg" )
-                          //.attr("viewBox", "0 0 1024 890")
-                          //.attr("id", "pubVis")
                           .attr({
                             id: "pubVis",
                             width: window_width, //full size of screen for the svg, otherwise some parts maybe hidden
@@ -220,7 +208,6 @@ PUBVIS = function () {
                                             width: width,
                                             height: header_height
                                         })
-                                        //.attr("transform", "translate( 0, 0)")
                                         .attr("transform", "translate( 0, 0)")
 
                 clearAll = d3.select( "#pubVis" )
@@ -230,8 +217,6 @@ PUBVIS = function () {
                                             width: button_width,
                                             height: button_height
                                         })
-                                        //btn middle: .attr("transform", "translate(" + (width/2 - (75/2)) + "," + 25 + ")");
-                                        //.attr("transform", "translate(" + (width - button_width) + "," + clarAll_yPos + ")");
                                         .attr("transform", "translate(" + (width - button_width) + ", 0 )");
                                         
 
@@ -242,7 +227,6 @@ PUBVIS = function () {
                                             width: width,
                                             height: overview_height //includes space between header and overivew
                                         })
-                                        //.attr("transform", "translate( 0, 60)");
                                         .attr("transform", "translate( 0," + overview_yPos + ")");
 
 
@@ -268,7 +252,6 @@ PUBVIS = function () {
                                             width: width,
                                             height: clouds_height //includes space between overivew and cloud
                                         })
-                                        //.attr("transform", "translate( 0, 460)");
                                         .attr("transform", "translate( 0," + clouds_yPos + ")");
 
                 background_clouds_words = d3.select( "#clouds" )
@@ -282,7 +265,6 @@ PUBVIS = function () {
                                             opacity: 1,
                                             id: "background_clouds_words"
                                         })
-                                        //.attr("transform", "translate( 0, 0)");
                                         .attr("transform", "translate(" + (width/2 + (space_between_view/2)) + "," + 0 + ")");
 
                 background_clouds_authors = d3.select( "#clouds" )
@@ -296,7 +278,6 @@ PUBVIS = function () {
                                             opacity: 1,
                                             id: "background_clouds_authors"
                                         })
-                                        //.attr("transform", "translate( 0, 0)");
                                         .attr("transform", "translate(" + 0 + "," + 0 + ")");
             }
 
@@ -326,6 +307,7 @@ PUBVIS = function () {
             //call all views to display them
             var display_all_views = function(){
                 //console.log( " display views" );
+                
                 //***display header
                 show_header = HEADER();
                 show_btn_clearAll = CLEAR_ALL();
@@ -377,8 +359,7 @@ PUBVIS = function () {
                                         });
                 //***display tagCloud
                 keywords = get_words(json).words;
-                //console.log( "keywords" );
-                //console.dir( keywords );
+
                 keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
                 wordCloud = CLOUD({ type:"keywords", 
                                     words: keywords, 
@@ -388,8 +369,7 @@ PUBVIS = function () {
 
                 //***display AuthorsCloud
                 authors = get_authors( json ).authors;
-                //authors = limit_words({ words: authors, optimum_size: 40, min: 1 });
-                //console.dir( authors );
+
                 wordCloud = CLOUD({ type:"authors", 
                                     words: authors, 
                                     xPos: 0, 
@@ -428,7 +408,6 @@ PUBVIS = function () {
                     selected_items_changed = true;
                     last_selected_item = value;
                     last_selected_view = key;
-                    //console.log("keywords added");
 
                 }
 
@@ -437,7 +416,6 @@ PUBVIS = function () {
                     selected_items_changed = true;
                     last_selected_item = value;
                     last_selected_view = key;
-                    //console.log("authors added");
 
                 }
 
@@ -454,7 +432,6 @@ PUBVIS = function () {
                 var value = params.value;
                 var list = params.list;
                 var item_contained = false;
-
                 //console.log( "key: " + key + " value: " + value + " list: " + list );
 
                 if ( key === undefined && list !== undefined ) { 
@@ -471,7 +448,6 @@ PUBVIS = function () {
 
                     for ( var z = 0; z < array.length; z++)  {
 
-                        //console.log( "array[ z ][key]: " + array[ z ][key] );
 
                         if ( array[ z ][key] === value ) {
                             item_contained = true;
@@ -616,15 +592,8 @@ PUBVIS = function () {
                     var entryTypes_grouped = [ 0,0,0,0,0,0,0 ];
                     var entries_grouped = {  articles: [], book: [], part_book: [], conference: [], thesis: [], report: [], misc:[] }
                     
-                    //console.log( "array_values" ); 
-                    //console.dir(array);   
-                    //console.log( "array_entries" ); 
-                    //console.dir(array_entries);
                  
                   for ( var y = 0; y < array.length; y++ ){
-                        //console.log( "array[y]" + array[y] );
-                        //console.log( "array_entries[y]" );
-                       // console.dir( array_entries[y] );
 
                         if (array[y] === "article" ) {
                             entryTypes_grouped[0] += 1;
@@ -798,12 +767,10 @@ PUBVIS = function () {
 
 
                 text = text.replace (/ /g, "_");
-                //text =text.replace(/[^\w\s]/gi, ''); //remove all special chars and whitespaces
                 text =text.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the -
 
                 if ( text.length > 29 ){ 
 
-                    //console.log( "bin zu lang: " + text );
                     short_text = text.substring( 0, 29 );
 
                 } 
@@ -837,10 +804,6 @@ PUBVIS = function () {
             var highlight_words = function( data ){
                 //console.log( "highlight words" );
                 var item_value, id_txt_label, id_background_div;
-
-               // console.log( " amount words to be highlight: " + data.length );
-               // console.dir( data );
-                //console.dir( words_displayed );
                 remove_highlight_selection_items_keywords();
 
                 for( var i = 0; i < data.length; i++ ){
@@ -852,12 +815,8 @@ PUBVIS = function () {
                     if ( item_already_selected( {array:words_displayed, key:"id", value:id_txt_label } ) ) {
 
                         d3.select(id_txt_label).attr('fill', selection_color );
-                        //d3.select(id_txt_label).attr('fill', highligth_color );
-                        //d3.select(id_txt_label).style("font-weight", "900");
 
-                    } else {
-                        //console.log( "item actually NOT displayed: " + item_value );
-                    }
+                    } 
                 }
             }
 
@@ -867,22 +826,14 @@ PUBVIS = function () {
                 //console.log( "highlight authors" );
                 var item_value, id_txt_label, id_background_div;
 
-                //console.log( " amount words to be highlight: " + data.length );
-                //console.dir( data );
                 remove_highlight_selection_items_authors();
 
                 for( var i = 0; i < data.length; i++ ){
 
                     item_value = data[i].text;
                     id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
-                    //console.log( "id_txt_label: " + id_txt_label );
-                    
-                    //id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
-                    //console.log( "id_background_div: " + id_background_div );
 
-                    //d3.select(id_txt_label).style("font-weight", "900");
                     d3.select(id_txt_label).attr('fill', selection_color );
-
                 }
             }
 
@@ -892,16 +843,17 @@ PUBVIS = function () {
                 //console.log( "call: update_views" );
                 var dataset = params.changed_data;
                 var selected_words;
-                //console.log( "dataset: " );
-                //console.dir( dataset );
 
+                //update the years chart
                 chart_years.highlight_subset( get_years({ 
                                                     json: dataset, 
                                                     years_to_display: chart_years.get_current_displayed_years()
-                                                }).amount_list );
+                                                    }).amount_list );
 
+                //update the types chart
                 chart_type.highlight_subset( get_types( dataset ).type_list ); 
 
+                //update the number of selected amount
                 show_amount.update_selected_amount({ selected_new: dataset.length });
 
                 //check if clear all was hit, consequently the json data have to be displayed by the list
@@ -918,23 +870,22 @@ PUBVIS = function () {
                     list = LIST({ data:dataset, update:true });
                 }
 
+                //fetch the words for highlighting
                 selected_words = get_words(dataset).words;
-
+                //highlight the words
                 highlight_words( selected_words );  
 
+                //fetch the authors for highlighting
                 selected_authors = get_authors( dataset ).authors;
-                //console.log( "selected_authors.length: " + selected_authors.length );
-                //console.dir( selected_authors );
-                highlight_authors ( selected_authors );  
-                //console.log( "authors_displayed" );
-                //console.dir( authors_displayed );                
+                //highlight the authors
+                highlight_authors ( selected_authors );                 
             }
 
             //change the visibility of the tooltips of the given year 
             //according to the given boolean
             var tooltip_change_visibility = function ( hoovered_year, bool ){
                 //console.log( "tooltip_change_visibility aufgerufen" );
-               // var ids = [];
+
                 var tooltip_id_normal = "#tooltip_normal_" + hoovered_year;
                 var tooltip_id_subset = "#tooltip_subset_" + hoovered_year;
                 //ids.push( tooltip_id_normal, tooltip_id_subset );
@@ -945,9 +896,7 @@ PUBVIS = function () {
                 } else {
                     d3.select( tooltip_id_normal ).attr( "opacity", "0" );
                     d3.select( tooltip_id_subset ).attr( "opacity", "0" );
-                }
-                //console.log( "opacity normal: " + d3.select( tooltip_id_normal ).attr( "opacity" ) );
-                //console.log( "opacity subset: " + d3.select( tooltip_id_subset ).attr( "opacity" ) );                
+                }               
             }
 
             //creates with the given year ids for the norml and the subset toolbar 
@@ -959,9 +908,7 @@ PUBVIS = function () {
                 var tooltip_id_subset = "#tooltip_subset_" + year;
                 ids.push( tooltip_id_normal, tooltip_id_subset );
 
-                return { //id_normal: tooltip_id_normal,
-                         //id_subset: tooltip_id_subset 
-                         ids: ids};
+                return { ids: ids };
             }
 
             //clear all highlighted authors
@@ -969,23 +916,15 @@ PUBVIS = function () {
                 //console.log( "CALL: remove_highlight_selection_items_authors" );
                 var item_value, id_txt_label, id_background_div;
 
-                //console.log("authors.length: " + authors.length);
-                //console.dir(authors);
 
                 for ( var i = 0; i < authors.length; i++ ){ 
 
                     item_value = authors[i].text;
                     
                     id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
-                    //console.log( "id_txt_label: " + id_txt_label );
 
-                    //id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
-                    //console.log( "id_background_div: " + id_background_div );
-
-                    //d3.select(id_background_div).attr('opacity', "0");
                     d3.select(id_txt_label).attr('fill', "#33333");
                     d3.select(id_txt_label).style('font-weight', "300");
-
                 }
             }
 
@@ -994,21 +933,12 @@ PUBVIS = function () {
                 //console.log( "CALL: remove_highlight_selection_items_keywords" );
                 var item_value, id_txt_label, id_background_div;
 
-                //console.log("keywords.length: " + keywords.length);
-                //console.dir(keywords);
-
                 for ( var i = 0; i < keywords.length; i++ ){ 
 
                     item_value = keywords[i].text;
                     
                     id_txt_label = generate_words_id({ text: item_value, group: "keywords", element: "text" }).exist_id;
-                    //console.log( "id_txt_label: " + id_txt_label );
 
-                    //id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
-                    //console.log( "id_background_div: " + id_background_div );
-
-                    //d3.select(id_background_div).attr('opacity', "0");
-                    //d3.select(id_background_div).attr('stroke', "");
                     d3.select(id_txt_label).attr('fill', "#33333");
                     d3.select(id_txt_label).style('font-weight', "300");
 
@@ -1026,14 +956,7 @@ PUBVIS = function () {
                 for ( var ct = 0; ct < current_timeline.length; ct++ ){ 
 
                     id_txt_label = "#label_year_" + current_timeline[ct];
-                    //console.log( "id_txt_label: " + id_txt_label );
                     id_bar = "#bar_subset" + current_timeline[ct];
-
-                    //id_background_div = "#background_div_" + current_timeline[ct];
-                    //console.log( "id_background_div: " + id_background_div );
-
-                    //d3.select(id_background_div).attr('fill', "#333333");
-                    //d3.select(id_background_div).attr('stroke', "");
                     
                     d3.select(id_txt_label).attr('fill', "#f5f5f5");
                     d3.select(id_txt_label).style('font-weight', 300);
@@ -1069,6 +992,7 @@ PUBVIS = function () {
                 var item_value = last_selected_item;
                 var item_key;
                 var id_txt_label, id_background_div;
+                var id_bar;
 
                 //highlight selection items of all year elements
                 if (   (selected_items.years.length > 0)
@@ -1077,7 +1001,6 @@ PUBVIS = function () {
                     && (selected_items.authors.length >= 0)  ) { 
 
                     item_key = "years";
-                    //console.log( "clicked year will be highlighted" );
 
                     remove_highlight_selection_items_years();
 
@@ -1086,12 +1009,10 @@ PUBVIS = function () {
                         item_value = selected_items.years[i];
 
                         id_txt_label = "#label_year_" + item_value;
-                        //console.log( "id_txt_label: " + id_txt_label );
-                        var id_bar = "#bar_subset" + item_value;
-                        //console.log( "id_bar: " + id_bar );
+
+                        id_bar = "#bar_subset" + item_value;
 
                         id_background_div = "#background_div_" + item_value;
-                        //console.log( "id_background_div: " + id_background_div );
 
                         if( item_already_selected( {array: current_timeline, value: item_value } ) ){ 
 
@@ -1109,9 +1030,7 @@ PUBVIS = function () {
                             //change the bar
                             //d3.select(id_bar).attr('fill', selection_color);
 
-                        } else {
-                            //console.log( "item NOT contained" );
-                        }
+                        } 
                     }
                 } else {
                     remove_highlight_selection_items_years();
@@ -1165,10 +1084,8 @@ PUBVIS = function () {
                         item_value = lookup_wordtext({ array: words_displayed, word_id: selected_items.keywords[k] });
             
                         id_txt_label = generate_words_id({ text: item_value, group: "keywords", element: "text" }).exist_id;
-                        //console.log( "id_txt_label: " + id_txt_label );
 
                         id_background_div = generate_words_id({ text: item_value, group: "keywords", element: "div" }).exist_id;
-                        //id_background_div = "#selection_div_keyword_" + item_value;
                  
                         //change the weight of the clicked item
                         d3.select(id_txt_label).style('font-weight', '900');
@@ -1180,9 +1097,7 @@ PUBVIS = function () {
 
            
                     }
-                } else {
-                    //remove_highlight_selection_items_keywords();
-                }
+                } 
 
                 //console.log( "selected_items.authors.length: " + selected_items.authors.length );
                 //highlight selection items of all author elements
@@ -1195,17 +1110,14 @@ PUBVIS = function () {
 
                     item_key = "authors";
 
-                    //remove_highlight_selection_items_authors();
 
                     for ( var a = 0; a < selected_items.authors.length; a++ ){
 
                         item_value = lookup_wordtext({ array: authors_displayed, word_id: selected_items.authors[a] });
             
                         id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
-                        //console.log( "id_txt_label: " + id_txt_label );
 
                         id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
-                        //id_background_div = "#selection_div_keyword_" + item_value;
                  
                         //change the weight of the clicked item
                         d3.select(id_txt_label).style('font-weight', '900');
@@ -1216,13 +1128,8 @@ PUBVIS = function () {
                         //d3.select(id_txt_label).attr('text-decoration', "underline");
                         //d3.select(id_background_div).attr('opacity', '0.5');
 
-                    }
-                    
-                } else {
-
-                    //remove_highlight_selection_items_authors();
-
-                }
+                    }  
+                } 
             }
 
             //search for the text of the given id in the words_displayed object
@@ -2208,8 +2115,6 @@ PUBVIS = function () {
             var to_title_case = function (str) {
                 //console.log( "to_title_case: str: " + str );
                 return str.replace(/\w\S*/g, function(txt) {
-                                                    //console.log( "txt.charAt(0): " + txt.charAt(0) );
-                                                    //console.log( "txt.substr(1): " + txt.substr(1) );
                                                     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
                                                 }
                                         );
@@ -2236,28 +2141,20 @@ PUBVIS = function () {
 
                 //fetch all words from json
                 all_words = collect_key_in_entryTags( { json: json, key: "keywords", value: "" } ).values;
-                //console.dir( all_words );
                 
                 all_words_str = all_words.toString();
 
-                //cleanup commas - only needed if the split will take place at any whitespace
-                //all_words_str = all_words_str.replace (/,/g, "");
-                
-                //only needed if the split will take place at any whitespace
-                //all_words_str = all_words_str.replace (/,|\[|\]|\(|\)/g, "");
-
+                //replace _ with whitespace
                 all_words_str = all_words_str.replace (/_/g, " ");
 
                 //split string at every whitspace
                 all_words_single = all_words_str.split( "," );
-                //console.dir( all_words_single );
 
                 for (var y = 0; y < all_words_single.length; y++) {   
                     //change all words to start with upper case and trim them
                     word = to_title_case( $.trim( all_words_single[y] ) );
                     word = word.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the  -
                     all_words_single_upperCase.push( word );
-                    //all_words_single_upperCase.push( to_title_case( $.trim( all_words_single[y] ) ) );
                 }             
                 
                 //sort the array ignoring upper and lower case
@@ -2272,19 +2169,15 @@ PUBVIS = function () {
                         return 0;
                     }
                 );
-                //console.dir( all_words_single_upperCase );
-
-
 
                 //compare words and count their occurance
                 for (var i = 0; i < all_words_single_upperCase.length; i++) {
                     //all words have to start with upper case 
-                    //current = to_title_case( all_words_single[i] );
                     current = all_words_single_upperCase[i];
                     long_text = all_words_single_upperCase[i];
                     
                     if ( i < all_words_single_upperCase.length-1 ) { 
-                        //next = to_title_case( all_words_single[( i + 1 )] );
+
                         next = all_words_single_upperCase[( i + 1 )];
                     } else {
                         next = "";  
@@ -2294,30 +2187,23 @@ PUBVIS = function () {
                     if ( current === next ){ 
                         
                         count += 1;
-                        //console.log( "current: " + current + " next: " + next + " count: "+ count); 
-                        
                     } 
                      else {
 
                         if ( current.length > 30 ){ 
 
-                            //console.log( "bin zu lang: " + current );
                             short_text = current.substring( 0, 30 ) + "..." ;
-                            //console.log( "shortText: " + shor_text );
                             long_text = current;
                             current = short_text;
 
                         } 
 
-                        //console.log( "PUSH: current: " + current + " count: "+ count);
                         result.push( {text: current, size: count, long_text: long_text} );
-                        //console.dir( result );
                         count = 1;
                     }
                     
                 }
                 //console.log( "get_words result.length: " + result.length );
-                //console.log( "result" );
                 //console.dir( result );  
                 return{ words: result };             
             }
@@ -2345,15 +2231,10 @@ PUBVIS = function () {
                     return b.size - a.size;
                 });
 
-                //console.dir( words );
-                //console.log( "words.length: " + words.length );
-                //console.log( "optimum_length: " + optimum_length );
 
                 //check if the length of the given array exceeds the given optimum size
                 if (words.length >= optimum_length) {
                     optimum_size = words[optimum_length].size;
-                    //console.log( "optimum_size: " + optimum_size );
-                    //console.log( "optimum_text: " + words[optimum_length].text );
 
                     //look downward if to the element where the size get smaller
                     for ( var i = optimum_length; i >= 0; i-- ) {
@@ -2378,19 +2259,11 @@ PUBVIS = function () {
                                             //console.log( "size of element smaller, new length: " + i );
                                             new_length = i;
                                             break;
-
-                                        } else {
-                                            //console.log( "absolut max exceeded" );
-                                        }
-
-                                    } else {
-                                        //console.log( "optimum size not changed" );
-                                    }
+                                        } 
+                                    } 
                                 }    
                             } else { 
-                                //console.log( "size of elements grow, new length: " + new_length )
                                 number_to_remove = words.length - new_length ;
-                                //console.log( "remove: " + remove );
                                 words.splice( (new_length), number_to_remove);
                                 break;
                             }
@@ -2400,7 +2273,6 @@ PUBVIS = function () {
 
                 //console.log( "words from limit function:" );
                 //console.dir( words );
-
                 return words;
             }
 
@@ -2425,14 +2297,11 @@ PUBVIS = function () {
 
                 //fetch all words from json
                 all_authors = collect_key_in_entryTags( { json: json, key: "author", value: "" } ).values;
-                //console.dir( all_authors );
 
                 all_authors_str = all_authors.toString();
-                //console.log( all_authors_str );
 
                 //split string at every whitspace
                 all_authors_split = all_authors_str.split( " and " );
-                //console.dir( all_authors_split );
 
                 all_authors_split_str = all_authors_split.toString();
 
@@ -2446,29 +2315,20 @@ PUBVIS = function () {
                     n = str.search( "," ); //n = -1 if there is no comma
 
                     if ( n === (-1) ) { //no comma found
-                        //console.log( "no comma found" );
-                        
-                        //console.log( "str: " + str );
 
                         first_name = $.trim( str.substr( 0, str.indexOf(' ') ) );
-                        //console.log( "first_name: " + first_name );
                         
                         last_name = $.trim(str.substr( str.indexOf(' ') ) );
-                        //console.log( "last_name: " + last_name );
+
                         result.push( {text: last_name, first_name: first_name} );
 
                     } else { //comma found
-                        //console.log( "comma found" );
-
-                        //console.log( "str: " + str );
 
                         last_name = $.trim(str.substr( 0, str.indexOf(',') ) );
-                        //console.log( "last_name: " + last_name );
 
                         first_name = str.substr( str.indexOf(',') );
                         first_name = first_name.replace (/,/g, "");
                         first_name = $.trim( first_name );
-                        //console.log( "first_name: " + first_name );
 
                         result.push( {text: last_name, first_name: first_name} );
 
@@ -2656,13 +2516,10 @@ PUBVIS = function () {
                                     })
                                     .style("font-size", "11px")
                                     .on( "mouseover", function() {
-                                        //console.log( "mouseover About" );
                                         d3.select(this).style("cursor", "pointer");
                                         d3.select("#txt_about").style("text-decoration", "underline");
                                     })
                                     .on( "mouseout", function() {
-                                        //console.log( "mouseover out About" );
-                                        //d3.select(this).style("cursor", "pointer");
                                         d3.select("#txt_about").style("text-decoration", "none");
                                     })
                                     .append("title") //show text on hover
@@ -2706,8 +2563,7 @@ PUBVIS = function () {
 
 
                     warining.on("click", function() {
-                                                //alert( error_text );
-                                                console.log( "clicked!" );
+                                                //console.log( "clicked!" );
 
                                                 if ($("#error_text").length > 0){
                                                     show('error_text', true);
@@ -2720,49 +2576,16 @@ PUBVIS = function () {
 
                                             })
                                             .on( "mouseover", function() {
-                                                //console.log( "mouseover bar_subset_group" );
                                                 d3.select(this).style("cursor", "pointer");
                                             })
                                             .append("title") //show text on hover
                                             .text( "Warning: data errors. Click for more info" )
                 }
-                
-
-                /*//old header  
-                    var search = d3.select( "#header" )
-                                    .append("g")
-                                    .attr( "id", "search_div" );
-
-                    var search_div = search.append( "rect" )
-                                        .attr({
-                                                x: 514, 
-                                                y: 0, 
-                                                width: (width/2 - button_width - 11),//480,
-                                                height: 30,
-                                                fill: "white",
-                                                id: "div_search"
-                                        })
-
-                    var deco = d3.select( "#header" )
-                                        .append("g")
-                                        .attr( "id", "deco" );
-
-                    var deci_div = deco.append( "rect" )
-                                        .attr({
-                                                x: 999, 
-                                                y: 0, 
-                                                width: 25,
-                                                height: 30,
-                                                fill: "#333333",
-                                                id: "div_search"
-                                        })
-                */
             }
 
         //***************************CLEAR ALL******************************//
 
             var CLEAR_ALL = function(){
-                //var empty = [];
                 var btn_clearAll;
                 var clearAll;
                 var btn_text
@@ -2771,8 +2594,7 @@ PUBVIS = function () {
                                 .append("g")
                                 .attr( "id", "btn_clearAll" )
                                 .on("click", function( d, i ) {
-                                    //console.log( "clearAll" );
-                                    //console.dir( selected_items );
+
                                     clearAll_pushed = true;
                                     selected_items = { years: [], types: [], keywords: [], authors:[] };
                                     update_views({ changed_data: empty });
@@ -2905,7 +2727,6 @@ PUBVIS = function () {
 
             var BAR_YEARS = function () {
                 //console.log( "bar_years start" );
-
                 //@param.data_year = Array 
                 //@param.data_amount = Array
                 var create_bar_years = function ( params ) {            
@@ -2977,9 +2798,7 @@ PUBVIS = function () {
                     var bar_highlight = svg.append( "g" )
                                             .attr( "class", "bar_subset_group" ) 
                                             .on( "mouseover", function() {
-                                                //console.log( "mouseover bar_subset_group" );
-                                                //element.style.cursor = "pointer";
-                                                //$('#selector').css('cursor', 'pointer');
+
                                                 d3.select(this).style("cursor", "pointer");
                                             });
 
@@ -3018,7 +2837,6 @@ PUBVIS = function () {
                                         width: xScale.rangeBand(),
                                         height: function( d ){ return yScale( d ); },
                                         fill: new_bar_years.get_color_bar(),
-                                        //class: "bar",
                                         class: function( d,i ) { return "bar " + data_years[i]; },
                                         id: function( d,i ) { 
                                             return "bar_" + data_years[i]; }
@@ -3078,7 +2896,6 @@ PUBVIS = function () {
                         var selected_dataset = [];
                         
                         tooltip_subset_height = get_width_of_text_element({ svg: svg, group: bar_group, data: data_amount }).height;
-                        //console.log( "tooltip_subset_height: " + tooltip_subset_height );
                         
                         var  tooltips = bar_group.selectAll( "text" )
                                         .data( data_amount )
@@ -3138,7 +2955,7 @@ PUBVIS = function () {
                                         })
 
                         if ( selected_dataset === undefined ){
-                            //console.log( "selected_dataset undefined" );
+
                             selected_dataset = [];
                             for( var i = 0; i < data_amount.length; i++ ){
                                 selected_dataset.push(0);
@@ -3244,7 +3061,7 @@ PUBVIS = function () {
 
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
-                                             //console.log( "arleady sel" );
+
                                              remove_selected_item( {value: item_value, key: item_key} ); 
 
                                         } else {
@@ -3320,7 +3137,6 @@ PUBVIS = function () {
                                         
                                         item_value = data_years[ j ].toString();
                                         item_key = "years";
-                                        //var item_label = "#label_year_" + data_years[ j ].toString();
 
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                              
@@ -3351,7 +3167,7 @@ PUBVIS = function () {
                                             x: function( d, i ){ return xScale( i ) - ( (label_width * overlap / 2) ) },
                                             y: 0 - label_height-4,  
                                             id: function( d, i ){ return "background_div_" + d },
-                                            width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
+                                            width: xScale.rangeBand() + ( label_width * overlap ), 
                                             height: label_height ,
                                             fill: color_background_div
                                         })
@@ -3363,7 +3179,6 @@ PUBVIS = function () {
                                         //add selected item to selectionArray
                                         if ( item_already_selected( {array: selected_items, list: item_key, value: item_value} ) ) {
                                              
-                                             //console.log( "arleady sel" );
                                              remove_selected_item( {value: item_value, key: item_key} ); 
                                         } else {
                                             
@@ -4632,9 +4447,8 @@ PUBVIS = function () {
 
                 }
             }
-
-        
-        //*****************************CALL**************************//
+       
+        //*****************************MAIN**************************//
         
 
             calculate_width();
@@ -4655,6 +4469,7 @@ PUBVIS = function () {
                 $( ".target" ).show();
             });
 
+        //*****************************ACTION**************************//
 
             $( "svg" ).click(function(event) {
 
@@ -4697,7 +4512,7 @@ PUBVIS = function () {
 
 
     //@param.errors = list with entries that were not able to parst into a json
-    var display_error = function ( errors ) {
+    var prepare_errors = function ( errors ) {
         var text;
         //console.dir ( errors ); 
         //console.log("errors.errorEntry.length: " + errors.errorEntry.length);
