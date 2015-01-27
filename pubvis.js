@@ -186,6 +186,8 @@ PUBVIS = function () {
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
+                console.log( "svg_height: " + svg_height);
+
                 
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
@@ -2033,7 +2035,7 @@ PUBVIS = function () {
                         &&   (filter_criteria.authors.length >= 1) 
                         &&   (filter_criteria.keywords.length >= 1) ){ 
 
-                        //console.log( "years, types keywords and authors are selected" );
+                        console.log( "years, types keywords and authors are selected" );
                         for ( var y = 0; y < filter_criteria.authors.length; y++ ){
 
                             for ( var a = 0; a < filter_criteria.authors.length; a++ ){
@@ -4288,7 +4290,7 @@ PUBVIS = function () {
                         if(data[j].entryTags['abstract'] != undefined 
                             || details !== ""){
 
-                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M2.992,5.232l8.315,4.161l-8.315,4.16V5.232z'/></g></g></svg>";
+                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve' class='download'><rect x='6.969' y='8' width='6.5' height='6.5'/></svg>";
 
                         }else{
 
