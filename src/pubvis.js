@@ -2032,7 +2032,7 @@ PUBVIS = function () {
                         &&   (filter_criteria.authors.length >= 1) 
                         &&   (filter_criteria.keywords.length >= 1) ){ 
 
-                        console.log( "years, types keywords and authors are selected" );
+                        //console.log( "years, types keywords and authors are selected" );
                         for ( var y = 0; y < filter_criteria.authors.length; y++ ){
 
                             for ( var a = 0; a < filter_criteria.authors.length; a++ ){
@@ -2043,6 +2043,7 @@ PUBVIS = function () {
 
                                         if (   (json[i].entryTags.year === filter_criteria.years[y]) 
                                             && (json[i].entryTags.keywords !== undefined)
+                                            && (is_entry_type_of_catagory({ type: filter_criteria.types[c], entryType: json[i].entryType}))
                                             && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[b] } ))  ){
                                                 
                                             searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[b] });
