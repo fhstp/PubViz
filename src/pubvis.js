@@ -186,9 +186,6 @@ PUBVIS = function () {
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
 
-                console.log( "svg_height: " + svg_height);
-
-                
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
                           .append( "svg" )
@@ -4520,7 +4517,7 @@ PUBVIS = function () {
         //console.log("errors.errorEntry.length: " + errors.errorEntry.length);
 
         if( errors.errorEntry.length > 0 ) { 
-            text = "<h1>DATA ERROR! </h1></br>The following " + errors.errorEntry.length + " listed entries of the file '" + filename + "' do not come up with the common bibTeX syntax and won't be contained in the PubVIZ visalization. </br></br> If you would like those entries to be contained, please correct the syntax in the '" + filename + "' and reload the page. </br></br>";
+            text = "<h1>DATA ERROR! </br></br><p>The following " + errors.errorEntry.length + " listed entries of the file '" + filename + "' cannot be parsed correctly and won't be shown in the visalization.  </p></br><p> Please correct the syntax in the '" + filename + "' and reload the page if you would like those entries to appear.</h1></p></br>";
 
             for ( var i = 0; i < errors.errorEntry.length; i++ ){
                 
