@@ -1,0 +1,38 @@
+<html>
+	<head>
+
+		<meta charset="utf-8">
+
+		<link rel="stylesheet" href="src/style.css" /> <!--embeds the style of the pubViz visualization-->
+
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,700,600,900' rel='stylesheet' type='text/css'><!--includes the Google-fonts [source sans pro]-->
+
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script><!-- includes jQuery -->
+
+		<script src="lib/zotero-bibtex-parse.js" type="text/javascript"></script> <!--includes parser for converting BibTex files into a JSON format -->
+
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> <!-- includes d3 javaScript library-->
+
+		<script src="lib/d3.layout.cloud.js"></script> <!-- includes the used layout for the tag clouds in the pubViz visualization-->
+
+		<script src="src/pubvis.js" type="text/javascript" ></script> <!-- includes the core script of the pubViz visualization-->
+
+	</head>
+
+	<body>
+
+		<script type="text/javascript">
+
+		    $(document).ready(function() {
+		        PUBVIS.make_it_all ({
+		            target : "#pubvis_container", //the node the pubViz visualization will be appended
+		            filename : "file.bib", //the bibTeX filename used for the pubViz visualization
+		            color: "#ffc200" //color name or hex value which will be used for highlighting
+		        });
+		    });
+		</script>
+
+		 <div id="pubvis_container"></div> <!-- an example for an costumer node on which the pubViz visualization will be append -->
+
+	</body>
+</html>
