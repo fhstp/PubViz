@@ -2032,7 +2032,7 @@ PUBVIS = function () {
                         &&   (filter_criteria.authors.length >= 1) 
                         &&   (filter_criteria.keywords.length >= 1) ){ 
 
-                        console.log( "years, types keywords and authors are selected" );
+                        //console.log( "years, types keywords and authors are selected" );
                         for ( var y = 0; y < filter_criteria.years.length; y++ ){
 
                             for ( var a = 0; a < filter_criteria.authors.length; a++ ){
@@ -2424,7 +2424,7 @@ PUBVIS = function () {
             var HEADER = function(){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
-                var home_link = "http://www.w3schools.com"; //will be replaced with our 'about page'
+                var home_link = "http://mt121074.students.fhstp.ac.at/pubviz/";
 
                 var logo = d3.select( "#header" )
                                 .append("g")
@@ -2449,6 +2449,7 @@ PUBVIS = function () {
 
                 var text_bold = txt_logo.append("a")
                                     .attr("xlink:href", home_link)
+                                    .attr("target", "_blank")
                                     .append( "text" )
                                     .text( "PUB" )
                                     .attr({
@@ -2468,6 +2469,7 @@ PUBVIS = function () {
 
                 var text_regular = txt_logo.append("a")
                                     .attr("xlink:href", home_link)
+                                    .attr("target", "_blank")
                                     .append( "text" )
                                     .text( "VIZ" )
                                     .attr({
@@ -2503,6 +2505,7 @@ PUBVIS = function () {
 
                 var about = logo.append("a")
                                     .attr("xlink:href", home_link)
+                                    .attr("target", "_blank")
                                     .append( "text" )
                                     .text( "About PubVIZ" )
                                     .attr({
