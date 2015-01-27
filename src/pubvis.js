@@ -2032,8 +2032,8 @@ PUBVIS = function () {
                         &&   (filter_criteria.authors.length >= 1) 
                         &&   (filter_criteria.keywords.length >= 1) ){ 
 
-                        //console.log( "years, types keywords and authors are selected" );
-                        for ( var y = 0; y < filter_criteria.authors.length; y++ ){
+                        console.log( "years, types keywords and authors are selected" );
+                        for ( var y = 0; y < filter_criteria.years.length; y++ ){
 
                             for ( var a = 0; a < filter_criteria.authors.length; a++ ){
 
@@ -2047,7 +2047,7 @@ PUBVIS = function () {
                                             && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[b] } ))  ){
                                                 
                                             searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[b] });
-
+                                            
                                             //fetch keyword from json
                                             str = json[i].entryTags.keywords;
 
@@ -2063,7 +2063,7 @@ PUBVIS = function () {
                                             if ( n !== (-1) ) {
 
                                                 searched_word = lookup_wordtext({ array:authors_displayed, word_id: filter_criteria.authors[a] });
-
+                                                
                                                 //fetch keyword from json
                                                 str = json[i].entryTags.author;
 
@@ -2077,7 +2077,7 @@ PUBVIS = function () {
                                                 n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
                                               
                                                 if ( n !== (-1) ) {
-
+                                                    
                                                     //if match was found check if it already excists in the result list.
                                                     if ( result.length > 0 ) { 
                                                         
@@ -2529,9 +2529,9 @@ PUBVIS = function () {
                 //show warn-triangle only if error occured
                 if ( error_text !== "" ){ 
 
-                    point_1 = logo_div_width - 120;
-                    point_2 = point_1 + 10;
-                    point_3 = point_2 + 10;
+                    point_1 = logo_div_width - 110;
+                    point_2 = point_1 + 7;
+                    point_3 = point_2 + 7;
 
 
                     var warining = d3.select( "#header" )
@@ -2542,7 +2542,7 @@ PUBVIS = function () {
                     var polygon = warining.append( "polygon" )
                                             .attr({
                                                 points: point_1 + ",22 "+ " " + point_2 + ",9 "+ " " + point_3 + ",22 ",
-                                                fill: selection_color,
+                                                fill: "#ffc200"//selection_color,
                                             })
                                             
                                             
