@@ -1,25 +1,22 @@
 PubViz
 ================
-1. Einleitung
-----------------
-Gearbeitet wird mit Git/Github. Bitte Bash/Powershell benutzen um Kompatibilitätsprobleme zu vermeiden.
 
-2.Basic Befehle
+----------------
+PubViz is a tool for interactive visualization of publication data. Usually, publications are presented in textual form with some sorting and searching capabilities. The aim of PubViz is to display structured publication data using a set of interactive visual representations working together. PubViz shows amounts of publications along a timeline, uses bar charts for different publication types, wordclouds to show co-authors as well as keywords, and finally a groupable list view. Allowing for interactive exploration with complex query funcionalities that are easily accessible are the main aims of this tool. PubViz provides powerful query functionality while using intuitive representations that are easy to grasp and add to a playful user experience.
+
+Getting Started
 ---------------
 
-MAC via Terminal (Bash)
-Windows via Powershell
+PubViz uses BibTeX as source data format, which can be exported by all major reference management applications. PubViz can be integrated into your own website easily: no installation procedure is required - just download the package on GitHub, edit the HTML template, upload it together with your .bib file to a webserver, and you are done.
 
-* cd .. // Ordner zurück
-* cd/PubViz // Öffne Ordner Pfad, in diesem Fall PubViz
-* ls // Ordnerinhalt anzeigen (MAC)
-* dir // Ordnerinhalt anzeigen (Windows)
-* git clone <url> // Repository hinzufügen
-* git status // Syncstatus abfragen
-* git add <file> // Änderungen vorschlagen (zum Index hinzufügen)
-* git commit -m "Kommentar" // Änderungen bestätigen (Änderungen ist jetzt im Head, aber noch nicht im entfernten Repository)
-* git push // Daten endgültig hochladen
-* git pull // Daten abfragen
-* git log // zeigt alle logs
-* git rm <file> // loescht file
-* git blame <file> // zeigt den Bearbeiter von jeder Zeile in dem File
+More information about the tool and its installation can be found at [(http://mt121074.students.fhstp.ac.at/pubviz/)]. 
+
+Credits
+---------------
+
+Created in the context of the project semester in media technology, St. Poelten University of Applied Sciences, 2014-2015
+
+Team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
+
+Project supervisor: FH-Prof. Priv.-Doz. Dipl.-Ing. Dr. Wolfgang Aigner, MSc
+
