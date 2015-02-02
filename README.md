@@ -18,5 +18,5 @@ Created in the context of the project semester in media technology, St. Poelten 
 
 Team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
 
-Project supervisor: FH-Prof. Priv.-Doz. Dipl.-Ing. Dr. Wolfgang Aigner, MSc
+Project supervisor: [Wolfgang AIGNER](http://mc.fhstp.ac.at/people/wolfgang-aigner)
 
