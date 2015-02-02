@@ -14,7 +14,7 @@ More information about the tool and its installation can be found [here](http://
 Credits
 ---------------
 
-Created in the context of the project semester in media technology, St. Poelten University of Applied Sciences, 2014-2015
+Created in the context of the project semester in media technology, [St. Poelten University of Applied Sciences](http://www.fhstp.ac.at), 2014-2015
 
 Team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
 
