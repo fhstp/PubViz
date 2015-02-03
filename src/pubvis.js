@@ -2424,7 +2424,7 @@ PUBVIS = function () {
             var HEADER = function(){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
-                var home_link = "http://mt121074.students.fhstp.ac.at/pubviz/";
+                var home_link = "http://pubviz.fhstp.ac.at/";
 
                 var logo = d3.select( "#header" )
                                 .append("g")
