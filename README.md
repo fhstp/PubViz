@@ -9,7 +9,7 @@ Getting Started
 
 PubViz uses BibTeX as source data format, which can be exported by all major reference management applications. PubViz can be integrated into your own website easily: no installation procedure is required - just download the package on GitHub, edit the HTML template, upload it together with your .bib file to a webserver, and you are done.
 
-More information about the tool and its installation can be found [here](http://mt121074.students.fhstp.ac.at/pubviz/). 
+More information about the tool and its installation can be found [here](http://pubviz.fhstp.ac.at). 
 
 Credits
 ---------------
