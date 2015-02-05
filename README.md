@@ -1,7 +1,7 @@
 PubViz
 ================
 
-----------------
+
 PubViz is a tool for interactive visualization of publication data. Usually, publications are presented in textual form with some sorting and searching capabilities. The aim of PubViz is to display structured publication data using a set of interactive visual representations working together. PubViz shows amounts of publications along a timeline, uses bar charts for different publication types, wordclouds to show co-authors as well as keywords, and finally a groupable list view. Allowing for interactive exploration with complex query funcionalities that are easily accessible are the main aims of this tool. PubViz provides powerful query functionality while using intuitive representations that are easy to grasp and add to a playful user experience.
 
 Getting Started
@@ -24,15 +24,20 @@ Used toolkits/external libraries
 ---------------
 
 [D3.js (Data-Driven Documents)](http://d3js.org/) version 3.5.3
+
 [zotero-bibtex-parse by Henrik Muehe](https://github.com/apcshields/zotero-bibtex-parse)
+
 [jQuery](http://jquery.com/) version 1.9.1
 
 Developed with
 ---------------
 
 Windows 8.1
+
 Mac OS X
+
 Sublime 3
+
 Coda 2.5
 
 Settings
