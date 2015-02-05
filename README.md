@@ -9,7 +9,7 @@ Getting Started
 
 PubViz uses BibTeX as source data format, which can be exported by all major reference management applications. PubViz can be integrated into your own website easily: no installation procedure is required - just download the package on GitHub, edit the HTML template, upload it together with your .bib file to a webserver, and you are done.
 
-More information about the tool and its installation can be found [here](http://pubviz.fhstp.ac.at). 
+More information about the tool and its installation can be found [here](http://pubviz.fhstp.ac.at/#download). 
 
 Credits
 ---------------
@@ -20,3 +20,26 @@ Team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Pau
 
 Project supervisor: [Wolfgang AIGNER](http://mc.fhstp.ac.at/people/wolfgang-aigner)
 
+Used toolkits/external libraries
+---------------
+
+[D3.js (Data-Driven Documents)](http://d3js.org/) version 3.5.3
+[zotero-bibtex-parse by Henrik Muehe](https://github.com/apcshields/zotero-bibtex-parse)
+[jQuery](http://jquery.com/) version 1.9.1
+
+Developed with
+---------------
+
+Windows 8.1
+Mac OS X
+Sublime 3
+Coda 2.5
+
+Settings
+--------------
+
+```
+target : "#pubvis_container", //the node the pubViz visualization will be appended
+filename : "file.bib", //the bibTeX filename used for the pubViz visualization
+color: "#ffc200" //color name or hex value which will be used for highlighting
+```
