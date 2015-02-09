@@ -117,6 +117,7 @@ PUBVIS = function () {
         var space_between_view = 30;
         var svg;
         var highligth_color = selection_color;
+        var years_available, types_available, keywords_available, authors_available;
 
 
         //*************************HELPER FUNCTIONS***********************//
@@ -242,6 +243,34 @@ PUBVIS = function () {
                                         })
                                         .attr("transform", "translate( 0, 0)");
 
+                //text will be shown if no years are in the bib file
+                d3.select( "#overview" ).append( "text" )
+                .text ( "publication years are not available " )
+                .attr({
+                        x: 20,
+                        y: 20, 
+                        fill: "#333333",
+                        "text-anchor": "start",
+                        "font-weight": "300",
+                        opacity: 0,
+                        id: "txt_no_years_message"
+                })
+                .style("font-size", "20");
+
+                //text will be shown if no types are in the bib file
+                d3.select( "#overview" ).append( "text" )
+                .text ( "publication types are not available " )
+                .attr({
+                        x: width/2,
+                        y: overview_height * 0.75, 
+                        fill: "#333333",
+                        "text-anchor": "start",
+                        "font-weight": "300",
+                        opacity: 0,
+                        id: "txt_no_types_message"
+                })
+                .style("font-size", "20");
+
                 
 
                 clouds = d3.select( "#pubVis" )
@@ -264,7 +293,22 @@ PUBVIS = function () {
                                             opacity: 1,
                                             id: "background_clouds_words"
                                         })
-                                        .attr("transform", "translate(" + (width/2 + (space_between_view/2)) + "," + 0 + ")");
+                                        .attr("transform", "translate(" + (width/2 + (space_between_view/2)) + "," + 0 + ")")
+                                        
+                //text will be shown if no keywords are in the bib file
+                d3.select( "#clouds" ).append( "text" )
+                .text ( "keywords are not available " )
+                .attr({
+                        x: width-20,//20 for margin right
+                        y: 20, 
+                        fill: "#333333",//color_text,
+                        "text-anchor": "end",
+                        "font-weight": "300",
+                        opacity: 0,
+                        id: "txt_no_words_message"
+                })
+                .style("font-size", "20");
+
 
                 background_clouds_authors = d3.select( "#clouds" )
                                         .append ( "rect" )
@@ -278,7 +322,31 @@ PUBVIS = function () {
                                             id: "background_clouds_authors"
                                         })
                                         .attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+                //text will be shown if no authors are in the bib file
+                d3.select( "#clouds" ).append( "text" )
+                .text ( "authors are not available " )
+                .attr({
+                        x: width/2-35, //35 because of 15 between clouds and for 20 margin right
+                        y: 20, 
+                        fill: "#333333",//color_text,
+                        "text-anchor": "end",
+                        "font-weight": "300",
+                        opacity: 0,
+                        id: "txt_no_authors_message"
+                })
+                .style("font-size", "20");
             }
+
+            //show the element of the given id by changing its opacity
+            var show_message_for_missing_data = function ( id ){
+                //console.log( "show_message aufgerufen" );
+                var words;
+
+                d3.select( id ).attr('opacity', '1');
+            }
+
+            
 
             //set the display of the element with the given id to the given bool
             //true = element will be shown
@@ -311,42 +379,59 @@ PUBVIS = function () {
                 show_header = HEADER();
                 show_btn_clearAll = CLEAR_ALL();
 
-                //fetch years from json
+                //fetch years from json 
                 dataset_years = get_years( {json: json} ).time_list;
+
                 //dataset_years = generated_data.years;
                 dataset_amount = get_years( {json: json} ).amount_list;
                 //dataset_amount = generated_data.amount;
 
                 //***display bar-chart with years
-                chart_years = BAR_YEARS.create_bar_years({
-                    data_years_all: dataset_years, 
-                    data_amount_all: dataset_amount, 
-                    color_bar: "#D9D9D9", 
-                    color_text: "#f5f5f5", 
-                    color_background_div: "#333333", 
-                    view_height: 157.5, 
-                    margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
-                    //view_width: 1024,
-                    view_width: width
-                });
-                chart_years.render();
+                if ( dataset_years.length !== 0 && dataset_amount.length !== 0 ) { 
+                    chart_years = BAR_YEARS.create_bar_years({
+                        data_years_all: dataset_years, 
+                        data_amount_all: dataset_amount, 
+                        color_bar: "#D9D9D9", 
+                        color_text: "#f5f5f5", 
+                        color_background_div: "#333333", 
+                        view_height: 157.5, 
+                        margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
+                        //view_width: 1024,
+                        view_width: width
+                    });
+                    chart_years.render();
+                    years_available = true;
+                } else {
+                    //console.log( "there are no years/amount in the bibfile!");
+                    show_message_for_missing_data( "#txt_no_years_message" );
+                    years_available = false;
+                }
+
+                //console.log( "years: " +  years_available );
 
                 //fetch types from json
                 dataset_types = get_types( json ).type_list;
                 dataset_types_text = get_types( json ).types_text;
 
                 //***display bar-cahrt with types
-                chart_type = BAR_TYPE.create_bar_type({
-                    all_entry_types: dataset_types, 
-                    entry_types_text: dataset_types_text, 
-                    color_bar: "#D9D9D9", 
-                    color_text: "#333333", 
-                    view_height: 162.5, 
-                    margin: {top: 0, right: 200, bottom: 0, left: 0}, 
-                    //view_width: 1024,
-                    view_width: width
-                });
-                chart_type.render();
+                if ( dataset_types.length !== 0 && dataset_types_text.length !== 0 ) { 
+                    chart_type = BAR_TYPE.create_bar_type({
+                        all_entry_types: dataset_types, 
+                        entry_types_text: dataset_types_text, 
+                        color_bar: "#D9D9D9", 
+                        color_text: "#333333", 
+                        view_height: 162.5, 
+                        margin: {top: 0, right: 200, bottom: 0, left: 0}, 
+                        //view_width: 1024,
+                        view_width: width
+                    });
+                    chart_type.render();
+                    types_available = true;
+                } else { 
+                    show_message_for_missing_data( "#txt_no_types_message" );
+                    types_available = false;
+                }
+                //console.log( "types: " +  types_available );
 
                 //***display total number of entries and number of selected entries
                 show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
@@ -356,24 +441,43 @@ PUBVIS = function () {
                                            selected: "0",
                                            width: width/2
                                         });
-                //***display tagCloud
+                //fetch the keywords
                 keywords = get_words(json).words;
 
-                keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
-                wordCloud = CLOUD({ type:"keywords", 
-                                    words: keywords, 
-                                    xPos: (width/2 + 15), 
-                                    yPos: 0,
-                                    size: [ (width/2 - 15), 340 ] });
+                //***if keywords available display them in the tagCloud
+                if ( keywords.length !== 0 ){ 
+                    keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
+                    wordCloud = CLOUD({ type:"keywords", 
+                                        words: keywords, 
+                                        xPos: (width/2 + 15), 
+                                        yPos: 0,
+                                        size: [ (width/2 - 15), 340 ] });
+                    keywords_available = true;
+                } else {
+                    //console.log( "there are no keywords in the bibfile!");
+                    show_message_for_missing_data( "#txt_no_words_message" );
+                    keywords_available = false;
+                }
+                //console.log( "words: " +  keywords_available );
 
-                //***display AuthorsCloud
+            
+                //fetch the authors 
                 authors = get_authors( json ).authors;
 
-                wordCloud = CLOUD({ type:"authors", 
-                                    words: authors, 
-                                    xPos: 0, 
-                                    yPos: 0,
-                                    size: [ (width/2 - 15), 340 ] });
+                //***if authors available display them in the tagCloud
+                if ( authors.length !== 0 ){ 
+                    wordCloud = CLOUD({ type:"authors", 
+                                        words: authors, 
+                                        xPos: 0, 
+                                        yPos: 0,
+                                        size: [ (width/2 - 15), 340 ] });
+                    authors_available = true;
+                } else {
+                    //console.log( "there are no authors in the bibfile!");
+                    show_message_for_missing_data( "#txt_no_authors_message" );
+                    authors_available = false;
+                }
+                //console.log( "authors: " +  authors_available );
 
                 //***display list
                 list = LIST({ data:json, update:false });
@@ -841,16 +945,20 @@ PUBVIS = function () {
             var update_views = function( params ){
                 //console.log( "call: update_views" );
                 var dataset = params.changed_data;
-                var selected_words;
+                var selected_words, selected_authors;
 
                 //update the years chart
-                chart_years.highlight_subset( get_years({ 
-                                                    json: dataset, 
-                                                    years_to_display: chart_years.get_current_displayed_years()
-                                                    }).amount_list );
+                if (   years_available ) { 
+                    chart_years.highlight_subset( get_years({json: dataset, 
+                                                            years_to_display: chart_years.get_current_displayed_years()
+                                                            }).amount_list );
+                }
 
+                
                 //update the types chart
-                chart_type.highlight_subset( get_types( dataset ).type_list ); 
+                if (  types_available ) { 
+                    chart_type.highlight_subset( get_types( dataset ).type_list ); 
+                }
 
                 //update the number of selected amount
                 show_amount.update_selected_amount({ selected_new: dataset.length });
@@ -864,20 +972,24 @@ PUBVIS = function () {
                     && ( selected_items.authors.length === 0 ) ){ 
 
                     list = LIST({ data: json, update:true });
-                }else{
+                } else {
 
                     list = LIST({ data:dataset, update:true });
                 }
 
-                //fetch the words for highlighting
-                selected_words = get_words(dataset).words;
-                //highlight the words
-                highlight_words( selected_words );  
+                if ( keywords_available ){ 
+                    //fetch the words for highlighting
+                    selected_words = get_words(dataset).words;
+                    //highlight the words
+                    highlight_words( selected_words );  
+                }
 
-                //fetch the authors for highlighting
-                selected_authors = get_authors( dataset ).authors;
-                //highlight the authors
-                highlight_authors ( selected_authors );                 
+                if ( authors_available ) { 
+                    //fetch the authors for highlighting
+                    selected_authors = get_authors( dataset ).authors;
+                    //highlight the authors
+                    highlight_authors ( selected_authors ); 
+                }                
             }
 
             //change the visibility of the tooltips of the given year 
@@ -949,20 +1061,19 @@ PUBVIS = function () {
                 //console.log( "CALL: remove_highlight_selection_items_years" );
                 var id_txt_label, id_background_div;
 
-                //console.dir(current_timeline);
-                //console.log("current_timeline.length: " + current_timeline.length);
+                if ( years_available ) { 
+                    for ( var ct = 0; ct < current_timeline.length; ct++ ){ 
 
-                for ( var ct = 0; ct < current_timeline.length; ct++ ){ 
+                        id_txt_label = "#label_year_" + current_timeline[ct];
+                        id_bar = "#bar_subset" + current_timeline[ct];
+                        
+                        d3.select(id_txt_label).attr('fill', "#f5f5f5");
+                        d3.select(id_txt_label).style('font-weight', 300);
 
-                    id_txt_label = "#label_year_" + current_timeline[ct];
-                    id_bar = "#bar_subset" + current_timeline[ct];
-                    
-                    d3.select(id_txt_label).attr('fill', "#f5f5f5");
-                    d3.select(id_txt_label).style('font-weight', 300);
+                        //change the bar
+                        //d3.select(id_bar).attr('fill', '#D9D9D9');
 
-                    //change the bar
-                    //d3.select(id_bar).attr('fill', '#D9D9D9');
-
+                    }
                 }
             }
 
@@ -1373,7 +1484,7 @@ PUBVIS = function () {
                         && (filter_criteria.years.length === 0)
                         && (filter_criteria.authors.length === 0)   ){
 
-                         console.log( "only keywords are selected" );
+                         //console.log( "only keywords are selected" );
 
                         for ( var k = 0; k < filter_criteria.keywords.length; k++ ){                           
 
@@ -3029,10 +3140,10 @@ PUBVIS = function () {
                                         ids = get_tooltip_ids( hoovered_year ).ids;
 
                                         if ( d3.select(ids[0]).attr( "class") !== "permanent" ){
-                                            console.log( "class is permanent" );
+                                            //console.log( "class is permanent" );
                                             tooltip_change_visibility( hoovered_year, false );
                                         }else{
-                                            console.log( "class is permanent" );
+                                            //console.log( "class is permanent" );
                                             tooltip_change_visibility( hoovered_year, true );
                                         }
 
@@ -3196,13 +3307,13 @@ PUBVIS = function () {
                         //console.log( "update_background_divs" );
                         var background_div;
 
-                        console.dir( dataset_years );
+                        //console.dir( dataset_years );
 
                         //label_width = //get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).width;
                         //label_height = //get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
 
-                        console.log( "label_width" + label_width );
-                        console.log( "label_height" + label_height );
+                        //console.log( "label_width" + label_width );
+                        //console.log( "label_height" + label_height );
 
                         /*label_group.on( "click", function( d, j ) { 
                                         console.log( "click label_group" );
@@ -3216,7 +3327,7 @@ PUBVIS = function () {
                                         //.append( "rect" )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            x: function( d, i ){ console.log( "xxx: " + xScale( i ) - ( (label_width * overlap / 2) ) ); return xScale( i ) - ( (label_width * overlap / 2) ) },
+                                            x: function( d, i ){ return xScale( i ) - ( (label_width * overlap / 2) ) },
                                             y: 0 - label_height-4,  
                                             id: function( d, i ){ return "background_div_" + d },
                                             width: xScale.rangeBand() + ( label_width * overlap ), //label_width + ( label_width * overlap ),
@@ -3877,12 +3988,9 @@ PUBVIS = function () {
                 var wordcloud;
                 //var size = [450, 340];
                 var size = params.size;
-                var fontSize = d3.scale.log().domain([params.words[(params.words.length-1)].size ,params.words[0].size])
-                                             .range( [15, 50] )
-                                             .clamp( true );
                 var margin = 10;
                 var update = false;
-
+                var fontSize = 12;
                 var dataset_words = params.words;
                 //console.dir( dataset_words );
                 //console.log( "dataset_words[0].long_text: " + dataset_words[0].long_text );
@@ -3891,6 +3999,12 @@ PUBVIS = function () {
                 var id_name = type;
                 var selection = params.selection;
                 var color_text = params.color_text;
+
+                if ( dataset_words !== 0 ) { 
+                    fontSize = d3.scale.log().domain([dataset_words[(dataset_words.length-1)].size ,dataset_words[0].size])
+                                             .range( [15, 50] )
+                                             .clamp( true );
+                }
 
                 if ( selection !== undefined ) {
                     update = true;
