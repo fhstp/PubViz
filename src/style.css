@@ -3,6 +3,7 @@
 	font-size: 12px;
 }
 
+
 /* -- RESET --*/
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -73,8 +74,8 @@ body{
 }
 .accordion .headl {
 	width:100%;
-  color:#000;
-  border-left: 3px solid #fff;
+	color:#000;
+	border-left: 3px solid #fff;
 }
 .accordion .headl:hover {
   background-color: #eeeeee;
@@ -126,6 +127,7 @@ body{
 	position: relative;
 	float: left;
 }
+
 
 #year{
 	margin-left: auto;
@@ -269,6 +271,55 @@ a{
 	margin: auto;
 
 }
+
+@media screen and (max-width: 875px) {
+    
+    html, body{
+		width:100%;
+		overflow-x:hidden;
+	}
+
+
+    #sortdiv{
+		margin: 0;
+		width: 100%;
+		height: 30px;
+		padding: 30px;
+		position: relative;
+		float: left;
+	}
+
+	#s_acc{
+		width: 100%;
+		height: 80%;
+		vertical-align:middle;
+		top:0%;
+		position: relative;
+		float: left;
+		border-left: 1px solid #d9d9d9;
+		overflow-y: auto;
+	}
+
+	.arrow{
+		position: relative;
+		float:left;
+		width: auto;
+	}
+
+	.accordion {
+
+		height: 100%;
+		overflow-x: hidden;
+		padding-left: 5%;
+	}
+
+	.accordion .headl {
+		width:100%;
+		color:#000;
+		border-left: 3px solid #fff;
+	}
+}
+
 
 
 
