@@ -117,8 +117,8 @@ PUBVIS = function () {
         var space_between_view = 30;
         var svg;
         var highligth_color = selection_color;
-        var years_available, types_available, keywords_available, authors_available;
-
+        var years_available, types_available, keywords_available, authors_available; //boolean that indicates if this data exists in the bibTeX.file
+        var max_number_of_bars = 30;//for desktop. will be adapted in the calculate_width function if the device width is less than 980
 
         //*************************HELPER FUNCTIONS***********************//
             
@@ -140,6 +140,7 @@ PUBVIS = function () {
             //claculates the width and the space left for the maring
             //which will be used in the setup_layout() for the svg and 
             //in the LIST() for the margin of the list
+            //change the number of bars in the timeline accoording to the device width 
             var calculate_width = function(){
                 //console.log( "calculate aufgerufen" );
                 var max_width = 1024;
@@ -155,9 +156,20 @@ PUBVIS = function () {
                     space_left = 0;
                 }
 
+                //according to the width of the screen change the maxinum number of bars for the timeline
+                //tablett
+                if (window_width <= 980 && window_width >= 760 ) {
+                    max_number_of_bars = 15;
+                    space_left = 0;
+                //smartphone
+                }else if (window_width < 760) {
+                    max_number_of_bars = 5;
+                    space_left = 0;
+                }
+
                 //console.log( "space_left: " + space_left );
                 //console.log( "document width: " + $( document ).width() );
-                //console.log( "window_width: " + $( window ).width() );
+                //console.log( "window_width: " + window_width );
             }
 
             //builds the necessary svg and svg-groups
@@ -346,8 +358,6 @@ PUBVIS = function () {
                 d3.select( id ).attr('opacity', '1');
             }
 
-            
-
             //set the display of the element with the given id to the given bool
             //true = element will be shown
             //false = element will be hidden
@@ -436,7 +446,7 @@ PUBVIS = function () {
                 //***display total number of entries and number of selected entries
                 show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
                                            color_text: "#333333",
-                                           text_size: "70px",
+                                           //text_size: "70px",
                                            total: json.length,
                                            selected: "0",
                                            width: width/2
@@ -466,11 +476,13 @@ PUBVIS = function () {
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
+                    
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
                                         xPos: 0, 
                                         yPos: 0,
                                         size: [ (width/2 - 15), 340 ] });
+                    
                     authors_available = true;
                 } else {
                     //console.log( "there are no authors in the bibfile!");
@@ -2869,7 +2881,7 @@ PUBVIS = function () {
                     var count_clicks = 0;             
                     
                     var label_space = 19;
-                    var max_number_of_bars = 30;
+                    //var max_number_of_bars = 30;
                     var steps = 5;
                     var overlap = 0.5 //percent how much the background div should extend the lable-width
                     var tooltip_subset_height;
@@ -3906,11 +3918,39 @@ PUBVIS = function () {
                 var selected_nb = params.selected;
                 var margin = params.margin;
                 var color_text = params.color_text;
-                var text_size = params.text_size;
+                var text_size = "70px";//params.text_size;
                 var width = params.width;
+                //desktop: postion of total amount amount in the center (no selection number is displayed)
+                var xPos_amount = width/2 - margin.left - (space_between_view) - 20; //20 because of the space for the types_labels
+                //desktop: postion of total amoung when selection number is displayed
+                var new_xPos_amount = xPos_amount + 50;
+                //desktop: xPos of the slash
+                var xPos_slash = xPos_amount + 13;
 
-                var xPos = width/2 - margin.left - (space_between_view) - 20; //20 because of the space for the types_labels
-                //console.log( "xPos: " + xPos );
+                //according to the size of the screen the max_number_of_bars will be 30(desktop), 15 (tablett), 10(smartphone) or 5 
+                //tablett
+                if ( max_number_of_bars === 15 ) { 
+                    text_size = "50px";
+                    new_xPos_amount = xPos_amount + 20;
+                    xPos_slash = xPos_amount +3;
+
+                } 
+               /* if ( ( max_number_of_bars === 10 ) ) { //so max_number_of_bars will be 10
+                    text_size = "20px";
+                    new_xPos_amount = xPos_amount + 10;
+                    xPos_slash = xPos_amount +3;
+
+                } */
+                //smartphone
+                if ( ( max_number_of_bars === 5 ) ) { 
+                    text_size = "20px";
+                    xPos_amount = width/2 - margin.left - (space_between_view) - 10; //10 because of the space for the types_labels
+                    new_xPos_amount = xPos_amount + 8;
+                    xPos_slash = xPos_amount +1;
+
+                }
+
+
 
                 var amount = d3.select( "#overview" )
                                 .append("g")
@@ -3921,7 +3961,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( total_nb )
                                     .attr({
-                                            x: xPos,
+                                            x: xPos_amount,
                                             y: 125, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -3934,7 +3974,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( " / " )
                                     .attr({
-                                            x: (xPos + 13),
+                                            x: xPos_slash,
                                             y: 122, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -3948,7 +3988,7 @@ PUBVIS = function () {
                 var selected_amount = amount.append( "text" )
                                     .text ( selected_nb )
                                     .attr({
-                                            x: xPos,
+                                            x: xPos_amount,
                                             y: 125,  
                                             fill: selection_color,//color_text, 
                                             "text-anchor": "end",
@@ -3969,7 +4009,7 @@ PUBVIS = function () {
                         d3.select("#lbl_selected_amount").attr("fill", selection_color);
                     }
                     
-                    d3.select("#lbl_total_amount").attr("x", (xPos + 50));
+                    d3.select("#lbl_total_amount").attr("x", new_xPos_amount);
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
                     d3.select("#lbl_slash_amount").attr("opacity", "1");
