@@ -2851,6 +2851,8 @@ PUBVIS = function () {
                 return { create_bar_chart: create_bar_chart };
             }();
 
+            
+
             var BAR_YEARS = function () {
                 //console.log( "bar_years start" );
                 //@param.data_year = Array 
@@ -2882,7 +2884,7 @@ PUBVIS = function () {
                     
                     var label_space = 19;
                     //var max_number_of_bars = 30;
-                    var steps = 5;
+                    var steps = 5; //number of years that will be shifted if a button was pushed in the timeline
                     var overlap = 0.5 //percent how much the background div should extend the lable-width
                     var tooltip_subset_height;
                     var hoovered_year;
@@ -2890,10 +2892,13 @@ PUBVIS = function () {
 
                     //check if number of years contained in the data, extend the number of planed bars that will be shown
                     if ( data_years_all.length > max_number_of_bars ) { 
-                        
+                        //console.log( "max_number_of_bars: " + max_number_of_bars );
+                        //console.log( "data_years_all.length: " + data_years_all.length );
+
                         overlap = 0.2;  
                         //claculate the number of needed periods that have to be slidable
-                        number_of_periods = Math.floor( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
+                        number_of_periods = Math.ceil( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
+                        //console.log( "number_of_periods: " + number_of_periods );
 
                         data_amount = set_data_period( data_amount_all, 0, steps, max_number_of_bars, number_of_periods);
                         data_years = set_data_period( data_years_all, 0, steps, max_number_of_bars, number_of_periods);
@@ -2937,17 +2942,85 @@ PUBVIS = function () {
                                         d3.select(this).style("cursor", "pointer");
                                     });
 
-                    btn_group = svg.append( "g" )
+                    /*btn_group = svg.append( "g" )
                                     .attr( "class", "btn_group" ) 
-                                    .attr("transform", "translate(-5," + svgH + ")")
+                                    .attr("transform", "translate(-15," + (svgH-20) + ")")
+                                    //.attr("transform", "translate(-5," + svgH + ")")
                                     .on( "mouseover", function() {
                                         //console.log( "mouseover bar_subset_group" );
                                         d3.select(this).style("cursor", "pointer");
-                                    });
+                                    });*/
 
                     var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
 
                     new_bar_years.get_current_displayed_years = function() { return data_years };
+
+                    //according to the number of clicks the right time period will be shwon
+                    //if the left button will be pushed the count clicks will be increased. 
+                    //if the right button will be pushed the count clicks will be reduced.
+                    //if count clicks is 0 the current period will be shown in the timeline
+                    //@parmas.direction = String "left" or "right" to indicate which button was pushed
+                    var button_clicked = function ( params ) { 
+                        //console.log( "button_clicked aufgerufen" );
+                        var direction = params.direction;
+                        //console.log( "direction: " + direction );
+                        //console.log( "number_of_periods: " + number_of_periods );
+                        //console.dir( current_timeline );
+                            
+                            //according to which button was pushed, increas or reduce the number of clicks
+                            //if the current period or the oldest period was reached hide the according button 
+                            if ( direction === "left") { 
+
+                                if ( count_clicks < number_of_periods ) { 
+                                    //increase the number of clicks as we erase from the current period (current period will be 0)
+                                    count_clicks++;
+                                    //show the right button to enable the user to navigate to a more actual period of time
+                                    d3.select( ".btn_right" ).attr('opacity', '1');
+
+                                    //hide the left button if we reach the last period
+                                    if ( count_clicks === number_of_periods ){
+                                        d3.select( ".btn_left" ).attr('opacity', '0');
+
+                                    }
+                                }
+                            }
+
+                            if ( direction === "right" ) {
+
+                                if ( count_clicks !== 0 ) {
+                                    //reduce the number of clicks as we converge the current period (current period will be 0)
+                                    count_clicks--;
+                                    //show the right button to enable the user to navigate to a more actual period of time
+                                    d3.select( ".btn_left" ).attr('opacity', '1');
+
+                                    //hide the right button if we reach the actual period
+                                    if ( count_clicks === 0 ){
+
+                                        d3.select( ".btn_right" ).attr('opacity', '0');
+                                    }
+                                } 
+                            }
+
+                            //console.log( "number of periods: " + number_of_periods );
+                            //console.log( "count_clicks: " + count_clicks );
+
+                            //change the data period in the timeline
+                            //0 clicks show the current period of time. the higher the clicks the farther away the current period of time
+                            data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars, number_of_periods);
+                            data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods);
+
+                            update_bars( data_amount, data_years );
+                            update_background_divs( data_years );
+                            update_labels( data_years );
+                            
+                            update_tooltip({ data_amount: data_amount, data_years: data_years });
+
+                            timeline_changed = true;
+                            current_timeline = data_years;
+
+                            remove_highlight_selection_items_years();
+                            highlight_selection_items;                             
+                    }
 
                     var create_bars = function () { 
                             //console.log( "create_bars start" );  
@@ -3143,6 +3216,7 @@ PUBVIS = function () {
 
                                         hoovered_year = data_years[ i ].toString();
                                         tooltip_change_visibility( hoovered_year, true );
+
 
                                     })
                                     .on("mouseout", function( d, i ) {
@@ -3443,27 +3517,55 @@ PUBVIS = function () {
                         var btn_left, btn_right, btn_group, buttons_text = [], background_div, buttons, buttons_width, buttons_height;
 
                         buttons_text = ["<", ">"];
+                        
 
                         btn_group = svg.append( "g" )
-                                        .attr("transform", "translate(-5," + (svgH-19) + ")");
-               
-                        
-                        buttons_width = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).width;
+                                        //.attr("transform", "translate(-5," + (svgH-19) + ")");
+                                        .attr( "class", "btn_group" )
+                                        .attr( "opacity", "1" )
+                                        .attr("transform", "translate(-15," + (svgH-20) + ")")
+                                        .on( "mouseover", function() {
+                                            d3.select(this).style("cursor", "pointer");
+                                        })
+
+                                        //.attr("transform", "translate(-" + buttons_width + "," + (svgH-19) + ")");
+                    
+                        //buttons_width = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).width;
                         buttons_height = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).height;
 
+                        //console.log( "buttons_width: " + buttons_width );
+                        //console.log( "svgW: " + svgW );
+
+                        
                         background_div = btn_group.selectAll( "rect" )
                                         .data( buttons_text )
                                         .enter()
                                         .append( "rect" )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            x: function( d, i ){ return i * svgW }, //later to include the width of the button image
+                                            x: function( d, i ){ return i * (svgW+10) }, //later to include the width of the button image
                                             y: 0,
                                             id: function( d, i ){ return d },
-                                            width: buttons_width,
-                                            height: label_height ,
+                                            class: function( d, i ){ 
+                                                if ( d === "<" ) { 
+                                                    return "btn_left" 
+                                                } else {
+                                                    return "btn_right"
+                                                }
+                                            },
+                                            width: 20,//buttons_width,
+                                            height: label_height,
                                             fill: color_background_div
                                         })
+                                        .on( "click", function( d, j ) {
+                                            //console.log( "hit background_div: " + d );
+                                            if ( d === "<" ){ 
+                                                button_clicked({ direction: "left" });
+                                            } else {
+                                                button_clicked({ direction: "right" });
+                                            
+                                            }
+                                        });
 
 
                         buttons = btn_group.selectAll( "text" )
@@ -3472,53 +3574,33 @@ PUBVIS = function () {
                                     .append( "text" )
                                     .text ( function( d ) { return d; } )
                                     .attr({
-                                        x: function( d, i ){ return i * svgW }, //later to include the width of the button image
+                                        x: function( d, i ){ return i * (svgW+10) + 7 }, //later to include the width of the button image
                                         y: label_height/1.25,
                                         id: function( d, i ){ return d },
+                                        class: function( d, i ){ 
+                                            if ( d === "<" ) { 
+                                                return "btn_left" 
+                                            } else {
+                                                return "btn_right"
+                                            }
+                                        },
+                                        "text-anchor": "start",
                                         fill: new_bar_years.get_color_text()
                                     })
+                                    .style("font-weight", "600")
                                     .on( "click", function( d, j ) {
-
-                                        //take care that number of clicks do not extend the maximal number of perisods
-                                        if ( (d === ">") 
-                                            && (count_clicks <= number_of_periods) 
-                                            && (count_clicks > 0 ) ) {
-                                                //console.log( "go right" );
-                                                count_clicks--;
-                                                //console.log("count_clicks: " + count_clicks);
-                                        }
-
-                                        if ( (d === ">") 
-                                            && (count_clicks > number_of_periods) 
-                                            && (count_clicks > 0 ) ) {
-
-                                                count_clicks = number_of_periods;
-                                        }
-
-                                        if ( (d === "<")
-                                            && (count_clicks >= 0) 
-                                            && (count_clicks <= number_of_periods) ) {
-
-                                                count_clicks++;
-                                        }
-
-                                        data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars, number_of_periods);
-                                        data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods); 
-
-                                        update_bars( data_amount, data_years );
-                                        update_background_divs( data_years );
-                                        update_labels( data_years );
+                                        //console.log( "hit text: " + d );
+                                        if ( d === "<" ){ 
+                                            button_clicked({ direction: "left" });
+                                        } else {
+                                            button_clicked({ direction: "right" });
                                         
-                                        update_tooltip({ data_amount: data_amount, data_years: data_years });
+                                        }
+                                    });    
 
-                                        timeline_changed = true;
-                                        current_timeline = data_years;
-
-                                        remove_highlight_selection_items_years();
-                                        highlight_selection_items;
-
-                                            
-                                    }); 
+                    //at the beginning show only the left button, cause we will alway start showing the current year
+                    d3.select( ".btn_right" ).attr('opacity', '0');
+                                    
                     };
 
                     new_bar_years.render = function () {
@@ -3530,6 +3612,7 @@ PUBVIS = function () {
                         
                         if ( (data_years_all.length - 1) >= max_number_of_bars + 1 ) {
                             create_buttons();
+                            //d3.select( ".btn_right" ).attr('opacity', '0');
                         }
 
                     }
