@@ -29,24 +29,23 @@ PUBVIS = function () {
     //return oneBigJson and errors in an object
     //@param.bibfile = bib data
     var bib2json = function ( bibfile ) {
-        var dataArr, bigJson, errors, entry, entryAt, jsonFormat, str;
+        var dataArr, bigJson, errors, entry, jsonFormat, str;
 
-        dataArr = bibfile.split("@");
+        dataArr = bibfile.splitKeep(/@[a-zA-Z]+ *{/g, 1);
 
         bigJson = [];
         errors = { index: [], errorMessage: [], errorEntry: [] };
-        for (var i = 1 ; i <= dataArr.length-1; i++) {
+        for (var i = 0 ; i <= dataArr.length-1; i++) {
 
             entry = dataArr[i].toString();
-            entryAt = "@" + entry;
 
             try {
                 //pars bib-entry to JSON list with one object
-                jsonFormat = bibtexParse.toJSON( entryAt );
+                jsonFormat = bibtexParse.toJSON( entry );
             } catch (e) {
                 errors.index.push( i );
                 errors.errorMessage.push( e );
-                errors.errorEntry.push ( entryAt );
+                errors.errorEntry.push ( entry );
                 jsonFormat = "";
             }
 
@@ -4778,5 +4777,52 @@ PUBVIS = function () {
 
 
 
+
+/* An extension function splits string with substring or RegEx and the delimiter is putted according to second parameter ahead or behind.
+found at: http://stackoverflow.com/questions/12001953/javascript-and-regex-split-string-and-keep-the-separator
+*/
+
+String.prototype.splitKeep = function (splitter, ahead) {
+    var self = this;
+    var result = [];
+    if (splitter != '') {
+        var matches = [];
+        // Getting mached value and its index
+        var replaceName = splitter instanceof RegExp ? "replace" : "replaceAll";
+        var r = self[replaceName](splitter, function (m, i, e) {
+            matches.push({ value: m, index: i });
+            return getSubst(m);
+        });
+        // Finds split substrings
+        var lastIndex = 0;
+        for (var i = 0; i < matches.length; i++) {
+            var m = matches[i];
+            var nextIndex = ahead == true ? m.index : m.index + m.value.length;
+            if (nextIndex != lastIndex) {
+                var part = self.substring(lastIndex, nextIndex);
+                result.push(part);
+                lastIndex = nextIndex;
+            }
+        };
+        if (lastIndex < self.length) {
+            var part = self.substring(lastIndex, self.length);
+            result.push(part);
+        };
+    }
+    else {
+        result.add(self);
+    };
+    return result;
+    
+    // Substitution of matched string
+    function getSubst(value) {
+        var substChar = value[0] == '0' ? '1' : '0';
+        var subst = '';
+        for (var i = 0; i < value.length; i++) {
+            subst += substChar;
+        }
+        return subst;
+    };
+};
 
 
