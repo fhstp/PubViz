@@ -457,6 +457,8 @@ PUBVIS = function () {
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
                     keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
+                    //console.log( "keywords" );
+                    //console.dir(keywords);
                     wordCloud = CLOUD({ type:"keywords", 
                                         words: keywords, 
                                         xPos: (width/2 + 15), 
@@ -473,10 +475,12 @@ PUBVIS = function () {
             
                 //fetch the authors 
                 authors = get_authors( json ).authors;
+                //console.log( "authors" );
+                //console.dir( authors );
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
-                    
+                    authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
                                         xPos: 0, 
@@ -2346,7 +2350,7 @@ PUBVIS = function () {
                 var absolut_max = 40;
                 var optimum_size;
                 var new_length;
-                var number_to_remove;
+                //var number_to_remove;
 
                 //sort the array descend according to the size of the elements
                 words.sort( function ( a, b ) {
@@ -2386,8 +2390,8 @@ PUBVIS = function () {
                                     } 
                                 }    
                             } else { 
-                                number_to_remove = words.length - new_length ;
-                                words.splice( (new_length), number_to_remove);
+                                //change the length of the words object to the new length
+                                words.length = new_length+1;
                                 break;
                             }
                         }
@@ -4125,7 +4129,7 @@ PUBVIS = function () {
 
                 if ( dataset_words !== 0 ) { 
                     fontSize = d3.scale.log().domain([dataset_words[(dataset_words.length-1)].size ,dataset_words[0].size])
-                                             .range( [15, 50] )
+                                             .range( [15, 40] )
                                              .clamp( true );
                 }
 
@@ -4170,6 +4174,8 @@ PUBVIS = function () {
                         id_name = "keywords";
                         //save the list with all words that are really displayed
                         words_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
+                        //console.log( "words_displayed" );
+                        //console.dir( words_displayed );
 
                     } else if ( type === "authors" ){
 
@@ -4177,7 +4183,8 @@ PUBVIS = function () {
                         id_name = "authors";
                         //save the list with all words that are really displayed
                         authors_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
-
+                        //console.log( "authors_displayed" );
+                        //console.dir( authors_displayed );
                     } else {
                         console.log( "WARNING: type of cloud is not determined! Please add the params.key 'type' with the value-stirng if the cloud is for 'authors' or 'keywords' '" );
                     }
