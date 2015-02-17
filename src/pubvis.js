@@ -4685,20 +4685,21 @@ String.prototype.splitKeep = function (splitter, ahead) {
             var part = self.substring(lastIndex, self.length);
             result.push(part);
         };
-        // Substitution of matched string
-        function getSubst(value) {
-            var substChar = value[0] == '0' ? '1' : '0';
-            var subst = '';
-            for (var i = 0; i < value.length; i++) {
-                subst += substChar;
-            }
-            return subst;
-        };
     }
     else {
         result.add(self);
     };
     return result;
+    
+    // Substitution of matched string
+    function getSubst(value) {
+        var substChar = value[0] == '0' ? '1' : '0';
+        var subst = '';
+        for (var i = 0; i < value.length; i++) {
+            subst += substChar;
+        }
+        return subst;
+    };
 };
 
 
