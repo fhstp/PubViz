@@ -4,6 +4,8 @@ PUBVIS = function () {
         target = params.target;
         selection_color = params.color;
 
+        decoraton_color = params.decoraton_color;
+
         //inform the user about loading
         $( target ).append( "<div id='loading'> LOADING... </div>" );
 
@@ -385,8 +387,8 @@ PUBVIS = function () {
                 //console.log( " display views" );
                 
                 //***display header
-                show_header = HEADER();
-                show_btn_clearAll = CLEAR_ALL();
+                show_header = HEADER( decoraton_color );
+                show_btn_clearAll = CLEAR_ALL( decoraton_color );
 
                 //fetch years from json 
                 dataset_years = get_years( {json: json} ).time_list;
@@ -402,7 +404,7 @@ PUBVIS = function () {
                         data_amount_all: dataset_amount, 
                         color_bar: "#D9D9D9", 
                         color_text: "#f5f5f5", 
-                        color_background_div: "#333333", 
+                        color_background_div: decoraton_color, 
                         view_height: 157.5, 
                         margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
                         //view_width: 1024,
@@ -479,7 +481,7 @@ PUBVIS = function () {
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
-                    //authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
+                    authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
 
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
@@ -496,7 +498,7 @@ PUBVIS = function () {
                 //console.log( "authors: " +  authors_available );
 
                 //***display list
-                list = LIST({ data:json, update:false });
+                list = LIST({ data:json, update:false, button_color:decoraton_color });
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -2562,10 +2564,13 @@ PUBVIS = function () {
             //dataset_types = testdata.amount;
 
         //***************************HEADER******************************//
-            var HEADER = function(){
+            var HEADER = function(color){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
                 var home_link = "http://pubviz.fhstp.ac.at/";
+
+                //if no color is defined, take a default
+                var background_color = (color === undefined || color === "" ) ? "#333333" : color;
 
                 var logo = d3.select( "#header" )
                                 .append("g")
@@ -2578,7 +2583,7 @@ PUBVIS = function () {
                                             y: 0, 
                                             width: logo_div_width,//(width - button_width - 11),//509,
                                             height: 30,
-                                            fill: "#333333",
+                                            fill: background_color,
                                             id: "div_logo"
                                     })
 
@@ -2596,9 +2601,6 @@ PUBVIS = function () {
                                     .attr({
                                             x: 35, 
                                             y: 23, 
-                                            width: 509,
-                                            height: 30,
-                                            fill: "#333333",
                                             id: "text_bold",
                                             fill: "#f5f5f5",
                                             "text-anchor": "start",
@@ -2616,9 +2618,6 @@ PUBVIS = function () {
                                     .attr({
                                             x: 81, 
                                             y: 23, 
-                                            width: 509,
-                                            height: 30,
-                                            fill: "#333333",
                                             id: "text_regular",
                                             fill: "#f5f5f5",
                                             "text-anchor": "start",
@@ -2729,10 +2728,13 @@ PUBVIS = function () {
 
         //***************************CLEAR ALL******************************//
 
-            var CLEAR_ALL = function(){
+            var CLEAR_ALL = function( color ){
                 var btn_clearAll;
                 var clearAll;
                 var btn_text
+
+                //if no color is defined, take a default
+                var background_color = (color === undefined || color === "" ) ? "#333333" : color;
 
                 btn_clearAll = d3.select( "#clearAll" )
                                 .append("g")
@@ -2768,7 +2770,7 @@ PUBVIS = function () {
                                             y: 0, 
                                             width: button_width,
                                             height: button_height,
-                                            fill: "#333333",
+                                            fill: background_color,
                                             id: "clearAll_div"
                                     });
 
@@ -2780,7 +2782,7 @@ PUBVIS = function () {
                                         y2: button_height,
                                         id: "btn_clearAll_line",
                                         "shape-rendering": "crispEdges",
-                                        "stroke": "#333333",
+                                        "stroke": background_color,
                                         "stroke-width": "5"
                                     });
 
@@ -4308,6 +4310,7 @@ PUBVIS = function () {
                 var data = params.data;
                 var update = params.update;
                 var offset;
+                //var btn_color;
                 //var update;
                 //location
                 if ( !update ){ 
@@ -4318,10 +4321,16 @@ PUBVIS = function () {
                     generate(0);
                 }
 
+                //if no color is defined, take a default
+                var btn_color = (params.button_color === undefined || params.button_color === "") ? "#333333" : params.button_color;
+
+                $( "#year" ).css("background-color", btn_color );
+                $( "#type" ).css("background-color", btn_color );
 
                 //set the same margin-left as the svg do
                 offset = $( "#pubVis" ).offset();
                 $( "#list" ).css("margin-left", offset.left);
+                
 
 
                 $("#year").click(function() {
