@@ -2754,7 +2754,7 @@ PUBVIS = function () {
                                         d3.select(this).style("cursor", "pointer");
 
                                 }).on("mouseout", function() {
-                                        d3.select("#btn_clearAll_line").attr( "stroke", "#333333" );
+                                        d3.select("#btn_clearAll_line").attr( "stroke", "#eeeeee" );
 
                                 }).on("mousedown", function() {
                                         d3.select("#txt_clearAll").attr( "fill", selection_color );
@@ -2782,7 +2782,7 @@ PUBVIS = function () {
                                         y2: button_height,
                                         id: "btn_clearAll_line",
                                         "shape-rendering": "crispEdges",
-                                        "stroke": background_color,
+                                        "stroke": "#eeeeee",
                                         "stroke-width": "5"
                                     });
 
