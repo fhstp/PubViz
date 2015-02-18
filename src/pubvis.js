@@ -479,7 +479,8 @@ PUBVIS = function () {
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
-                    authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
+                    //authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
+
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
                                         xPos: 0, 
@@ -1471,7 +1472,9 @@ PUBVIS = function () {
                 var filter_criteria = params.filter_criteria;
                 var shorter_list, longer_list;
                 var str = "", n;
-                var word_id, searched_word;
+                var word_id; 
+                var searched_word;
+                var pattern;
 
                 for ( var i = 0; i < json.length; i++ ){
                     
@@ -1553,7 +1556,9 @@ PUBVIS = function () {
                         for ( var m = 0; m < filter_criteria.authors.length; m++ ){
 
                             searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[m] });
-                           
+                
+                            //console.log( "searched_word: " + searched_word );
+
                             if (   json[i].entryTags.author !== undefined 
                                 && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
 
@@ -1565,9 +1570,12 @@ PUBVIS = function () {
                                 
                                 //start every word with upper case
                                 str = to_title_case( str );
-
+                                //console.log( "str: " + str );
+                                
                                 //lookup if filtered word match in the keywords of this entry
-                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
+                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                //console.log( "pattern: " + pattern );
 
                                 if ( n !== (-1) ) {
                                     //if match was found check if it already excists in the result list.
@@ -1734,8 +1742,9 @@ PUBVIS = function () {
                                             str = to_title_case( str );
 
                                             //lookup if filtered word match in the keywords of this entry
-                                            n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                                        
+                                            pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                            n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                             if ( n !== (-1) ) {
                                     
                                                 //if match was found check if the result list has already entries
@@ -1789,8 +1798,9 @@ PUBVIS = function () {
                                     str = to_title_case( str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index                               
-
+                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                     if ( n !== (-1) ) {
                                     
                                         //if match was found check if the result list has already entries
@@ -1900,8 +1910,9 @@ PUBVIS = function () {
                                     //console.log( "str: " + str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                          
+                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                     if ( n !== (-1) ) {
                             
                                         //if match was found check if the result list has already entries
@@ -2004,8 +2015,9 @@ PUBVIS = function () {
                                         str = to_title_case( str );
 
                                         //lookup if filtered word match in the keywords of this entry
-                                        n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                         if ( n !== (-1) ) {
                                             //if match was found add this entry
                                             result.push(json[i]);
@@ -2049,8 +2061,9 @@ PUBVIS = function () {
                                         str = to_title_case( str );
 
                                         //lookup if filtered word match in the keywords of this entry
-                                        n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                         //check if keyword was found
                                         if ( n !== (-1) ) {
 
@@ -2137,8 +2150,9 @@ PUBVIS = function () {
                                                     str = to_title_case( str );
 
                                                     //lookup if filtered word match in the keywords of this entry
-                                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                                     if ( n !== (-1) ) {
                                                         //if match was found add this entry
                                                         result.push(json[i]);
@@ -2200,8 +2214,9 @@ PUBVIS = function () {
                                                 str = to_title_case( str );
 
                                                 //lookup if filtered word match in the keywords of this entry
-                                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                                              
+                                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                                 if ( n !== (-1) ) {
                                                     
                                                     //if match was found check if it already excists in the result list.
