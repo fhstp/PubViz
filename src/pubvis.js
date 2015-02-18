@@ -4382,9 +4382,8 @@ PUBVIS = function () {
                         var thesis_type;
                         var details = ""; //all information that will be contained in the folding box
 
-
-                        if(data[j].entryTags['author'] != undefined) {
-                            author = data[j].entryTags['author'];
+                        if(data[j].list_authors != undefined) {
+                            author = data[j].list_authors;
                         } else {
                             author = "<i style='font-style: italic;'>Unknown Author</i>";
                         }
