@@ -195,10 +195,10 @@ PUBVIS = function () {
                 //var button_height = 30; //clearAll button
 
                 //calculation of the position for the views
-                //var clarAll_yPos = header_height; //svg_margin_top + header_height;
                 var overview_yPos = header_height + space_between_view;
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
+                //console.log( "svg_height: " + svg_height );
 
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
@@ -481,13 +481,17 @@ PUBVIS = function () {
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
+
                     authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
+                    //console.log( "authors.length after limit function: "+ authors.length );
 
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
                                         xPos: 0, 
                                         yPos: 0,
                                         size: [ (width/2 - 15), 340 ] });
+
+                    
                     
                     authors_available = true;
                 } else {
@@ -2401,6 +2405,7 @@ PUBVIS = function () {
 
                                             //console.log( "size of element smaller, new length: " + i );
                                             new_length = i;
+                                            words.length = new_length+1;
                                             break;
                                         } 
                                     } 
@@ -4199,7 +4204,18 @@ PUBVIS = function () {
                         id_name = "authors";
                         //save the list with all words that are really displayed
                         authors_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
-                        //console.log( "authors_displayed" );
+                        //console.log( "authors_displayed.length: " + authors_displayed.length );
+
+                        //if there is not enough space for the authors, the limit function will be called to cut of the authors according to their 
+                        //number of publication. Thus an arbitrary disappearance of names can be avoided
+                        if (authors_displayed.length < authors.length) {
+
+                            //console.log( "too less space >> limit authors again from : "+ authors.length + " to: " + authors_displayed.length );
+                            //console.dir( authors );
+                            authors = limit_words({ words: authors, optimum_size: authors_displayed.length, min: 1 });
+                            //console.log( "new length authors: " + authors.length );
+                        }
+
                         //console.dir( authors_displayed );
                     } else {
                         console.log( "WARNING: type of cloud is not determined! Please add the params.key 'type' with the value-stirng if the cloud is for 'authors' or 'keywords' '" );
@@ -4727,6 +4743,7 @@ PUBVIS = function () {
 
             //display the view
             display_all_views();
+            //console.log("document.body.scrollHeight: " + document.body.scrollHeight);
 
            //window.onresize = update_window;
             //console.log( "parseInt(d3.select('#pubVis')...?: " + parseInt(d3.select('#pubVis').attr('width')) );
