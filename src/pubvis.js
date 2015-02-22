@@ -4475,9 +4475,7 @@ PUBVIS = function () {
                 var data = params.data;
                 var update = params.update;
                 var offset;
-                //var btn_color;
-                //var update;
-                //location
+                
                 if ( !update ){ 
                     $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
@@ -4497,55 +4495,67 @@ PUBVIS = function () {
                 $( "#list" ).css("margin-left", offset.left);
                 
 
+                $("#year")
+                    .click(function() {
+                        if(y) {
+                            y = false;
+                            $("#year").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            generate(0);
+                        } else {
+                            y = true;
+                            t = false;
+                            $("#year").css({
+                                "border-right": "5px solid " + selection_color
+                            });
+                            $("#type").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            $(".accordion").css({"margin-top": "-20px"});
+                            generate(1);
+                        }
+                    })
+                    .mouseover(function() {
+                        $( this ).css("border-right", "5px solid " + selection_color );
+                    })
+                    .mouseout(function() {
+                        $( this ).css("border-right", "5px solid #d9d9d9" );
+                    });
 
-                $("#year").click(function() {
-                    if(y) {
-                        y = false;
-                        $("#year").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        generate(0);
-                    } else {
-                        y = true;
-                        t = false;
-                        $("#year").css({
-                            "border-right": "5px solid " + selection_color//"5px solid #ffc200"
-                        });
-                        $("#type").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        $(".accordion").css({"margin-top": "-20px"});
-                        generate(1);
-                    }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
-                });
-                $("#type").click(function() {
-                    if(t) {
-                        t = false;
-                        $("#type").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        generate(0);
-                    } else {
-                        t = true;
-                        y = false;
-                        $("#type").css({
-                            "border-right": "5px solid " + selection_color//"5px solid #ffc200"
-                        });
-                        $("#year").css({
-                            "border-right": "5px solid #d9d9d9"
-                        })
-                        $(".accordion").html('');
-                        $(".accordion").css({"margin-top": "-20px"});
-                        generate(2);
-                    }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
-                });
+                $("#type")
+                    .click(function() {
+                        if(t) {
+                            t = false;
+                            $("#type").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            generate(0);
+                        } else {
+                            t = true;
+                            y = false;
+                            $("#type").css({
+                                "border-right": "5px solid " + selection_color
+                            });
+                            $("#year").css({
+                                "border-right": "5px solid #d9d9d9"
+                            })
+                            $(".accordion").html('');
+                            $(".accordion").css({"margin-top": "-20px"});
+                            generate(2);
+                        }
+                    })
+                    .mouseover(function() {
+                        $( this ).css("border-right", "5px solid " + selection_color );
+                    })
+                    .mouseout(function() {
+                        $( this ).css("border-right", "5px solid #d9d9d9" );
+                    });
+
+              
 
                 function generate(sortBy) {
 
@@ -4870,14 +4880,13 @@ PUBVIS = function () {
                     }
                       //  Accordion Panels
                       $(".accordion .pane").show();
+                      $('.accordion .pane').css("border-left", "3px solid " + selection_color );
                       setTimeout("$('.accordion .pane').slideToggle('slow');", 1);
                       $(".accordion .headl").click(function () {
                         $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
-                        $(this).toggleClass("current");
-                        $(this).siblings(".headl").removeClass("current");
+                        $(this).next(".pane").css("border-left", "3px solid " + selection_color );
                         $(".subpane").css({"display": "block"});
                       });
-
 
                 }
             }
