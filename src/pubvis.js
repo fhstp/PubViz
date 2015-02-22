@@ -58,32 +58,7 @@ PUBVIS = function () {
 
         };        
 
-        //fetch all authors and remove all comma and replace 'and' with a comma
-        //needed format to show the authors in the list
-        for ( var i = 0; i < bigJson.length; i++ ){
-
-            if ( bigJson[i].entryTags.author !== undefined ) { 
-
-                str = bigJson[i].entryTags.author;
-                //console.log( "str: " + str );
-
-                //all_authors_str = all_authors.toString();
-                str = str.replace (/,/g, "");
-
-                //split string at every 'and'
-                str = str.replace (/ and /g, ", ");
-
-                bigJson[i].list_authors = str;
-                //console.dir( all_authors_split );
-
-            }
-
-        }
-
-        //console.log ( "bigJson[0].list_authors: "  + bigJson[0].list_authors);
-
         //console.dir( bigJson );
-        //console.log("ende Bib2Json");
         return { json: bigJson,
                  errors: errors }; 
     }
@@ -385,6 +360,8 @@ PUBVIS = function () {
             //call all views to display them
             var display_all_views = function(){
                 //console.log( " display views" );
+
+                prepare_authors();
                 
                 //***display header
                 show_header = HEADER( decoraton_color );
@@ -478,6 +455,8 @@ PUBVIS = function () {
                 authors = get_authors( json ).authors;
                 //console.log( "authors" );
                 //console.dir( authors );
+
+                
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
@@ -2534,6 +2513,176 @@ PUBVIS = function () {
                 return{ authors: final_result };
             }
 
+            var prepare_authors = function () {
+                var names = [];
+                var authors_nodes = [];
+                var index_number = 0;
+                var first_name = "";
+                var laste_name = "";
+                var match = false;
+                var existing_index_nb;
+                var authors_edges = [];
+
+                var update_authors_edges = function( params ){
+                    //console.log( 'update_authors_edges' );
+                    var source = params.source;
+                    var target = params.target;
+                    var filtered = [];
+                    var link_node_data = { nodes: [], edges: [] };
+
+
+                    filtered = authors_edges.filter( function( x ){
+
+                        if ((x.source === source) && (x.target === target)) {
+                            return true;                
+                        }
+
+                        return false;
+                        //return ( ((x.source === source) && (x.traget === target)) === true) ? true : false;
+                    })
+
+                    if ( !filtered.length ){ //falsi
+                        authors_edges.push({ source:source, target:target }); 
+                        //console.log( "not contained: " + source + " " + target );
+                    } else {
+                        //console.log( "contained!" );
+                        //console.dir( filtered );
+                    }
+                }
+
+                
+                var find_authors_edges = function( params ) {
+                    var list = params.list;
+                    //console.log( 'find_authors_edges' );
+                    var source, target;
+
+                    for ( var i = 0; i < list.length; i++ ) {
+                        for ( var y = (i+1); y < list.length; y++ ){
+
+                            //console.log( "source: " + list[i].index + " target: " + list[y].index );
+                            source = list[i].index;
+                            target = list[y].index;
+                            //authors_edges.push({ source:source, target:target }); 
+                            update_authors_edges({
+                                source:Math.min(source,target),
+                                target:Math.max(source, target)
+                            });
+
+                        }
+
+                    }
+                }
+
+                //fetch all authors and remove all comma and replace 'and' with a comma for the list view
+                //fetch all authors find out first and last name. Attache them as own element to the bigJson
+                for ( var i = 0; i < json.length; i++ ) {
+                    
+                    if ( json[i].entryTags.author !== undefined ){
+
+                        
+                        //***prepare a string to add an element to the json to display all authors in the list
+                        str = json[i].entryTags.author;
+
+                        //all_authors_str = all_authors.toString();
+                        str = str.replace (/,/g, "");
+
+                        //split string at every 'and'
+                        str = str.replace (/ and /g, ", ");
+
+                        json[i].list_authors = str;
+
+
+
+                        //***prepare an array to be attached to the json with the first and last name of the authors
+                        //split string at every whitspace
+                        authors = json[i].entryTags.author.split( " and " );
+
+                        authors_str = authors.toString();
+                        //console.log("authors_str: " + authors_str);
+
+                        //split at comma only if there is no whitespace before or after the comma
+                        authors = authors_str.split( /,(?!\s)/ );
+                        //console.log( "authors splitted: " );
+                        //console.dir( authors );
+                        
+                        if ( authors.length !== undefined ) { 
+                            //find first name, last name and create an index
+                            for ( var y = 0; y < authors.length; y++ ){ 
+                                
+                                str = authors[y];
+                                n = str.search( "," ); //n = -1 if there is no comma
+
+                                if ( n === (-1) ) { //no comma found
+
+                                    first_name = $.trim( str.substr( 0, str.indexOf(' ') ) );
+                                    last_name = $.trim(str.substr( str.indexOf(' ') ) );
+
+                                } else { //comma found
+
+                                    last_name = $.trim(str.substr( 0, str.indexOf(',') ) );
+                                    first_name = str.substr( str.indexOf(',') );
+                                    first_name = first_name.replace (/,/g, "");
+                                    first_name = $.trim( first_name );
+
+                                }
+
+                                //look up the entries before if this author has already an index number 
+                                for ( var x = 0; x < i; x++ ){
+
+                                    if ( json[x].authors !== undefined ) { 
+
+                                        //look up the list of authors in an entry
+                                        for ( var z = 0; z < json[x].authors.length; z++ ) {
+
+                                            //if the author has alredy got an index take the existing one
+                                            if (   json[x].authors[z].name === last_name
+                                                && json[x].authors[z].first_name === first_name  ){
+                                                
+                                                match = true;
+                                                existing_index_nb = json[x].authors[z].index;
+                                                break;
+
+                                            }                                         
+                                        }
+
+                                    } 
+
+                                    if ( match ){
+                                        break;
+                                    }
+                                }
+                                //if the author has not be found prepare a new index and save the name and the index
+                                if ( match === false ){
+
+                                    names.push( {name: last_name, first_name: first_name, index: index_number} );
+                                    index_number++;
+                                    authors_nodes.push({ name: last_name });
+                                } else {
+                                    //if the autor was found save the name and the existing index
+                                    //console.log( "match true for: " + first_name + " " + last_name);
+                                    names.push( {name: last_name, first_name: first_name, index: existing_index_nb } );
+
+                                }
+                                match = false;   
+                            }//end for y
+
+                            //add the list with names and index to the entry
+                            json[i].authors = names;
+                            find_authors_edges({ list:names });
+                            
+                            authors = [];
+                            names = [];
+
+                        } // if
+                        
+                    } //if
+                } //for i
+
+                
+                link_node_data = { nodes: authors_nodes, edges: authors_edges };
+                //console.dir( link_node_data );
+            }
+
         //*************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
@@ -4361,7 +4510,7 @@ PUBVIS = function () {
                         y = true;
                         t = false;
                         $("#year").css({
-                            "border-right": "5px solid #ffc200"
+                            "border-right": "5px solid " + selection_color//"5px solid #ffc200"
                         });
                         $("#type").css({
                             "border-right": "5px solid #d9d9d9"
@@ -4385,7 +4534,7 @@ PUBVIS = function () {
                         t = true;
                         y = false;
                         $("#type").css({
-                            "border-right": "5px solid #ffc200"
+                            "border-right": "5px solid " + selection_color//"5px solid #ffc200"
                         });
                         $("#year").css({
                             "border-right": "5px solid #d9d9d9"
