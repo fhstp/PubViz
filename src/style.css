@@ -86,12 +86,12 @@ body{
 .accordion .headl.current {
   background-color: #eeeeee;
   color:#000;
-  border-left: 3px solid #ffc200;
+  /*border-left: 3px solid #ffc200;*/
 }
 .accordion div.pane {
   padding:5px 10px;
   background-color:#eeeeee;
-  border-left: 3px solid #ffc200;
+  /*border-left: 3px solid #ffc200;*/
   color:#141414;
   padding-left:40px;
   width:100%;
@@ -139,7 +139,6 @@ body{
 	padding-left: 10px;
 	border: none;
 	border-right: 5px solid #d9d9d9;
-	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
 	
@@ -155,7 +154,6 @@ body{
 	padding-left: 10px;
 	border: none;
 	border-right: 5px solid #d9d9d9;
-	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
 	
@@ -170,7 +168,7 @@ body{
 	padding-right: 10px;
 	padding-left: 10px;
 	border: none;
-	border-right: 5px solid #ffc200;
+	/*border-right: 5px solid #ffc200;*/
 	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
@@ -185,7 +183,7 @@ body{
 	padding-right: 10px;
 	padding-left: 10px;
 	border: none;
-	border-right: 5px solid #ffc200;
+	/*border-right: 5px solid #ffc200;*/
 	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
