@@ -972,10 +972,10 @@ PUBVIS = function () {
                     && ( selected_items.keywords.length === 0 )
                     && ( selected_items.authors.length === 0 ) ){ 
 
-                    list = LIST({ data: json, update:true });
+                    list = LIST({ data: json, update:true, button_color:decoraton_color });
                 } else {
 
-                    list = LIST({ data:dataset, update:true });
+                    list = LIST({ data:dataset, update:true, button_color:decoraton_color });
                 }
 
                 if ( keywords_available ){ 
@@ -4475,7 +4475,7 @@ PUBVIS = function () {
                 var data = params.data;
                 var update = params.update;
                 var offset;
-                
+
                 if ( !update ){ 
                     $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
