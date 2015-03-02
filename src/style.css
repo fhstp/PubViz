@@ -270,6 +270,24 @@ a{
 
 }
 
+#warning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    height: 500%;
+    background-color: rgba(192, 192, 192, 0.9);
+    text-align: center;
+	font-size: 1.2em;
+	font-weight: 300;
+	line-height: 1.2em;
+	box-sizing: border-box;
+	padding-top: 3%;
+	padding-left: 20%;
+	padding-right: 20%;
+}
+
 #footer {
 	width: 100%;
     text-align: center;
@@ -288,6 +306,8 @@ a{
 	text-decoration:underline;
 	color: #333333; 
 }
+
+
 
 @media screen and (max-width: 875px) {
     
