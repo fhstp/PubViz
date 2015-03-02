@@ -482,6 +482,8 @@ PUBVIS = function () {
 
                 //***display list
                 list = LIST({ data:json, update:false, button_color:decoraton_color });
+
+                FOOTER();
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -2522,31 +2524,33 @@ PUBVIS = function () {
                 var match = false;
                 var existing_index_nb;
                 var authors_edges = [];
+                var link_node_data = { nodes: [], edges: [] };
 
                 var update_authors_edges = function( params ){
                     //console.log( 'update_authors_edges' );
                     var source = params.source;
                     var target = params.target;
                     var filtered = [];
-                    var link_node_data = { nodes: [], edges: [] };
+                    //var link_node_data = { nodes: [], edges: [] };
 
 
                     filtered = authors_edges.filter( function( x ){
 
                         if ((x.source === source) && (x.target === target)) {
+                            //console.log( "match: " + source + " " + target + " " + x.weight );
+                            x.weight += 1;
+                            //console.log( "changes: " + source + " " + target + " " + x.weight );
                             return true;                
                         }
 
                         return false;
-                        //return ( ((x.source === source) && (x.traget === target)) === true) ? true : false;
                     })
-
+                    //if no doubles are found filtered list is falsi
                     if ( !filtered.length ){ //falsi
-                        authors_edges.push({ source:source, target:target }); 
+                        authors_edges.push({ source:source, target:target, weight:1 }); 
                         //console.log( "not contained: " + source + " " + target );
-                    } else {
-                        //console.log( "contained!" );
-                        //console.dir( filtered );
+                    } else { //filtered list contains the doubles
+                        //console.log( "contained! " + filtered.length );
                     }
                 }
 
@@ -2606,7 +2610,9 @@ PUBVIS = function () {
                         //console.dir( authors );
                         
                         if ( authors.length !== undefined ) { 
-                            //find first name, last name and create an index
+                            //iterate the authors of an entry
+                            //according to the position of the comma, find first name, last name and 
+                            //then create an index
                             for ( var y = 0; y < authors.length; y++ ){ 
                                 
                                 str = authors[y];
@@ -2626,7 +2632,7 @@ PUBVIS = function () {
 
                                 }
 
-                                //look up the entries before if this author has already an index number 
+                                //look up the previous entries if this author has already an index number 
                                 for ( var x = 0; x < i; x++ ){
 
                                     if ( json[x].authors !== undefined ) { 
@@ -2658,9 +2664,9 @@ PUBVIS = function () {
                                     index_number++;
                                     authors_nodes.push({ name: last_name });
                                 } else {
-                                    //if the autor was found save the name and the existing index
+                                    //if the autor was found save the name, the existing index and increase & save the weight
                                     //console.log( "match true for: " + first_name + " " + last_name);
-                                    names.push( {name: last_name, first_name: first_name, index: existing_index_nb } );
+                                    names.push( {name: last_name, first_name: first_name, index: existing_index_nb} );
 
                                 }
                                 match = false;   
@@ -2681,9 +2687,11 @@ PUBVIS = function () {
                 
                 link_node_data = { nodes: authors_nodes, edges: authors_edges };
                 //console.dir( link_node_data );
+                //var string = JSON.stringify(link_node_data);
+                //console.log( string );
             }
 
-        //*************************TEST DATA******************************//
+        //***************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
             //@params.startYear = number (e.g. 1980)
@@ -2717,7 +2725,7 @@ PUBVIS = function () {
             //var testdata = generate_testData( 2008 );
             //dataset_types = testdata.amount;
 
-        //***************************HEADER******************************//
+        //****************************HEADER******************************//
             var HEADER = function(color){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
@@ -4276,7 +4284,7 @@ PUBVIS = function () {
                 return { update_selected_amount: update_selected_amount };               
             }   
 
-        //*****************************CLOUDS******************************// 
+        //****************************CLOUDS******************************// 
 
             //@params.type = "keywords" or "authors" (only this two types are allowed!)
             var CLOUD = function ( params ) {
@@ -4890,6 +4898,18 @@ PUBVIS = function () {
 
                 }
             }
+
+        //****************************FOOTER*******************************//
+            
+            var FOOTER = function(){
+                
+                //append a div with text
+                $('#pubvis_container').append( "<div id='footer'> PubViz is an Open Source Project and can be downloaded from <a href='https://github.com/aha01/PubViz/' target='_blank'>GitHub</a>. More information about the tool and its installation can be found on the <a href='http://pubviz.fhstp.ac.at/#download/' target='_blank'>PubViz website.</a></div>" );
+                
+                //set the same margin-left as the svg do
+                offset = $( "#pubVis" ).offset();
+                $( "#footer" ).css("margin-left", offset.left);
+            }          
        
         //*****************************MAIN**************************//
         
@@ -4913,7 +4933,7 @@ PUBVIS = function () {
                 $( ".target" ).show();
             });
 
-        //*****************************ACTION**************************//
+        //****************************ACTION**************************//
 
             $( "svg" ).click(function(event) {
 
