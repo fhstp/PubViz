@@ -122,7 +122,7 @@ body{
 #sortdiv{
 	margin: 0;
 	width: calc(15% - 60px);
-	height: 100%;
+	/*height: 100%;*/
 	padding: 30px;
 	position: relative;
 	float: left;
@@ -268,6 +268,23 @@ a{
 	font-weight: 300;
 	margin: auto;
 
+}
+
+#footer {
+	margin: 0%;
+	float: left;
+	padding: 15px;
+	color: #898989;
+}
+
+#footer a:link { 
+	text-decoration:underline;  
+	 
+}
+
+#footer a:hover {
+	text-decoration:underline;
+	color: #333333; 
 }
 
 @media screen and (max-width: 875px) {
