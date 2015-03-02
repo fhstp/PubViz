@@ -271,10 +271,12 @@ a{
 }
 
 #footer {
-	margin: 0%;
+	width: 100%;
+    text-align: center;
 	float: left;
 	padding: 15px;
 	color: #898989;
+	font-size: 0.9em;
 }
 
 #footer a:link { 
