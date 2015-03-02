@@ -2809,7 +2809,7 @@ PUBVIS = function () {
                                     .attr("xlink:href", home_link)
                                     .attr("target", "_blank")
                                     .append( "text" )
-                                    .text( "About PubVIZ" )
+                                    .text( "About PubViz" )
                                     .attr({
                                             x: logo_div_width - 20, 
                                             y: 20, 
@@ -2819,7 +2819,7 @@ PUBVIS = function () {
                                             "font-weight": "lighter"
 
                                     })
-                                    .style("font-size", "11px")
+                                    .style("font-size", "0.9em")
                                     .on( "mouseover", function() {
                                         d3.select(this).style("cursor", "pointer");
                                         d3.select("#txt_about").style("text-decoration", "underline");
@@ -2950,7 +2950,7 @@ PUBVIS = function () {
 
 
                 btn_text = btn_clearAll.append( "text" )
-                                    .text( "ClearAll" )
+                                    .text( "Clear All" )
                                     .attr({
                                             x: 20, 
                                             y: 20, 
@@ -4906,9 +4906,9 @@ PUBVIS = function () {
                 //append a div with text
                 $('#pubvis_container').append( "<div id='footer'> PubViz is an Open Source Project and can be downloaded from <a href='https://github.com/aha01/PubViz/' target='_blank'>GitHub</a>. More information about the tool and its installation can be found on the <a href='http://pubviz.fhstp.ac.at/#download/' target='_blank'>PubViz website.</a></div>" );
                 
-                //set the same margin-left as the svg do
-                offset = $( "#pubVis" ).offset();
-                $( "#footer" ).css("margin-left", offset.left);
+                //set the same margin-left as the svg do - comment in if footer is left-aligned, comment out is footer is centered
+                //offset = $( "#pubVis" ).offset();
+                //$( "#footer" ).css("margin-left", offset.left);
             }          
        
         //*****************************MAIN**************************//
