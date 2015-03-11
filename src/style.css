@@ -3,6 +3,7 @@
 	font-size: 12px;
 }
 
+
 /* -- RESET --*/
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -73,8 +74,8 @@ body{
 }
 .accordion .headl {
 	width:100%;
-  color:#000;
-  border-left: 3px solid #fff;
+	color:#000;
+	border-left: 3px solid #fff;
 }
 .accordion .headl:hover {
   background-color: #eeeeee;
@@ -85,12 +86,12 @@ body{
 .accordion .headl.current {
   background-color: #eeeeee;
   color:#000;
-  border-left: 3px solid #ffc200;
+  /*border-left: 3px solid #ffc200;*/
 }
 .accordion div.pane {
   padding:5px 10px;
   background-color:#eeeeee;
-  border-left: 3px solid #ffc200;
+  /*border-left: 3px solid #ffc200;*/
   color:#141414;
   padding-left:40px;
   width:100%;
@@ -121,11 +122,12 @@ body{
 #sortdiv{
 	margin: 0;
 	width: calc(15% - 60px);
-	height: 100%;
+	/*height: 100%;*/
 	padding: 30px;
 	position: relative;
 	float: left;
 }
+
 
 #year{
 	margin-left: auto;
@@ -137,7 +139,6 @@ body{
 	padding-left: 10px;
 	border: none;
 	border-right: 5px solid #d9d9d9;
-	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
 	
@@ -153,7 +154,6 @@ body{
 	padding-left: 10px;
 	border: none;
 	border-right: 5px solid #d9d9d9;
-	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
 	
@@ -168,7 +168,7 @@ body{
 	padding-right: 10px;
 	padding-left: 10px;
 	border: none;
-	border-right: 5px solid #ffc200;
+	/*border-right: 5px solid #ffc200;*/
 	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
@@ -183,7 +183,7 @@ body{
 	padding-right: 10px;
 	padding-left: 10px;
 	border: none;
-	border-right: 5px solid #ffc200;
+	/*border-right: 5px solid #ffc200;*/
 	background-color: #333333;
 	color: white;
 	margin-bottom: 2px;
@@ -269,6 +269,94 @@ a{
 	margin: auto;
 
 }
+
+#warning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    height: 500%;
+    background-color: rgba(192, 192, 192, 0.9);
+    text-align: center;
+	font-size: 1.2em;
+	font-weight: 300;
+	line-height: 1.2em;
+	box-sizing: border-box;
+	padding-top: 3%;
+	padding-left: 20%;
+	padding-right: 20%;
+}
+
+#footer {
+	width: 100%;
+    text-align: center;
+	float: left;
+	padding: 15px;
+	color: #898989;
+	font-size: 0.9em;
+}
+
+#footer a:link { 
+	text-decoration:underline;  
+	 
+}
+
+#footer a:hover {
+	text-decoration:underline;
+	color: #333333; 
+}
+
+
+
+@media screen and (max-width: 875px) {
+    
+    html, body{
+		width:100%;
+		overflow-x:hidden;
+	}
+
+
+    #sortdiv{
+		margin: 0;
+		width: 100%;
+		height: 30px;
+		padding: 30px;
+		position: relative;
+		float: left;
+	}
+
+	#s_acc{
+		width: 100%;
+		height: 80%;
+		vertical-align:middle;
+		top:0%;
+		position: relative;
+		float: left;
+		border-left: 1px solid #d9d9d9;
+		overflow-y: auto;
+	}
+
+	.arrow{
+		position: relative;
+		float:left;
+		width: auto;
+	}
+
+	.accordion {
+
+		height: 100%;
+		overflow-x: hidden;
+		padding-left: 5%;
+	}
+
+	.accordion .headl {
+		width:100%;
+		color:#000;
+		border-left: 3px solid #fff;
+	}
+}
+
 
 
 

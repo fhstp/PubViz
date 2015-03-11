@@ -1,7 +1,18 @@
 <html>
+	<!--[if lte IE 9]>
+		<div id="warning">
+			<h1>Your Browser Is Not Supported!</br></br>
+			<p>Please upgrade to <a href='http://getfirefox.com'>FireFox</a>, <a href='http://www.opera.com/download/'>Opera</a>, <a href='http://www.apple.com/safari/'>Safari</a> or <a href='http://www.microsoft.com/windows/downloads/ie/getitnow.mspx'>Internet Explorer 10 or higher</a>. </br></br> Thank You!</br></br><a href="#" onClick="document.getElementById('warning').style.display = 'none';"><b>Close Window</b></a></p></h1>
+		</div>
+	<![endif]-->
+
 	<head>
 
 		<meta charset="utf-8">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- sets the browsers viewport to the device width-->
+
+		<title>PubViz</title> <!--set title name-->
 
 		<link rel="stylesheet" href="src/style.css" /> <!--embeds the style of the pubViz visualization-->
 
@@ -26,8 +37,9 @@
 		    $(document).ready(function() {
 		        PUBVIS.make_it_all ({
 		            target : "#pubvis_container", //the node the pubViz visualization will be appended
-		            filename : "file.bib", //the bibTeX filename used for the pubViz visualization
-		            color: "#ffc200" //color name or hex value which will be used for highlighting
+		            filename : "data/file.bib", //the bibTeX filename used for the pubViz visualization
+		            color: "#ffc200", //color name or hex value which will be used for highlighting
+		            decoraton_color: "#285b85" //optional parameter, default is hex value #333333
 		        });
 		    });
 		</script>

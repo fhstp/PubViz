@@ -4,6 +4,8 @@ PUBVIS = function () {
         target = params.target;
         selection_color = params.color;
 
+        decoraton_color = params.decoraton_color;
+
         //inform the user about loading
         $( target ).append( "<div id='loading'> LOADING... </div>" );
 
@@ -56,32 +58,7 @@ PUBVIS = function () {
 
         };        
 
-        //fetch all authors and remove all comma and replace 'and' with a comma
-        //needed format to show the authors in the list
-        for ( var i = 0; i < bigJson.length; i++ ){
-
-            if ( bigJson[i].entryTags.author !== undefined ) { 
-
-                str = bigJson[i].entryTags.author;
-                //console.log( "str: " + str );
-
-                //all_authors_str = all_authors.toString();
-                str = str.replace (/,/g, "");
-
-                //split string at every 'and'
-                str = str.replace (/ and /g, ", ");
-
-                bigJson[i].list_authors = str;
-                //console.dir( all_authors_split );
-
-            }
-
-        }
-
-        //console.log ( "bigJson[0].list_authors: "  + bigJson[0].list_authors);
-
         //console.dir( bigJson );
-        //console.log("ende Bib2Json");
         return { json: bigJson,
                  errors: errors }; 
     }
@@ -116,8 +93,8 @@ PUBVIS = function () {
         var space_between_view = 30;
         var svg;
         var highligth_color = selection_color;
-        var years_available, types_available, keywords_available, authors_available;
-
+        var years_available, types_available, keywords_available, authors_available; //boolean that indicates if this data exists in the bibTeX.file
+        var max_number_of_bars = 30;//for desktop. will be adapted in the calculate_width function if the device width is less than 980
 
         //*************************HELPER FUNCTIONS***********************//
             
@@ -139,6 +116,7 @@ PUBVIS = function () {
             //claculates the width and the space left for the maring
             //which will be used in the setup_layout() for the svg and 
             //in the LIST() for the margin of the list
+            //change the number of bars in the timeline accoording to the device width 
             var calculate_width = function(){
                 //console.log( "calculate aufgerufen" );
                 var max_width = 1024;
@@ -154,9 +132,20 @@ PUBVIS = function () {
                     space_left = 0;
                 }
 
+                //according to the width of the screen change the maxinum number of bars for the timeline
+                //tablett
+                if (window_width <= 980 && window_width >= 760 ) {
+                    max_number_of_bars = 15;
+                    space_left = 0;
+                //smartphone
+                }else if (window_width < 760) {
+                    max_number_of_bars = 5;
+                    space_left = 0;
+                }
+
                 //console.log( "space_left: " + space_left );
                 //console.log( "document width: " + $( document ).width() );
-                //console.log( "window_width: " + $( window ).width() );
+                //console.log( "window_width: " + window_width );
             }
 
             //builds the necessary svg and svg-groups
@@ -181,10 +170,10 @@ PUBVIS = function () {
                 //var button_height = 30; //clearAll button
 
                 //calculation of the position for the views
-                //var clarAll_yPos = header_height; //svg_margin_top + header_height;
                 var overview_yPos = header_height + space_between_view;
                 var clouds_yPos = overview_yPos + overview_height + space_between_view;
                 var svg_height = svg_margin_top +  header_height + overview_height + clouds_height + (space_between_view * 3);
+                //console.log( "svg_height: " + svg_height );
 
                 //create the svg:
                 svg = d3.select( "#pubvis_container" )
@@ -345,8 +334,6 @@ PUBVIS = function () {
                 d3.select( id ).attr('opacity', '1');
             }
 
-            
-
             //set the display of the element with the given id to the given bool
             //true = element will be shown
             //false = element will be hidden
@@ -373,10 +360,12 @@ PUBVIS = function () {
             //call all views to display them
             var display_all_views = function(){
                 //console.log( " display views" );
+
+                prepare_authors();
                 
                 //***display header
-                show_header = HEADER();
-                show_btn_clearAll = CLEAR_ALL();
+                show_header = HEADER( decoraton_color );
+                show_btn_clearAll = CLEAR_ALL( decoraton_color );
 
                 //fetch years from json 
                 dataset_years = get_years( {json: json} ).time_list;
@@ -392,7 +381,7 @@ PUBVIS = function () {
                         data_amount_all: dataset_amount, 
                         color_bar: "#D9D9D9", 
                         color_text: "#f5f5f5", 
-                        color_background_div: "#333333", 
+                        color_background_div: decoraton_color, 
                         view_height: 157.5, 
                         margin: {top: 35, right: 25, bottom: 22.5, left: 25}, 
                         //view_width: 1024,
@@ -435,7 +424,7 @@ PUBVIS = function () {
                 //***display total number of entries and number of selected entries
                 show_amount = AMOUNT ({ margin: {top: 157, right: 200, bottom: 0, left: 25}, 
                                            color_text: "#333333",
-                                           text_size: "70px",
+                                           //text_size: "70px",
                                            total: json.length,
                                            selected: "0",
                                            width: width/2
@@ -446,6 +435,8 @@ PUBVIS = function () {
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
                     keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
+                    //console.log( "keywords" );
+                    //console.dir(keywords);
                     wordCloud = CLOUD({ type:"keywords", 
                                         words: keywords, 
                                         xPos: (width/2 + 15), 
@@ -462,14 +453,25 @@ PUBVIS = function () {
             
                 //fetch the authors 
                 authors = get_authors( json ).authors;
+                //console.log( "authors" );
+                //console.dir( authors );
+
+                
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
+
+                    authors = limit_words({ words: authors, optimum_size: 80, min: 1 });
+                    //console.log( "authors.length after limit function: "+ authors.length );
+
                     wordCloud = CLOUD({ type:"authors", 
                                         words: authors, 
                                         xPos: 0, 
                                         yPos: 0,
                                         size: [ (width/2 - 15), 340 ] });
+
+                    
+                    
                     authors_available = true;
                 } else {
                     //console.log( "there are no authors in the bibfile!");
@@ -479,7 +481,9 @@ PUBVIS = function () {
                 //console.log( "authors: " +  authors_available );
 
                 //***display list
-                list = LIST({ data:json, update:false });
+                list = LIST({ data:json, update:false, button_color:decoraton_color });
+
+                FOOTER();
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -970,10 +974,10 @@ PUBVIS = function () {
                     && ( selected_items.keywords.length === 0 )
                     && ( selected_items.authors.length === 0 ) ){ 
 
-                    list = LIST({ data: json, update:true });
+                    list = LIST({ data: json, update:true, button_color:decoraton_color });
                 } else {
 
-                    list = LIST({ data:dataset, update:true });
+                    list = LIST({ data:dataset, update:true, button_color:decoraton_color });
                 }
 
                 if ( keywords_available ){ 
@@ -1455,7 +1459,9 @@ PUBVIS = function () {
                 var filter_criteria = params.filter_criteria;
                 var shorter_list, longer_list;
                 var str = "", n;
-                var word_id, searched_word;
+                var word_id; 
+                var searched_word;
+                var pattern;
 
                 for ( var i = 0; i < json.length; i++ ){
                     
@@ -1537,7 +1543,9 @@ PUBVIS = function () {
                         for ( var m = 0; m < filter_criteria.authors.length; m++ ){
 
                             searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[m] });
-                           
+                
+                            //console.log( "searched_word: " + searched_word );
+
                             if (   json[i].entryTags.author !== undefined 
                                 && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
 
@@ -1549,9 +1557,12 @@ PUBVIS = function () {
                                 
                                 //start every word with upper case
                                 str = to_title_case( str );
-
+                                //console.log( "str: " + str );
+                                
                                 //lookup if filtered word match in the keywords of this entry
-                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
+                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                //console.log( "pattern: " + pattern );
 
                                 if ( n !== (-1) ) {
                                     //if match was found check if it already excists in the result list.
@@ -1718,8 +1729,9 @@ PUBVIS = function () {
                                             str = to_title_case( str );
 
                                             //lookup if filtered word match in the keywords of this entry
-                                            n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                                        
+                                            pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                            n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                             if ( n !== (-1) ) {
                                     
                                                 //if match was found check if the result list has already entries
@@ -1773,8 +1785,9 @@ PUBVIS = function () {
                                     str = to_title_case( str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index                               
-
+                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                     if ( n !== (-1) ) {
                                     
                                         //if match was found check if the result list has already entries
@@ -1884,8 +1897,9 @@ PUBVIS = function () {
                                     //console.log( "str: " + str );
 
                                     //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                          
+                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                     if ( n !== (-1) ) {
                             
                                         //if match was found check if the result list has already entries
@@ -1988,8 +2002,9 @@ PUBVIS = function () {
                                         str = to_title_case( str );
 
                                         //lookup if filtered word match in the keywords of this entry
-                                        n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                         if ( n !== (-1) ) {
                                             //if match was found add this entry
                                             result.push(json[i]);
@@ -2033,8 +2048,9 @@ PUBVIS = function () {
                                         str = to_title_case( str );
 
                                         //lookup if filtered word match in the keywords of this entry
-                                        n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                         //check if keyword was found
                                         if ( n !== (-1) ) {
 
@@ -2121,8 +2137,9 @@ PUBVIS = function () {
                                                     str = to_title_case( str );
 
                                                     //lookup if filtered word match in the keywords of this entry
-                                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
+                                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                                     if ( n !== (-1) ) {
                                                         //if match was found add this entry
                                                         result.push(json[i]);
@@ -2184,8 +2201,9 @@ PUBVIS = function () {
                                                 str = to_title_case( str );
 
                                                 //lookup if filtered word match in the keywords of this entry
-                                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                                              
+                                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                
                                                 if ( n !== (-1) ) {
                                                     
                                                     //if match was found check if it already excists in the result list.
@@ -2333,7 +2351,7 @@ PUBVIS = function () {
                 var absolut_max = 40;
                 var optimum_size;
                 var new_length;
-                var number_to_remove;
+                //var number_to_remove;
 
                 //sort the array descend according to the size of the elements
                 words.sort( function ( a, b ) {
@@ -2368,13 +2386,14 @@ PUBVIS = function () {
 
                                             //console.log( "size of element smaller, new length: " + i );
                                             new_length = i;
+                                            words.length = new_length+1;
                                             break;
                                         } 
                                     } 
                                 }    
                             } else { 
-                                number_to_remove = words.length - new_length ;
-                                words.splice( (new_length), number_to_remove);
+                                //change the length of the words object to the new length
+                                words.length = new_length+1;
                                 break;
                             }
                         }
@@ -2496,7 +2515,183 @@ PUBVIS = function () {
                 return{ authors: final_result };
             }
 
-        //*************************TEST DATA******************************//
+            var prepare_authors = function () {
+                var names = [];
+                var authors_nodes = [];
+                var index_number = 0;
+                var first_name = "";
+                var laste_name = "";
+                var match = false;
+                var existing_index_nb;
+                var authors_edges = [];
+                var link_node_data = { nodes: [], edges: [] };
+
+                var update_authors_edges = function( params ){
+                    //console.log( 'update_authors_edges' );
+                    var source = params.source;
+                    var target = params.target;
+                    var filtered = [];
+                    //var link_node_data = { nodes: [], edges: [] };
+
+
+                    filtered = authors_edges.filter( function( x ){
+
+                        if ((x.source === source) && (x.target === target)) {
+                            //console.log( "match: " + source + " " + target + " " + x.weight );
+                            x.weight += 1;
+                            //console.log( "changes: " + source + " " + target + " " + x.weight );
+                            return true;                
+                        }
+
+                        return false;
+                    })
+                    //if no doubles are found filtered list is falsi
+                    if ( !filtered.length ){ //falsi
+                        authors_edges.push({ source:source, target:target, weight:1 }); 
+                        //console.log( "not contained: " + source + " " + target );
+                    } else { //filtered list contains the doubles
+                        //console.log( "contained! " + filtered.length );
+                    }
+                }
+
+                
+                var find_authors_edges = function( params ) {
+                    var list = params.list;
+                    //console.log( 'find_authors_edges' );
+                    var source, target;
+
+                    for ( var i = 0; i < list.length; i++ ) {
+                        for ( var y = (i+1); y < list.length; y++ ){
+
+                            //console.log( "source: " + list[i].index + " target: " + list[y].index );
+                            source = list[i].index;
+                            target = list[y].index;
+                            //authors_edges.push({ source:source, target:target }); 
+                            update_authors_edges({
+                                source:Math.min(source,target),
+                                target:Math.max(source, target)
+                            });
+
+                        }
+
+                    }
+                }
+
+                //fetch all authors and remove all comma and replace 'and' with a comma for the list view
+                //fetch all authors find out first and last name. Attache them as own element to the bigJson
+                for ( var i = 0; i < json.length; i++ ) {
+                    
+                    if ( json[i].entryTags.author !== undefined ){
+
+                        
+                        //***prepare a string to add an element to the json to display all authors in the list
+                        str = json[i].entryTags.author;
+
+                        //all_authors_str = all_authors.toString();
+                        str = str.replace (/,/g, "");
+
+                        //split string at every 'and'
+                        str = str.replace (/ and /g, ", ");
+
+                        json[i].list_authors = str;
+
+
+
+                        //***prepare an array to be attached to the json with the first and last name of the authors
+                        //split string at every whitspace
+                        authors = json[i].entryTags.author.split( " and " );
+
+                        authors_str = authors.toString();
+                        //console.log("authors_str: " + authors_str);
+
+                        //split at comma only if there is no whitespace before or after the comma
+                        authors = authors_str.split( /,(?!\s)/ );
+                        //console.log( "authors splitted: " );
+                        //console.dir( authors );
+                        
+                        if ( authors.length !== undefined ) { 
+                            //iterate the authors of an entry
+                            //according to the position of the comma, find first name, last name and 
+                            //then create an index
+                            for ( var y = 0; y < authors.length; y++ ){ 
+                                
+                                str = authors[y];
+                                n = str.search( "," ); //n = -1 if there is no comma
+
+                                if ( n === (-1) ) { //no comma found
+
+                                    first_name = $.trim( str.substr( 0, str.indexOf(' ') ) );
+                                    last_name = $.trim(str.substr( str.indexOf(' ') ) );
+
+                                } else { //comma found
+
+                                    last_name = $.trim(str.substr( 0, str.indexOf(',') ) );
+                                    first_name = str.substr( str.indexOf(',') );
+                                    first_name = first_name.replace (/,/g, "");
+                                    first_name = $.trim( first_name );
+
+                                }
+
+                                //look up the previous entries if this author has already an index number 
+                                for ( var x = 0; x < i; x++ ){
+
+                                    if ( json[x].authors !== undefined ) { 
+
+                                        //look up the list of authors in an entry
+                                        for ( var z = 0; z < json[x].authors.length; z++ ) {
+
+                                            //if the author has alredy got an index take the existing one
+                                            if (   json[x].authors[z].name === last_name
+                                                && json[x].authors[z].first_name === first_name  ){
+                                                
+                                                match = true;
+                                                existing_index_nb = json[x].authors[z].index;
+                                                break;
+
+                                            }                                         
+                                        }
+
+                                    } 
+
+                                    if ( match ){
+                                        break;
+                                    }
+                                }
+                                //if the author has not be found prepare a new index and save the name and the index
+                                if ( match === false ){
+
+                                    names.push( {name: last_name, first_name: first_name, index: index_number} );
+                                    index_number++;
+                                    authors_nodes.push({ name: last_name });
+                                } else {
+                                    //if the autor was found save the name, the existing index and increase & save the weight
+                                    //console.log( "match true for: " + first_name + " " + last_name);
+                                    names.push( {name: last_name, first_name: first_name, index: existing_index_nb} );
+
+                                }
+                                match = false;   
+                            }//end for y
+
+                            //add the list with names and index to the entry
+                            json[i].authors = names;
+                            find_authors_edges({ list:names });
+                            
+                            authors = [];
+                            names = [];
+
+                        } // if
+                        
+                    } //if
+                } //for i
+
+                
+                link_node_data = { nodes: authors_nodes, edges: authors_edges };
+                //console.dir( link_node_data );
+                //var string = JSON.stringify(link_node_data);
+                //console.log( string );
+            }
+
+        //***************************TEST DATA******************************//
             //generates an array with testdata, returns a list with all years counted 
             //from startYear and a list in the same length with randmom amount
             //@params.startYear = number (e.g. 1980)
@@ -2530,11 +2725,14 @@ PUBVIS = function () {
             //var testdata = generate_testData( 2008 );
             //dataset_types = testdata.amount;
 
-        //***************************HEADER******************************//
-            var HEADER = function(){
+        //****************************HEADER******************************//
+            var HEADER = function(color){
                 var point_1 = "", point_2 = "", point_3 = "";
                 var logo_div_width = (width - button_width - 11);
                 var home_link = "http://pubviz.fhstp.ac.at/";
+
+                //if no color is defined, take a default
+                var background_color = (color === undefined || color === "" ) ? "#333333" : color;
 
                 var logo = d3.select( "#header" )
                                 .append("g")
@@ -2547,7 +2745,7 @@ PUBVIS = function () {
                                             y: 0, 
                                             width: logo_div_width,//(width - button_width - 11),//509,
                                             height: 30,
-                                            fill: "#333333",
+                                            fill: background_color,
                                             id: "div_logo"
                                     })
 
@@ -2565,9 +2763,6 @@ PUBVIS = function () {
                                     .attr({
                                             x: 35, 
                                             y: 23, 
-                                            width: 509,
-                                            height: 30,
-                                            fill: "#333333",
                                             id: "text_bold",
                                             fill: "#f5f5f5",
                                             "text-anchor": "start",
@@ -2585,9 +2780,6 @@ PUBVIS = function () {
                                     .attr({
                                             x: 81, 
                                             y: 23, 
-                                            width: 509,
-                                            height: 30,
-                                            fill: "#333333",
                                             id: "text_regular",
                                             fill: "#f5f5f5",
                                             "text-anchor": "start",
@@ -2617,7 +2809,7 @@ PUBVIS = function () {
                                     .attr("xlink:href", home_link)
                                     .attr("target", "_blank")
                                     .append( "text" )
-                                    .text( "About PubVIZ" )
+                                    .text( "About PubViz" )
                                     .attr({
                                             x: logo_div_width - 20, 
                                             y: 20, 
@@ -2627,7 +2819,7 @@ PUBVIS = function () {
                                             "font-weight": "lighter"
 
                                     })
-                                    .style("font-size", "11px")
+                                    .style("font-size", "0.9em")
                                     .on( "mouseover", function() {
                                         d3.select(this).style("cursor", "pointer");
                                         d3.select("#txt_about").style("text-decoration", "underline");
@@ -2698,10 +2890,13 @@ PUBVIS = function () {
 
         //***************************CLEAR ALL******************************//
 
-            var CLEAR_ALL = function(){
+            var CLEAR_ALL = function( color ){
                 var btn_clearAll;
                 var clearAll;
                 var btn_text
+
+                //if no color is defined, take a default
+                var background_color = (color === undefined || color === "" ) ? "#333333" : color;
 
                 btn_clearAll = d3.select( "#clearAll" )
                                 .append("g")
@@ -2721,7 +2916,7 @@ PUBVIS = function () {
                                         d3.select(this).style("cursor", "pointer");
 
                                 }).on("mouseout", function() {
-                                        d3.select("#btn_clearAll_line").attr( "stroke", "#333333" );
+                                        d3.select("#btn_clearAll_line").attr( "stroke", "#eeeeee" );
 
                                 }).on("mousedown", function() {
                                         d3.select("#txt_clearAll").attr( "fill", selection_color );
@@ -2737,7 +2932,7 @@ PUBVIS = function () {
                                             y: 0, 
                                             width: button_width,
                                             height: button_height,
-                                            fill: "#333333",
+                                            fill: background_color,
                                             id: "clearAll_div"
                                     });
 
@@ -2749,13 +2944,13 @@ PUBVIS = function () {
                                         y2: button_height,
                                         id: "btn_clearAll_line",
                                         "shape-rendering": "crispEdges",
-                                        "stroke": "#333333",
+                                        "stroke": "#eeeeee",
                                         "stroke-width": "5"
                                     });
 
 
                 btn_text = btn_clearAll.append( "text" )
-                                    .text( "ClearAll" )
+                                    .text( "Clear All" )
                                     .attr({
                                             x: 20, 
                                             y: 20, 
@@ -2838,6 +3033,8 @@ PUBVIS = function () {
                 return { create_bar_chart: create_bar_chart };
             }();
 
+            
+
             var BAR_YEARS = function () {
                 //console.log( "bar_years start" );
                 //@param.data_year = Array 
@@ -2868,8 +3065,8 @@ PUBVIS = function () {
                     var count_clicks = 0;             
                     
                     var label_space = 19;
-                    var max_number_of_bars = 30;
-                    var steps = 5;
+                    //var max_number_of_bars = 30;
+                    var steps = 5; //number of years that will be shifted if a button was pushed in the timeline
                     var overlap = 0.5 //percent how much the background div should extend the lable-width
                     var tooltip_subset_height;
                     var hoovered_year;
@@ -2877,10 +3074,13 @@ PUBVIS = function () {
 
                     //check if number of years contained in the data, extend the number of planed bars that will be shown
                     if ( data_years_all.length > max_number_of_bars ) { 
-                        
+                        //console.log( "max_number_of_bars: " + max_number_of_bars );
+                        //console.log( "data_years_all.length: " + data_years_all.length );
+
                         overlap = 0.2;  
                         //claculate the number of needed periods that have to be slidable
-                        number_of_periods = Math.floor( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
+                        number_of_periods = Math.ceil( ( (data_years_all.length - 1) - max_number_of_bars ) / steps ); 
+                        //console.log( "number_of_periods: " + number_of_periods );
 
                         data_amount = set_data_period( data_amount_all, 0, steps, max_number_of_bars, number_of_periods);
                         data_years = set_data_period( data_years_all, 0, steps, max_number_of_bars, number_of_periods);
@@ -2924,17 +3124,85 @@ PUBVIS = function () {
                                         d3.select(this).style("cursor", "pointer");
                                     });
 
-                    btn_group = svg.append( "g" )
+                    /*btn_group = svg.append( "g" )
                                     .attr( "class", "btn_group" ) 
-                                    .attr("transform", "translate(-5," + svgH + ")")
+                                    .attr("transform", "translate(-15," + (svgH-20) + ")")
+                                    //.attr("transform", "translate(-5," + svgH + ")")
                                     .on( "mouseover", function() {
                                         //console.log( "mouseover bar_subset_group" );
                                         d3.select(this).style("cursor", "pointer");
-                                    });
+                                    });*/
 
                     var label_height = get_width_of_text_element({ svg: svg, group: label_group, data: dataset_years }).height;
 
                     new_bar_years.get_current_displayed_years = function() { return data_years };
+
+                    //according to the number of clicks the right time period will be shwon
+                    //if the left button will be pushed the count clicks will be increased. 
+                    //if the right button will be pushed the count clicks will be reduced.
+                    //if count clicks is 0 the current period will be shown in the timeline
+                    //@parmas.direction = String "left" or "right" to indicate which button was pushed
+                    var button_clicked = function ( params ) { 
+                        //console.log( "button_clicked aufgerufen" );
+                        var direction = params.direction;
+                        //console.log( "direction: " + direction );
+                        //console.log( "number_of_periods: " + number_of_periods );
+                        //console.dir( current_timeline );
+                            
+                            //according to which button was pushed, increas or reduce the number of clicks
+                            //if the current period or the oldest period was reached hide the according button 
+                            if ( direction === "left") { 
+
+                                if ( count_clicks < number_of_periods ) { 
+                                    //increase the number of clicks as we erase from the current period (current period will be 0)
+                                    count_clicks++;
+                                    //show the right button to enable the user to navigate to a more actual period of time
+                                    d3.select( ".btn_right" ).attr('opacity', '1');
+
+                                    //hide the left button if we reach the last period
+                                    if ( count_clicks === number_of_periods ){
+                                        d3.select( ".btn_left" ).attr('opacity', '0');
+
+                                    }
+                                }
+                            }
+
+                            if ( direction === "right" ) {
+
+                                if ( count_clicks !== 0 ) {
+                                    //reduce the number of clicks as we converge the current period (current period will be 0)
+                                    count_clicks--;
+                                    //show the right button to enable the user to navigate to a more actual period of time
+                                    d3.select( ".btn_left" ).attr('opacity', '1');
+
+                                    //hide the right button if we reach the actual period
+                                    if ( count_clicks === 0 ){
+
+                                        d3.select( ".btn_right" ).attr('opacity', '0');
+                                    }
+                                } 
+                            }
+
+                            //console.log( "number of periods: " + number_of_periods );
+                            //console.log( "count_clicks: " + count_clicks );
+
+                            //change the data period in the timeline
+                            //0 clicks show the current period of time. the higher the clicks the farther away the current period of time
+                            data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars, number_of_periods);
+                            data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods);
+
+                            update_bars( data_amount, data_years );
+                            update_background_divs( data_years );
+                            update_labels( data_years );
+                            
+                            update_tooltip({ data_amount: data_amount, data_years: data_years });
+
+                            timeline_changed = true;
+                            current_timeline = data_years;
+
+                            remove_highlight_selection_items_years();
+                            highlight_selection_items;                             
+                    }
 
                     var create_bars = function () { 
                             //console.log( "create_bars start" );  
@@ -3130,6 +3398,7 @@ PUBVIS = function () {
 
                                         hoovered_year = data_years[ i ].toString();
                                         tooltip_change_visibility( hoovered_year, true );
+
 
                                     })
                                     .on("mouseout", function( d, i ) {
@@ -3430,27 +3699,55 @@ PUBVIS = function () {
                         var btn_left, btn_right, btn_group, buttons_text = [], background_div, buttons, buttons_width, buttons_height;
 
                         buttons_text = ["<", ">"];
+                        
 
                         btn_group = svg.append( "g" )
-                                        .attr("transform", "translate(-5," + (svgH-19) + ")");
-               
-                        
-                        buttons_width = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).width;
+                                        //.attr("transform", "translate(-5," + (svgH-19) + ")");
+                                        .attr( "class", "btn_group" )
+                                        .attr( "opacity", "1" )
+                                        .attr("transform", "translate(-15," + (svgH-20) + ")")
+                                        .on( "mouseover", function() {
+                                            d3.select(this).style("cursor", "pointer");
+                                        })
+
+                                        //.attr("transform", "translate(-" + buttons_width + "," + (svgH-19) + ")");
+                    
+                        //buttons_width = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).width;
                         buttons_height = get_width_of_text_element({ svg: svg, group: btn_group, data: buttons_text }).height;
 
+                        //console.log( "buttons_width: " + buttons_width );
+                        //console.log( "svgW: " + svgW );
+
+                        
                         background_div = btn_group.selectAll( "rect" )
                                         .data( buttons_text )
                                         .enter()
                                         .append( "rect" )
                                         .text ( function( d ) { return d; } )
                                         .attr({
-                                            x: function( d, i ){ return i * svgW }, //later to include the width of the button image
+                                            x: function( d, i ){ return i * (svgW+10) }, //later to include the width of the button image
                                             y: 0,
                                             id: function( d, i ){ return d },
-                                            width: buttons_width,
-                                            height: label_height ,
+                                            class: function( d, i ){ 
+                                                if ( d === "<" ) { 
+                                                    return "btn_left" 
+                                                } else {
+                                                    return "btn_right"
+                                                }
+                                            },
+                                            width: 20,//buttons_width,
+                                            height: label_height,
                                             fill: color_background_div
                                         })
+                                        .on( "click", function( d, j ) {
+                                            //console.log( "hit background_div: " + d );
+                                            if ( d === "<" ){ 
+                                                button_clicked({ direction: "left" });
+                                            } else {
+                                                button_clicked({ direction: "right" });
+                                            
+                                            }
+                                        });
 
 
                         buttons = btn_group.selectAll( "text" )
@@ -3459,53 +3756,33 @@ PUBVIS = function () {
                                     .append( "text" )
                                     .text ( function( d ) { return d; } )
                                     .attr({
-                                        x: function( d, i ){ return i * svgW }, //later to include the width of the button image
+                                        x: function( d, i ){ return i * (svgW+10) + 7 }, //later to include the width of the button image
                                         y: label_height/1.25,
                                         id: function( d, i ){ return d },
+                                        class: function( d, i ){ 
+                                            if ( d === "<" ) { 
+                                                return "btn_left" 
+                                            } else {
+                                                return "btn_right"
+                                            }
+                                        },
+                                        "text-anchor": "start",
                                         fill: new_bar_years.get_color_text()
                                     })
+                                    .style("font-weight", "600")
                                     .on( "click", function( d, j ) {
-
-                                        //take care that number of clicks do not extend the maximal number of perisods
-                                        if ( (d === ">") 
-                                            && (count_clicks <= number_of_periods) 
-                                            && (count_clicks > 0 ) ) {
-                                                //console.log( "go right" );
-                                                count_clicks--;
-                                                //console.log("count_clicks: " + count_clicks);
-                                        }
-
-                                        if ( (d === ">") 
-                                            && (count_clicks > number_of_periods) 
-                                            && (count_clicks > 0 ) ) {
-
-                                                count_clicks = number_of_periods;
-                                        }
-
-                                        if ( (d === "<")
-                                            && (count_clicks >= 0) 
-                                            && (count_clicks <= number_of_periods) ) {
-
-                                                count_clicks++;
-                                        }
-
-                                        data_years = set_data_period( data_years_all, count_clicks, steps, max_number_of_bars, number_of_periods);
-                                        data_amount = set_data_period( data_amount_all, count_clicks, steps, max_number_of_bars, number_of_periods); 
-
-                                        update_bars( data_amount, data_years );
-                                        update_background_divs( data_years );
-                                        update_labels( data_years );
+                                        //console.log( "hit text: " + d );
+                                        if ( d === "<" ){ 
+                                            button_clicked({ direction: "left" });
+                                        } else {
+                                            button_clicked({ direction: "right" });
                                         
-                                        update_tooltip({ data_amount: data_amount, data_years: data_years });
+                                        }
+                                    });    
 
-                                        timeline_changed = true;
-                                        current_timeline = data_years;
-
-                                        remove_highlight_selection_items_years();
-                                        highlight_selection_items;
-
-                                            
-                                    }); 
+                    //at the beginning show only the left button, cause we will alway start showing the current year
+                    d3.select( ".btn_right" ).attr('opacity', '0');
+                                    
                     };
 
                     new_bar_years.render = function () {
@@ -3517,6 +3794,7 @@ PUBVIS = function () {
                         
                         if ( (data_years_all.length - 1) >= max_number_of_bars + 1 ) {
                             create_buttons();
+                            //d3.select( ".btn_right" ).attr('opacity', '0');
                         }
 
                     }
@@ -3905,11 +4183,39 @@ PUBVIS = function () {
                 var selected_nb = params.selected;
                 var margin = params.margin;
                 var color_text = params.color_text;
-                var text_size = params.text_size;
+                var text_size = "70px";//params.text_size;
                 var width = params.width;
+                //desktop: postion of total amount amount in the center (no selection number is displayed)
+                var xPos_amount = width/2 - margin.left - (space_between_view) - 20; //20 because of the space for the types_labels
+                //desktop: postion of total amoung when selection number is displayed
+                var new_xPos_amount = xPos_amount + 50;
+                //desktop: xPos of the slash
+                var xPos_slash = xPos_amount + 13;
 
-                var xPos = width/2 - margin.left - (space_between_view) - 20; //20 because of the space for the types_labels
-                //console.log( "xPos: " + xPos );
+                //according to the size of the screen the max_number_of_bars will be 30(desktop), 15 (tablett), 10(smartphone) or 5 
+                //tablett
+                if ( max_number_of_bars === 15 ) { 
+                    text_size = "50px";
+                    new_xPos_amount = xPos_amount + 20;
+                    xPos_slash = xPos_amount +3;
+
+                } 
+               /* if ( ( max_number_of_bars === 10 ) ) { //so max_number_of_bars will be 10
+                    text_size = "20px";
+                    new_xPos_amount = xPos_amount + 10;
+                    xPos_slash = xPos_amount +3;
+
+                } */
+                //smartphone
+                if ( ( max_number_of_bars === 5 ) ) { 
+                    text_size = "20px";
+                    xPos_amount = width/2 - margin.left - (space_between_view) - 10; //10 because of the space for the types_labels
+                    new_xPos_amount = xPos_amount + 8;
+                    xPos_slash = xPos_amount +1;
+
+                }
+
+
 
                 var amount = d3.select( "#overview" )
                                 .append("g")
@@ -3920,7 +4226,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( total_nb )
                                     .attr({
-                                            x: xPos,
+                                            x: xPos_amount,
                                             y: 125, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -3933,7 +4239,7 @@ PUBVIS = function () {
                                     //.text ( format_nb_total ) if zeros should be shown when the number has less than three digit
                                     .text ( " / " )
                                     .attr({
-                                            x: (xPos + 13),
+                                            x: xPos_slash,
                                             y: 122, 
                                             fill: color_text,
                                             "text-anchor": "start",
@@ -3947,7 +4253,7 @@ PUBVIS = function () {
                 var selected_amount = amount.append( "text" )
                                     .text ( selected_nb )
                                     .attr({
-                                            x: xPos,
+                                            x: xPos_amount,
                                             y: 125,  
                                             fill: selection_color,//color_text, 
                                             "text-anchor": "end",
@@ -3968,7 +4274,7 @@ PUBVIS = function () {
                         d3.select("#lbl_selected_amount").attr("fill", selection_color);
                     }
                     
-                    d3.select("#lbl_total_amount").attr("x", (xPos + 50));
+                    d3.select("#lbl_total_amount").attr("x", new_xPos_amount);
                     d3.select("#lbl_selected_amount").text(new_selected_nb);
                     d3.select("#lbl_selected_amount").attr("opacity", "1");
                     d3.select("#lbl_slash_amount").attr("opacity", "1");
@@ -3978,7 +4284,7 @@ PUBVIS = function () {
                 return { update_selected_amount: update_selected_amount };               
             }   
 
-        //*****************************CLOUDS******************************// 
+        //****************************CLOUDS******************************// 
 
             //@params.type = "keywords" or "authors" (only this two types are allowed!)
             var CLOUD = function ( params ) {
@@ -4001,7 +4307,7 @@ PUBVIS = function () {
 
                 if ( dataset_words !== 0 ) { 
                     fontSize = d3.scale.log().domain([dataset_words[(dataset_words.length-1)].size ,dataset_words[0].size])
-                                             .range( [15, 50] )
+                                             .range( [15, 40] )
                                              .clamp( true );
                 }
 
@@ -4046,6 +4352,8 @@ PUBVIS = function () {
                         id_name = "keywords";
                         //save the list with all words that are really displayed
                         words_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
+                        //console.log( "words_displayed" );
+                        //console.dir( words_displayed );
 
                     } else if ( type === "authors" ){
 
@@ -4053,7 +4361,19 @@ PUBVIS = function () {
                         id_name = "authors";
                         //save the list with all words that are really displayed
                         authors_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
+                        //console.log( "authors_displayed.length: " + authors_displayed.length );
 
+                        //if there is not enough space for the authors, the limit function will be called to cut of the authors according to their 
+                        //number of publication. Thus an arbitrary disappearance of names can be avoided
+                        if (authors_displayed.length < authors.length) {
+
+                            //console.log( "too less space >> limit authors again from : "+ authors.length + " to: " + authors_displayed.length );
+                            //console.dir( authors );
+                            authors = limit_words({ words: authors, optimum_size: authors_displayed.length, min: 1 });
+                            //console.log( "new length authors: " + authors.length );
+                        }
+
+                        //console.dir( authors_displayed );
                     } else {
                         console.log( "WARNING: type of cloud is not determined! Please add the params.key 'type' with the value-stirng if the cloud is for 'authors' or 'keywords' '" );
                     }
@@ -4163,8 +4483,7 @@ PUBVIS = function () {
                 var data = params.data;
                 var update = params.update;
                 var offset;
-                //var update;
-                //location
+
                 if ( !update ){ 
                     $('#pubvis_container').append("<div id='list'><div id='sortdiv'><button class='btn' id='year'>Year</button><button class='btn' id='type'>Type</button></div><div id='s_acc'><div class='accordion'></div></div></div>");
                     generate(0);
@@ -4173,60 +4492,78 @@ PUBVIS = function () {
                     generate(0);
                 }
 
+                //if no color is defined, take a default
+                var btn_color = (params.button_color === undefined || params.button_color === "") ? "#333333" : params.button_color;
+
+                $( "#year" ).css("background-color", btn_color );
+                $( "#type" ).css("background-color", btn_color );
 
                 //set the same margin-left as the svg do
                 offset = $( "#pubVis" ).offset();
                 $( "#list" ).css("margin-left", offset.left);
+                
 
+                $("#year")
+                    .click(function() {
+                        if(y) {
+                            y = false;
+                            $("#year").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            generate(0);
+                        } else {
+                            y = true;
+                            t = false;
+                            $("#year").css({
+                                "border-right": "5px solid " + selection_color
+                            });
+                            $("#type").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            $(".accordion").css({"margin-top": "-20px"});
+                            generate(1);
+                        }
+                    })
+                    .mouseover(function() {
+                        $( this ).css("border-right", "5px solid " + selection_color );
+                    })
+                    .mouseout(function() {
+                        $( this ).css("border-right", "5px solid #d9d9d9" );
+                    });
 
-                $("#year").click(function() {
-                    if(y) {
-                        y = false;
-                        $("#year").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        generate(0);
-                    } else {
-                        y = true;
-                        t = false;
-                        $("#year").css({
-                            "border-right": "5px solid #ffc200"
-                        });
-                        $("#type").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        $(".accordion").css({"margin-top": "-20px"});
-                        generate(1);
-                    }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
-                });
-                $("#type").click(function() {
-                    if(t) {
-                        t = false;
-                        $("#type").css({
-                            "border-right": "5px solid #d9d9d9"
-                        });
-                        $(".accordion").html('');
-                        generate(0);
-                    } else {
-                        t = true;
-                        y = false;
-                        $("#type").css({
-                            "border-right": "5px solid #ffc200"
-                        });
-                        $("#year").css({
-                            "border-right": "5px solid #d9d9d9"
-                        })
-                        $(".accordion").html('');
-                        $(".accordion").css({"margin-top": "-20px"});
-                        generate(2);
-                    }
-                    //console.log("year = " + y);
-                    //console.log("type = " + t);
-                });
+                $("#type")
+                    .click(function() {
+                        if(t) {
+                            t = false;
+                            $("#type").css({
+                                "border-right": "5px solid #d9d9d9"
+                            });
+                            $(".accordion").html('');
+                            generate(0);
+                        } else {
+                            t = true;
+                            y = false;
+                            $("#type").css({
+                                "border-right": "5px solid " + selection_color
+                            });
+                            $("#year").css({
+                                "border-right": "5px solid #d9d9d9"
+                            })
+                            $(".accordion").html('');
+                            $(".accordion").css({"margin-top": "-20px"});
+                            generate(2);
+                        }
+                    })
+                    .mouseover(function() {
+                        $( this ).css("border-right", "5px solid " + selection_color );
+                    })
+                    .mouseout(function() {
+                        $( this ).css("border-right", "5px solid #d9d9d9" );
+                    });
+
+              
 
                 function generate(sortBy) {
 
@@ -4252,9 +4589,8 @@ PUBVIS = function () {
                         var thesis_type;
                         var details = ""; //all information that will be contained in the folding box
 
-
-                        if(data[j].entryTags['author'] != undefined) {
-                            author = data[j].entryTags['author'];
+                        if(data[j].list_authors != undefined) {
+                            author = data[j].list_authors;
                         } else {
                             author = "<i style='font-style: italic;'>Unknown Author</i>";
                         }
@@ -4552,17 +4888,28 @@ PUBVIS = function () {
                     }
                       //  Accordion Panels
                       $(".accordion .pane").show();
+                      $('.accordion .pane').css("border-left", "3px solid " + selection_color );
                       setTimeout("$('.accordion .pane').slideToggle('slow');", 1);
                       $(".accordion .headl").click(function () {
                         $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
-                        $(this).toggleClass("current");
-                        $(this).siblings(".headl").removeClass("current");
+                        $(this).next(".pane").css("border-left", "3px solid " + selection_color );
                         $(".subpane").css({"display": "block"});
                       });
 
-
                 }
             }
+
+        //****************************FOOTER*******************************//
+            
+            var FOOTER = function(){
+                
+                //append a div with text
+                $('#pubvis_container').append( "<div id='footer'> PubViz is an Open Source Project and can be downloaded from <a href='https://github.com/aha01/PubViz/' target='_blank'>GitHub</a>. More information about the tool and its installation can be found on the <a href='http://pubviz.fhstp.ac.at/#download/' target='_blank'>PubViz website.</a></div>" );
+                
+                //set the same margin-left as the svg do - comment in if footer is left-aligned, comment out is footer is centered
+                //offset = $( "#pubVis" ).offset();
+                //$( "#footer" ).css("margin-left", offset.left);
+            }          
        
         //*****************************MAIN**************************//
         
@@ -4574,6 +4921,7 @@ PUBVIS = function () {
 
             //display the view
             display_all_views();
+            //console.log("document.body.scrollHeight: " + document.body.scrollHeight);
 
            //window.onresize = update_window;
             //console.log( "parseInt(d3.select('#pubVis')...?: " + parseInt(d3.select('#pubVis').attr('width')) );
@@ -4585,7 +4933,7 @@ PUBVIS = function () {
                 $( ".target" ).show();
             });
 
-        //*****************************ACTION**************************//
+        //****************************ACTION**************************//
 
             $( "svg" ).click(function(event) {
 
