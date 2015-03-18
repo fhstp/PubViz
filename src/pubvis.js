@@ -434,7 +434,7 @@ PUBVIS = function () {
 
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
-                    keywords = limit_words({ words: keywords, optimum_size: 40, min: 1 });
+                    keywords = limit_words({ words: keywords, optimum_size: 80, min: 1 });
                     //console.log( "keywords" );
                     //console.dir(keywords);
                     wordCloud = CLOUD({ type:"keywords", 
@@ -484,6 +484,10 @@ PUBVIS = function () {
                 list = LIST({ data:json, update:false, button_color:decoraton_color });
 
                 FOOTER();
+
+                //console.log( "authors.length: " + authors.length );
+                //console.dir( authors );
+                //console.log( "keywords.length: " + keywords.length );
             }
 
             //adds an additional filter cirteria to the selected_items list
@@ -870,7 +874,7 @@ PUBVIS = function () {
 
                 new_id = "";
                 exist_id = "#";
-
+                //console.log( "text: " + text );
 
                 text = text.replace (/ /g, "_");
                 text =text.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the -
@@ -1030,10 +1034,10 @@ PUBVIS = function () {
                 //console.log( "CALL: remove_highlight_selection_items_authors" );
                 var item_value, id_txt_label, id_background_div;
 
-
                 for ( var i = 0; i < authors.length; i++ ){ 
 
                     item_value = authors[i].text;
+                    //console.log( "text: " + item_value );
                     
                     id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
 
@@ -1223,11 +1227,10 @@ PUBVIS = function () {
 
                     item_key = "authors";
 
-
                     for ( var a = 0; a < selected_items.authors.length; a++ ){
 
                         item_value = lookup_wordtext({ array: authors_displayed, word_id: selected_items.authors[a] });
-            
+                       
                         id_txt_label = generate_words_id({ text: item_value, group: "authors", element: "text" }).exist_id;
 
                         id_background_div = generate_words_id({ text: item_value, group: "authors", element: "div" }).exist_id;
@@ -1247,9 +1250,13 @@ PUBVIS = function () {
 
             //search for the text of the given id in the words_displayed object
             var lookup_wordtext = function( params ){
+                //console.log( "CALL: lookup_wordtext" );
                 var text;
                 var word_id = params.word_id;
                 var arr = params.array;
+
+                //console.log( "lookup word_id: " + word_id )
+                //console.dir( arr );
                 
                 for ( var g = 0; g < arr.length; g++ ) {
                     
@@ -2515,6 +2522,9 @@ PUBVIS = function () {
                 return{ authors: final_result };
             }
 
+            //prepare auhtors into the needed format to show them in the list-view
+            //fetch all authors, removes all commas and replace the 'and' with a comma 
+            //append this spelling as new tag called "list_authors" to the json 
             var prepare_authors = function () {
                 var names = [];
                 var authors_nodes = [];
@@ -2596,7 +2606,8 @@ PUBVIS = function () {
                         json[i].list_authors = str;
 
 
-
+                /* PREPAREATION OF DATA ONLY IF A NODE-LINK DIAGRAM WOULD HAVE BEEN USED
+                   A NODE-LINKE DIAGRAM WILL BE RELEASED ONCE A GOOD SOLUTION OF THE HAIRBALL PROBLEM WILL BE FOUND 
                         //***prepare an array to be attached to the json with the first and last name of the authors
                         //split string at every whitspace
                         authors = json[i].entryTags.author.split( " and " );
@@ -2680,6 +2691,7 @@ PUBVIS = function () {
                             names = [];
 
                         } // if
+                */
                         
                     } //if
                 } //for i
@@ -4350,7 +4362,8 @@ PUBVIS = function () {
 
                         //console.log( "type of cloud = keywords" );
                         id_name = "keywords";
-                        //save the list with all words that are really displayed
+                        //save the list with all words that are really displayed 
+                        //(if too much words have been contained in the given words-arr, d3 would reduce them in the  )
                         words_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
                         //console.log( "words_displayed" );
                         //console.dir( words_displayed );
@@ -4366,11 +4379,15 @@ PUBVIS = function () {
                         //if there is not enough space for the authors, the limit function will be called to cut of the authors according to their 
                         //number of publication. Thus an arbitrary disappearance of names can be avoided
                         if (authors_displayed.length < authors.length) {
-
                             //console.log( "too less space >> limit authors again from : "+ authors.length + " to: " + authors_displayed.length );
-                            //console.dir( authors );
+                            
+                            //find new length for authors according to the size of the author which is on the position of the authors_displayed.length
                             authors = limit_words({ words: authors, optimum_size: authors_displayed.length, min: 1 });
-                            //console.log( "new length authors: " + authors.length );
+                            //update authors_displaxed to new length
+                            authors_displayed = save_wordtext_and_wordid({ array: authors, id:id_name });;
+                            //change words.length to the new length 
+                            words.length = authors.length; 
+                            
                         }
 
                         //console.dir( authors_displayed );
@@ -4380,34 +4397,6 @@ PUBVIS = function () {
 
                     if ( !update ){
                         //console.log("its no update");
-                        
-                        selection_div = cloud.selectAll( "rect" )
-                                        .data( words )
-                                        .enter()
-                                        .append( "rect" )
-                                        .text ( function( d ) { return d; } )
-                                        .attr("transform", function(d) {
-                                                    var x,y
-                                                    x = d.x;
-                                                    y = d.y;
-                                                    x = x - (d.width/2);
-                                                    y = y - (d.height/2-6);
-                                                    return "translate(" + [x, y] + ")rotate(" + d.rotate + ")";
-                                            })
-                                        .attr({  
-                                            id: function( d ){ 
-                                                    
-                                                    txt = d.text;
-                                                    id = generate_words_id({ text: txt, group: id_name, element: "div" }).new_id;
-                                                    return id;
-                                                },
-
-                                            width: ( function( d ) { return d.width; } ) ,
-                                            height: ( function( d ) { return d.height/2 + 3; } ) ,
-                                            fill: selection_color,
-                                            opacity: 0
-                                        });
-
                         wordcloud = cloud.selectAll("text")
                                     .data( words )
                                     .enter()
