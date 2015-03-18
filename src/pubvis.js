@@ -25,7 +25,10 @@ PUBVIS = function () {
         
             display_data( result.json, prepare_errors( result.errors ).error_text ) ;
 
-        });    
+        }) .fail(function() {
+               $("#loading").hide();
+               $("body").append( "<div id='error'> Sorry, the BiTex file cannot be found. </br></br>Please check if the the file '" + filename +"' contains a correct URL and/or correct filename.</div>" );
+            });    
     }
 
     //return oneBigJson and errors in an object
