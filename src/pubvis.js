@@ -1413,7 +1413,8 @@ PUBVIS = function () {
                 if ( all_years_distinct === undefined ){ 
                     //get first element (= oldest year) and calculate time span for length of array           
                     all_years_distinct = [];
-                    actual_year = new Date().getFullYear();
+//                    actual_year = new Date().getFullYear();
+                    actual_year = parseInt(all_years_double[all_years_double.length-1], 10);
                     oldest_year = parseInt(all_years_double[0], 10);
                     time_span = actual_year - oldest_year;
 
