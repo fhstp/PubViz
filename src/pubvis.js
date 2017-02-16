@@ -1806,11 +1806,19 @@ PUBVIS = function () {
                                     //start every word with upper case
                                     str = to_title_case( str );
 
+                                    //reverse authors first and last name to find all possible matches
+                                    var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                    //console.log( "reversed: " + reversed_author );
+                                    
                                     //lookup if filtered word match in the keywords of this entry
                                     pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                     n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                    if ( n !== (-1) ) {
+                                    //console.log( "pattern: " + pattern );
+
+                                    var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                    if ( (n !== (-1)) || (rev !== (-1)) ) {
                                     
                                         //if match was found check if the result list has already entries
                                         if ( result.length > 0 ) { 
@@ -1916,13 +1924,19 @@ PUBVIS = function () {
                                     //start every word with upper case
                                     str = to_title_case( str );
 
-                                    //console.log( "str: " + str );
-
+                                    //reverse authors first and last name to find all possible matches
+                                    var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                    //console.log( "reversed: " + reversed_author );
+                                    
                                     //lookup if filtered word match in the keywords of this entry
                                     pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                     n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                    if ( n !== (-1) ) {
+                                    //console.log( "pattern: " + pattern );
+
+                                    var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                    var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                    if ( (n !== (-1)) || (rev !== (-1)) ) {
                             
                                         //if match was found check if the result list has already entries
                                         if ( result.length > 0 ) { 
@@ -2023,11 +2037,19 @@ PUBVIS = function () {
                                         //start every word with upper case
                                         str = to_title_case( str );
 
+                                        //reverse authors first and last name to find all possible matches
+                                        var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                        //console.log( "reversed: " + reversed_author );
+                                        
                                         //lookup if filtered word match in the keywords of this entry
                                         pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                         n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                        if ( n !== (-1) ) {
+                                        //console.log( "pattern: " + pattern );
+
+                                        var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                        var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                        if ( (n !== (-1)) || (rev !== (-1)) ) {
                                             //if match was found add this entry
                                             result.push(json[i]);
                                         } else { 
@@ -2091,10 +2113,19 @@ PUBVIS = function () {
                                                 //start every word with upper case
                                                 str = to_title_case( str );
 
+                                                //reverse authors first and last name to find all possible matches
+                                                var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                                //console.log( "reversed: " + reversed_author );
+                                                
                                                 //lookup if filtered word match in the keywords of this entry
-                                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
+                                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
+                                                //console.log( "pattern: " + pattern );
 
-                                                if ( n !== (-1) ) {
+                                                var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                                if ( (n !== (-1)) || (rev !== (-1)) ) {
                                                     //if match was found add this entry
                                                     result.push(json[i]);
                                                 } else { 
@@ -2158,11 +2189,19 @@ PUBVIS = function () {
                                                     //start every word with upper case
                                                     str = to_title_case( str );
 
+                                                    //reverse authors first and last name to find all possible matches
+                                                    var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                                    //console.log( "reversed: " + reversed_author );
+                                                    
                                                     //lookup if filtered word match in the keywords of this entry
                                                     pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                                     n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                                    if ( n !== (-1) ) {
+                                                    //console.log( "pattern: " + pattern );
+
+                                                    var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                    var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                                    if ( (n !== (-1)) || (rev !== (-1)) ) {
                                                         //if match was found add this entry
                                                         result.push(json[i]);
                                                     } 
@@ -2222,11 +2261,19 @@ PUBVIS = function () {
                                                 //start every word with upper case
                                                 str = to_title_case( str );
 
+                                                //reverse authors first and last name to find all possible matches
+                                                var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                                //console.log( "reversed: " + reversed_author );
+                                                
                                                 //lookup if filtered word match in the keywords of this entry
                                                 pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                                 n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                                if ( n !== (-1) ) {
+                                                //console.log( "pattern: " + pattern );
+
+                                                var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                                var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                                if ( (n !== (-1)) || (rev !== (-1)) ) {
                                                     
                                                     //if match was found check if it already excists in the result list.
                                                     if ( result.length > 0 ) { 
