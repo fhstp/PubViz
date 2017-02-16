@@ -459,8 +459,6 @@ PUBVIS = function () {
                 //console.log( "authors" );
                 //console.dir( authors );
 
-                
-
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
 
@@ -496,7 +494,8 @@ PUBVIS = function () {
             //adds an additional filter cirteria to the selected_items list
             //@params.years = number ( eg 2011 )
             //@params.types = Stirng ( eg "article" )
-            //@params.authors && @params.words planed >> currently not implemented
+            //@params.authors
+            //@params.words 
             add_selected_item = function ( params ) {           
                 //console.log( "call: add_selected_item" );
                 var value = params.value;
@@ -955,6 +954,7 @@ PUBVIS = function () {
             var update_views = function( params ){
                 //console.log( "call: update_views" );
                 var dataset = params.changed_data;
+                //console.dir(dataset);
                 var selected_words, selected_authors;
 
                 //update the years chart
@@ -1413,7 +1413,7 @@ PUBVIS = function () {
                 if ( all_years_distinct === undefined ){ 
                     //get first element (= oldest year) and calculate time span for length of array           
                     all_years_distinct = [];
-//                    actual_year = new Date().getFullYear();
+                    //actual_year = new Date().getFullYear();
                     actual_year = parseInt(all_years_double[all_years_double.length-1], 10);
                     oldest_year = parseInt(all_years_double[0], 10);
                     time_span = actual_year - oldest_year;
@@ -1560,23 +1560,32 @@ PUBVIS = function () {
                             if (   json[i].entryTags.author !== undefined 
                                 && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
 
-                                //fetch keyword from json
+                                //fetch authors from json
                                 str = json[i].entryTags.author;
                                 //str = words_displayed[i].tex
+                                //console.log("str: " + str);
 
                                 str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
                                 
                                 //start every word with upper case
                                 str = to_title_case( str );
                                 //console.log( "str: " + str );
+
+                                //reverse authors first and last name to find all possible matches
+                                var reversed_author = searched_word.split(' ').reverse().join(' ');
+                                //console.log( "reversed: " + reversed_author );
                                 
                                 //lookup if filtered word match in the keywords of this entry
                                 pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
                                 n = str.search( pattern );  //if not contained n = -1 else it retruns the index
                                 //console.log( "pattern: " + pattern );
 
-                                if ( n !== (-1) ) {
+                                var pattern_reversed = new RegExp("\\b" + reversed_author + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+                                var rev = str.search( pattern_reversed );//if not contained rev = -1 else it retruns the index
+
+                                if ( (n !== (-1)) || (rev !== (-1)) ) {
                                     //if match was found check if it already excists in the result list.
+                                    //console.log( "str: " + str + " n: " + n + " rev: " + rev );
                                     if ( result.length > 0 ) { 
                                         
                                         for ( var r = 0; r < result.length; r++ ){
@@ -1584,11 +1593,13 @@ PUBVIS = function () {
                                             if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
                                                 
                                                 result.push(json[i]);
+                                                //console.log( "not already push" );
                                             } 
                                         }
 
                                     } else { 
                                         result.push(json[i]);
+                                        //console.log( "push" );
                                     }
                                 } 
                             } 
@@ -2457,10 +2468,12 @@ PUBVIS = function () {
                     if ( n === (-1) ) { //no comma found
 
                         first_name = $.trim( str.substr( 0, str.indexOf(' ') ) );
-                        
+
                         last_name = $.trim(str.substr( str.indexOf(' ') ) );
 
-                        result.push( {text: last_name, first_name: first_name} );
+                        //result.push( {text: last_name, first_name: first_name} );
+                        var fullname = last_name + " " + first_name;
+                        result.push( {text: fullname, first_name: first_name} );
 
                     } else { //comma found
 
@@ -2470,19 +2483,26 @@ PUBVIS = function () {
                         first_name = first_name.replace (/,/g, "");
                         first_name = $.trim( first_name );
 
-                        result.push( {text: last_name, first_name: first_name} );
+                        //result.push( {text: last_name, first_name: first_name} );
+                        var fullname = last_name + " " + first_name;
+                        result.push( {text: fullname, first_name: first_name} );
 
                     }
                 }
 
                 //sort the array by the last name
-                result.sort( function ( a, b) {
+                /*result.sort( function ( a, b) {
                     if (a.text < b.text)
                         return -1;
                     if (a.text > b.text)
                         return 1;
                     return 0;
-                } )
+                } )*/
+
+                //sort array by last and first name
+                result.sort(function(a, b) {
+                    return b.text.localeCompare(a.text) || b.first_name.localeCompare(a.first_name)
+                });
 
                 //console.dir( result );
 
@@ -2490,11 +2510,13 @@ PUBVIS = function () {
                 for (var x = 0; x < result.length; x++) {
                     //all words have to start with upper case 
                     //current = to_title_case( all_words_single[i] );
-                    current = result[x].text;
+                    //current = result[x].text
+                    current = result[x].text + result[x].first_name;
                     
                     if ( x < result.length-1 ) { 
                         //next = to_title_case( all_words_single[( i + 1 )] );
-                        next = result[( x + 1 )].text;
+                        //next = result[( x + 1 )].text
+                        next = result[( x + 1 )].text + result[x + 1].first_name;
                     } else {
                         next = "";  
                     } 
@@ -2513,6 +2535,7 @@ PUBVIS = function () {
                             result[x].size = count;
                             final_result.push( {text: result[x].text, size: count, first_name: result[x].first_name} );
                             //console.dir( result );
+                            //console.log(result[x].text + " " + result[x].first_name + ": " + result[x].size);
                             count = 1;
                     }
                 }
@@ -4303,6 +4326,12 @@ PUBVIS = function () {
         //****************************CLOUDS******************************// 
 
             //@params.type = "keywords" or "authors" (only this two types are allowed!)
+            //@params.size
+            //@params.words = words to be displayed (keywords or authors)
+            //@params.xPos, @params.yPos
+            //@params.selection
+            //@params.color_text;
+            //@params.type = "keywords" or "authors" (only this two types are allowed!)
             var CLOUD = function ( params ) {
                 //console.log( "cloud aufgerufen" );
                 var type = params.type //to distinguish if a keyword was clicked or an author
@@ -4401,6 +4430,7 @@ PUBVIS = function () {
 
                     if ( !update ){
                         //console.log("its no update");
+                        //console.dir(words);
                         wordcloud = cloud.selectAll("text")
                                     .data( words )
                                     .enter()
@@ -4409,6 +4439,26 @@ PUBVIS = function () {
                                     .style("fill", color_text )
                                     .attr("text-anchor", "middle")
                                     .attr("id", function( d ){
+                                        //console.log("dataset_words.length: " + dataset_words.length);
+                                        /*for ( var i = 0; i < dataset_words.length; i++ ){ 
+                                            console.log( dataset_words[i].text + " === " + d.text);
+                                            if ( dataset_words[i].text === d.text ) { 
+                                                console.log("yes");
+
+                                                if ( type === "keywords" ) { 
+                                                    txt = d.text;
+                                                    id = generate_words_id({ text: txt, group: id_name, element: "text" }).new_id;
+                                                    //return id;
+                                                }
+                                               
+                                                if ( type === "authors" ) { 
+
+                                                    id = dataset_words[i].text + dataset_words[i].first_name;
+                                                    //return id;
+                                                    //console.log(dataset_words[i].text + " " +dataset_words[i].first_name); 
+                                                }
+                                            }
+                                        }*/
                                         
                                         txt = d.text;
                                         id = generate_words_id({ text: txt, group: id_name, element: "text" }).new_id;
@@ -4424,9 +4474,7 @@ PUBVIS = function () {
 
                                             item_value = generate_words_id({ text: d.text, group: id_name, element: "text" }).exist_id;                                          
                                             item_key = id_name;
-
-                                            //console.log( "item_value: " + item_value );
-                                            //console.log( "id_name: " + id_name );
+                                            //console.log(item_value + " " + item_key);
 
                                             if ( item_already_selected( { array: selected_items, 
                                                                           list: item_key, 
@@ -4436,9 +4484,10 @@ PUBVIS = function () {
                                                  remove_selected_item( {value: item_value, 
                                                                         key: item_key} ); 
                                             } else {
-                                                //console.log("before add item");
+                                                //console.log("item_value: " + item_value);
                                                 add_selected_item( {value: item_value, 
                                                                     key: item_key} );
+                                                //console.dir(selected_items);
                                             } 
                                                
                                     })
