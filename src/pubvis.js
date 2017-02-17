@@ -458,6 +458,7 @@ PUBVIS = function () {
                 authors = get_authors( json ).authors;
                 //console.log( "authors" );
                 //console.dir( authors );
+                //console.log( "authors.length before limit function: "+ authors.length );
 
                 //***if authors available display them in the tagCloud
                 if ( authors.length !== 0 ){ 
@@ -936,6 +937,7 @@ PUBVIS = function () {
             //@params.data = word Array containing at least a "text" element ( data.text )
             var highlight_authors = function( data ){
                 //console.log( "highlight authors" );
+                //console.log("laenge arr: " + data.length );
                 var item_value, id_txt_label, id_background_div;
 
                 remove_highlight_selection_items_authors();
@@ -997,6 +999,8 @@ PUBVIS = function () {
                 if ( authors_available ) { 
                     //fetch the authors for highlighting
                     selected_authors = get_authors( dataset ).authors;
+                    //selected_authors = authors_displayed;
+                    //console.log("selected_authors: " + selected_authors.length);
                     //highlight the authors
                     highlight_authors ( selected_authors ); 
                 }                
@@ -1035,6 +1039,7 @@ PUBVIS = function () {
             //clear all highlighted authors
             var remove_highlight_selection_items_authors = function(){
                 //console.log( "CALL: remove_highlight_selection_items_authors" );
+                //console.log("laenge arr: " + authors_displayed.length );
                 var item_value, id_txt_label, id_background_div;
 
                 for ( var i = 0; i < authors.length; i++ ){ 
@@ -2427,7 +2432,6 @@ PUBVIS = function () {
                     //console.log( "a[1]: " + a[1] ); 
                     return b.size - a.size;
                 });
-
 
                 //check if the length of the given array exceeds the given optimum size
                 if (words.length >= optimum_length) {
@@ -4387,7 +4391,7 @@ PUBVIS = function () {
                 var size = params.size;
                 var margin = 10;
                 var update = false;
-                var fontSize = 12;
+                var fontSize = 10;
                 var dataset_words = params.words;
                 //console.dir( dataset_words );
                 //console.log( "dataset_words[0].long_text: " + dataset_words[0].long_text );
@@ -4456,8 +4460,10 @@ PUBVIS = function () {
                         authors_displayed = save_wordtext_and_wordid({ array: words, id:id_name });
                         //console.log( "authors_displayed.length: " + authors_displayed.length );
 
-                        //if there is not enough space for the authors, the limit function will be called to cut of the authors according to their 
-                        //number of publication. Thus an arbitrary disappearance of names can be avoided
+                        //if there is not enough space for the authors, the limit function will be called to 
+                        //cut of the authors according to their number of publication. 
+                        //consecqently the cloud must be removed and drawn again (otherwise there may be authors in the cloud that have been cut of by the limit function)
+                        //Thus an arbitrary disappearance of names can be avoided
                         if (authors_displayed.length < authors.length) {
                             //console.log( "too less space >> limit authors again from : "+ authors.length + " to: " + authors_displayed.length );
                             
@@ -4467,6 +4473,17 @@ PUBVIS = function () {
                             authors_displayed = save_wordtext_and_wordid({ array: authors, id:id_name });;
                             //change words.length to the new length 
                             words.length = authors.length; 
+                            ///Redrawing the Cloud is nececssary as if there is not enough space for the authors
+                            //console.log("redraw authors cloud again, authorls.length: " + authors.length )
+                            //remove the already drawn author cloud that has to much authors
+                            d3.select("#authors").remove();
+                            //redraw cloud with smaller author array
+                            wordCloud = CLOUD({ type:"authors", 
+                                        words: authors, 
+                                        xPos: xPos, 
+                                        yPos: yPos,
+                                        size: size });
+                            
                             
                         }
 
