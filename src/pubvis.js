@@ -2337,7 +2337,7 @@ PUBVIS = function () {
 
                         } 
 
-                        result.push( {text: current, size: count, long_text: long_text} );
+                        result.push( {text: current, size: count, long_text: long_text, count: count,} );
                         count = 1;
                     }
                     
@@ -2511,7 +2511,7 @@ PUBVIS = function () {
                             //result.push( {text: current, size: count, long_text: long_text} );
                             //result[x].size.push({size:count});
                             result[x].size = count;
-                            final_result.push( {text: result[x].text, size: count, first_name: result[x].first_name} );
+                            final_result.push( {text: result[x].text, size: count, first_name: result[x].first_name, count: count} );
                             //console.dir( result );
                             count = 1;
                     }
@@ -4451,12 +4451,12 @@ PUBVIS = function () {
                                             if ( dataset_words[i].text === d.text ) { 
                                                
                                                 if ( type === "keywords" ) { 
-                                                    text = dataset_words[i].long_text + ", found: " + dataset_words[i].size + "x";
+                                                    text = dataset_words[i].long_text + ", found: " + dataset_words[i].count + "x";
                                                     return text;
                                                 }
                                                
                                                 if ( type === "authors" ) { 
-                                                    text = dataset_words[i].text + ", found: " + dataset_words[i].size + "x";
+                                                    text = dataset_words[i].text + ", found: " + dataset_words[i].count + "x";
                                                     return text;
                                                 }
                                             }
