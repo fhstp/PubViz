@@ -1523,6 +1523,9 @@ PUBVIS = function () {
                                 //start every word with upper case
                                 str = to_title_case( str );
 
+                                //also start searched word with upper case
+                                searched_word = to_title_case( searched_word );
+
                                 //lookup if filtered word match in the keywords of this entry
                                 n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
@@ -1559,8 +1562,6 @@ PUBVIS = function () {
                         for ( var m = 0; m < filter_criteria.authors.length; m++ ){
 
                             searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[m] });
-                
-                            //console.log( "searched_word: " + searched_word );
 
                             if (   json[i].entryTags.author !== undefined 
                                 && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
@@ -1575,6 +1576,9 @@ PUBVIS = function () {
                                 //start every word with upper case
                                 str = to_title_case( str );
                                 //console.log( "str: " + str );
+
+                                //also start searched word with upper case
+                                searched_word = to_title_case( searched_word );
 
                                 //reverse authors first and last name to find all possible matches
                                 var reversed_author = searched_word.split(' ').reverse().join(' ');
@@ -1680,6 +1684,9 @@ PUBVIS = function () {
                                     //start every word with upper case
                                     str = to_title_case( str );
 
+                                    //also start searched word with upper case
+                                    searched_word = to_title_case( searched_word );
+
                                     //lookup if filtered word match in the keywords of this entry
                                     n = str.search( searched_word ); //if not contained n = -1 else it retruns the index     
 
@@ -1734,6 +1741,9 @@ PUBVIS = function () {
                                     
                                     //start every word with upper case
                                     str = to_title_case( str );
+
+                                    //also start searched word with upper case
+                                    searched_word = to_title_case( searched_word );
 
                                     //lookup if filtered word match in the keywords of this entry
                                     n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
@@ -1811,6 +1821,9 @@ PUBVIS = function () {
                                     //start every word with upper case
                                     str = to_title_case( str );
 
+                                    //also start searched word with upper case
+                                    searched_word = to_title_case( searched_word );
+
                                     //reverse authors first and last name to find all possible matches
                                     var reversed_author = searched_word.split(' ').reverse().join(' ');
                                     //console.log( "reversed: " + reversed_author );
@@ -1874,6 +1887,9 @@ PUBVIS = function () {
                                     //start every word with upper case
                                     str = to_title_case( str );
 
+                                    //also start searched word with upper case
+                                    searched_word = to_title_case( searched_word );
+
                                     //lookup if filtered word match in the keywords of this entry
                                     n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
                                   
@@ -1928,6 +1944,9 @@ PUBVIS = function () {
                                     
                                     //start every word with upper case
                                     str = to_title_case( str );
+
+                                    //also start searched word with upper case
+                                    searched_word = to_title_case( searched_word );
 
                                     //reverse authors first and last name to find all possible matches
                                     var reversed_author = searched_word.split(' ').reverse().join(' ');
@@ -1995,6 +2014,9 @@ PUBVIS = function () {
                                         //start every word with upper case
                                         str = to_title_case( str );
 
+                                        //also start searched word with upper case
+                                        searched_word = to_title_case( searched_word );
+
                                         //lookup if filtered word match in the keywords of this entry
                                         n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
@@ -2041,6 +2063,9 @@ PUBVIS = function () {
                                         
                                         //start every word with upper case
                                         str = to_title_case( str );
+
+                                        //also start searched word with upper case
+                                        searched_word = to_title_case( searched_word );
 
                                         //reverse authors first and last name to find all possible matches
                                         var reversed_author = searched_word.split(' ').reverse().join(' ');
@@ -2095,6 +2120,9 @@ PUBVIS = function () {
                                         
                                         //start every word with upper case
                                         str = to_title_case( str );
+
+                                        //also start searched word with upper case
+                                        searched_word = to_title_case( searched_word );
 
                                         //lookup if filtered word match in the keywords of this entry
                                         pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
@@ -2174,6 +2202,9 @@ PUBVIS = function () {
                                             //start every word with upper case
                                             str = to_title_case( str );
 
+                                            //also start searched word with upper case
+                                            searched_word = to_title_case( searched_word );
+
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
 
@@ -2249,6 +2280,9 @@ PUBVIS = function () {
                                             
                                             //start every word with upper case
                                             str = to_title_case( str );
+
+                                            //also start searched word with upper case
+                                            searched_word = to_title_case( searched_word );
 
                                             //lookup if filtered word match in the keywords of this entry
                                             n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
@@ -4503,27 +4537,6 @@ PUBVIS = function () {
                                     .style("fill", color_text )
                                     .attr("text-anchor", "middle")
                                     .attr("id", function( d ){
-                                        //console.log("dataset_words.length: " + dataset_words.length);
-                                        /*for ( var i = 0; i < dataset_words.length; i++ ){ 
-                                            console.log( dataset_words[i].text + " === " + d.text);
-                                            if ( dataset_words[i].text === d.text ) { 
-                                                console.log("yes");
-
-                                                if ( type === "keywords" ) { 
-                                                    txt = d.text;
-                                                    id = generate_words_id({ text: txt, group: id_name, element: "text" }).new_id;
-                                                    //return id;
-                                                }
-                                               
-                                                if ( type === "authors" ) { 
-
-                                                    id = dataset_words[i].text + dataset_words[i].first_name;
-                                                    //return id;
-                                                    //console.log(dataset_words[i].text + " " +dataset_words[i].first_name); 
-                                                }
-                                            }
-                                        }*/
-                                        
                                         txt = d.text;
                                         id = generate_words_id({ text: txt, group: id_name, element: "text" }).new_id;
                                         return id;
@@ -5053,6 +5066,8 @@ PUBVIS = function () {
                     clearAll_pushed = false;
                     
                     filtered_json = create_filtered_json({ filter_criteria: selected_items }).entries;
+
+                    //console.dir(filtered_json);
 
                     //highlight_selection_items();
 
