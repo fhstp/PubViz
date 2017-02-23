@@ -87,7 +87,7 @@ PUBVIS = function () {
     {
         var tmp_json = data.json;
         var tmp_errors = data.errors;
-        var currYear = new Date().getFullYear();
+        var currYear = new Date().getFullYear().toString();
 
         for(i = 0; i < tmp_json.length; i++)
         {
