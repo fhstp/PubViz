@@ -16,7 +16,9 @@ Credits
 
 Created in the context of the project semester in media technology, [St. Poelten University of Applied Sciences](http://www.fhstp.ac.at), 2014-2015
 
-Team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
+Initial team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
+
+Further development: Alexander RIND, Niklas THÜR, Ewald WIESER
 
 Project supervisor: [Wolfgang AIGNER](http://mc.fhstp.ac.at/people/wolfgang-aigner)
 
@@ -48,3 +50,7 @@ target : "#pubvis_container", //the node the pubViz visualization will be append
 filename : "file.bib", //the bibTeX filename used for the pubViz visualization
 color: "#ffc200" //color name or hex value which will be used for highlighting
 ```
+
+Citation
+--------------
+Rind, A., A. Haberson, K. Blumenstein, C. Niederer, M. Wagner, and W. Aigner, [PubViz: Lightweight Visual Presentation of Publication Data](http://phaidra.fhstp.ac.at/o:1933), Proc. Eurographics Conf. Visualization (EuroVis) -- Short Paper: EuroGraphics, forthcoming, 2017.
