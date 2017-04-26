@@ -4934,7 +4934,7 @@ PUBVIS = function () {
             var FOOTER = function(){
                 
                 //append a div with text
-                $('#pubvis_container').append( "<div id='footer'> PubViz is an Open Source Project and can be downloaded from <a href='https://github.com/aha01/PubViz/' target='_blank'>GitHub</a>. More information about the tool and its installation can be found on the <a href='http://pubviz.fhstp.ac.at/#download/' target='_blank'>PubViz website.</a></div>" );
+                $('#pubvis_container').append( "<div id='footer'> PubViz is an Open Source Project and can be downloaded from <a href='https://github.com/fhstp/PubViz/' target='_blank'>GitHub</a>. More information about the tool and its installation can be found on the <a href='http://pubviz.fhstp.ac.at/#download/' target='_blank'>PubViz website.</a></div>" );
                 
                 //set the same margin-left as the svg do - comment in if footer is left-aligned, comment out is footer is centered
                 //offset = $( "#pubVis" ).offset();
