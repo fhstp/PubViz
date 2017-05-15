@@ -51,6 +51,12 @@ filename : "file.bib", //the bibTeX filename used for the pubViz visualization
 color: "#ffc200" //color name or hex value which will be used for highlighting
 ```
 
+### Content Management Systems
+The `filename` may also be a URL pointing to a dynamically generated BibTeX file
+from a content management system or [Zotero](http://zotero.org/).
+
 Citation
 --------------
-Rind, A., A. Haberson, K. Blumenstein, C. Niederer, M. Wagner, and W. Aigner, [PubViz: Lightweight Visual Presentation of Publication Data](http://phaidra.fhstp.ac.at/o:1933), Proc. Eurographics Conf. Visualization (EuroVis) -- Short Paper: EuroGraphics, forthcoming, 2017.
+Rind, A., A. Haberson, K. Blumenstein, C. Niederer, M. Wagner, and W. Aigner,
+[PubViz: Lightweight Visual Presentation of Publication Data](http://phaidra.fhstp.ac.at/o:1933),
+Proc. Eurographics Conf. Visualization (EuroVis) -- Short Paper, Goslar: EuroGraphics, forthcoming, 2017.
