@@ -53,7 +53,7 @@ color: "#ffc200" //color name or hex value which will be used for highlighting
 
 ### Content Management Systems
 The `filename` may also be a URL pointing to a dynamically generated BibTeX file
-from a content management system or [Zotero](http://zotero.org/).
+from a content management system or [Zotero](https://github.com/fhstp/PubViz/wiki/Zotero-Integration).
 
 Citation
 --------------
