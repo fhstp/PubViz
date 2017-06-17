@@ -4831,13 +4831,12 @@ PUBVIS = function () {
                         } else if ( (data[j].entryTags['abstract'] === undefined) 
                             && (details !== "") ) {
                             
-                            //abs = "";
                             $(".accordion").append("<div class='pane'>" + "<div class='subpane' style='width: 75%;'>" + "<p>" + details + "</p>" + "</div>" + "<div class='subpane' style='width: 15%;'><span style='font-style: italic; color: #898989; font-weight:bold;'>Notes:<br></span>" + notes + "</div>" + "</div>");
                         
                         } else if ( (data[j].entryTags['abstract'] !== undefined) 
                             && (details === "") ) {
                             
-                            abs = "";
+                            abs = data[j].entryTags['abstract'];
                             $(".accordion").append("<div class='pane'>" + "<div class='subpane' style='width: 75%;'>" + "<p>" + abs + "</p>" + "</div>" + "<div class='subpane' style='width: 15%;'><span style='font-style: italic; color: #898989; font-weight:bold;'>Notes:<br></span>" + notes + "</div>" + "</div>");
                         }
 
