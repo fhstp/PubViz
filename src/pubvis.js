@@ -2409,7 +2409,7 @@ PUBVIS = function () {
 
 
                 //check if the length of the given array exceeds the given optimum size
-                if (words.length >= optimum_length) {
+                if (words.length > optimum_length) {
                     optimum_size = words[optimum_length].size;
 
                     //look downward if to the element where the size get smaller
