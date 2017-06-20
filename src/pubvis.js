@@ -4912,14 +4912,15 @@ PUBVIS = function () {
                         $(".subpane").css({"display": "block"});
                           
                         var g = d3.select(this).select("g");
-                        if (g.classed("open")){
-                            g.classed("open", false);
-                            g.attr("transform", "rotate(-90, 11, 11)");
-                        } else {
-                            g.classed("open", true);
-                            g.attr("transform", "rotate(0, 11, 11)");
-                        }
-                          
+            			if (! g.empty()) {
+                            if (g.classed("open")){
+                                g.classed("open", false);
+                                g.attr("transform", "rotate(-90, 11, 11)");
+                            } else {
+                                g.classed("open", true);
+                                g.attr("transform", "rotate(0, 11, 11)");
+                            }
+                        }  
                       });
 
                 }
