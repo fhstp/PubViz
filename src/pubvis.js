@@ -74,6 +74,11 @@ PUBVIS = function () {
                     var key = keys[i];
                     newEntryTags[key.toLowerCase()] = entryTags[key];
                 }
+            
+                if (newEntryTags['doi'] != undefined && newEntryTags['url'] == undefined){
+                    newEntryTags['url'] = 'http://dx.doi.org/' + newEntryTags['doi'];
+                }
+            
                 bigJson[e].entryTags = newEntryTags;
                 bigJson[e].entryType = bigJson[e].entryType.toLowerCase();
         }
