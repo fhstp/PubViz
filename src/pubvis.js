@@ -4772,25 +4772,11 @@ PUBVIS = function () {
                         } 
                         
                         //depending if abstract is availabel an arrow will be added
-                        if(data[j].entryTags['abstract'] != undefined 
-                            || details !== ""){
-
-                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve' class='download'><rect x='6.969' y='8' width='6.5' height='6.5'/></svg>";
-
-                        }else{
-
+                        if (data[j].entryTags['abstract'] != undefined || details !== ""){
+                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve' class='download'><g transform='rotate(-90, 11, 11)')><path fill='#333333' d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g></svg>";
+                        } else {
                             arrow = "&nbsp";
-
                         }
-
-                        
-                      //  <svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g></g></svg>
-
-                        $(".headl").click(function(){
-
-                            arrow = "<svg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='22px' height='22px' viewBox='0 0 22 22' enable-background='new 0 0 22 22' xml:space='preserve'><g><g><path fill='#333333' d='M11.31,5.236l-4.161,8.315l-4.16-8.315H11.31z'/></g></g></svg>";
-
-                        });
 
                        
                         //check the type and according to the type, add different information
@@ -4928,6 +4914,17 @@ PUBVIS = function () {
                         $(this).next(".pane").slideToggle("slow").siblings(".pane:visible").slideUp("slow");
                         $(this).next(".pane").css("border-left", "3px solid " + selection_color );
                         $(".subpane").css({"display": "block"});
+                          
+                        var g = d3.select(this).select("g");
+            			if (! g.empty()) {
+                            if (g.classed("open")){
+                                g.classed("open", false);
+                                g.attr("transform", "rotate(-90, 11, 11)");
+                            } else {
+                                g.classed("open", true);
+                                g.attr("transform", "rotate(0, 11, 11)");
+                            }
+                        }  
                       });
 
                 }
