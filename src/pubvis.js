@@ -2470,7 +2470,7 @@ PUBVIS = function () {
                 var all_authors_split;
                 var all_authors_split_str;
                 var all_authors_single;
-                var str, n;
+                var str;
                 var result = [];//{ text:[], size:[], first_name:[] };
                 var first_name, last_name;
                 var next, current;
@@ -2479,33 +2479,27 @@ PUBVIS = function () {
 
                 //fetch all words from json
                 all_authors = collect_key_in_entryTags( { json: json, key: "author", value: "" } ).values;
-
                 all_authors_str = all_authors.toString();
 
-                //split string at every whitspace
                 all_authors_split = all_authors_str.split( " and " );
-
                 all_authors_split_str = all_authors_split.toString();
 
                 //split at comma only if there is no whitespace before or after the comma
                 all_authors_single = all_authors_split_str.split( /,(?!\s)/ );
 
-                //the last name is before the comma
                 for ( var i = 0; i < all_authors_single.length; i++ ){ 
                     
-                    str = all_authors_single[i];
-                    n = str.search( "," ); //n = -1 if there is no comma
+                    str = all_authors_single[i].trim();
 
-                    if ( n === (-1) ) { //no comma found
+                    if ( str.search( "," ) === (-1) ) { 
+                        // no comma found, so split on final space
 
-                        first_name = $.trim( str.substr( 0, str.indexOf(' ') ) );
-                        
-                        last_name = $.trim(str.substr( str.indexOf(' ') ) );
-
+                        first_name = $.trim( str.substr( 0, str.lastIndexOf(' ') ) );
+                        last_name = $.trim(str.substr( str.lastIndexOf(' ') ) );
                         result.push( {text: last_name, first_name: first_name} );
 
-                    } else { //comma found
-
+                    } else { 
+                        // comma found, so split on it
                         last_name = $.trim(str.substr( 0, str.indexOf(',') ) );
 
                         first_name = str.substr( str.indexOf(',') );
@@ -2513,7 +2507,6 @@ PUBVIS = function () {
                         first_name = $.trim( first_name );
 
                         result.push( {text: last_name, first_name: first_name} );
-
                     }
                 }
 
