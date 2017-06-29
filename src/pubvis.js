@@ -3763,7 +3763,7 @@ PUBVIS = function () {
                                         //.attr("transform", "translate(-5," + (svgH-19) + ")");
                                         .attr( "class", "btn_group" )
                                         .attr( "opacity", "1" )
-                                        .attr("transform", "translate(-15," + (svgH-20) + ")")
+                                        .attr("transform", "translate(-15," + (svgH) + ")")
                                         .on( "mouseover", function() {
                                             d3.select(this).style("cursor", "pointer");
                                         })
@@ -3784,7 +3784,7 @@ PUBVIS = function () {
                                         .text ( function( d ) { return d; } )
                                         .attr({
                                             x: function( d, i ){ return i * (svgW+10) }, //later to include the width of the button image
-                                            y: 0,
+                                            y: 0 - label_height - 4,
                                             id: function( d, i ){ return d },
                                             class: function( d, i ){ 
                                                 if ( d === "<" ) { 
@@ -3815,7 +3815,7 @@ PUBVIS = function () {
                                     .text ( function( d ) { return d; } )
                                     .attr({
                                         x: function( d, i ){ return i * (svgW+10) + 7 }, //later to include the width of the button image
-                                        y: label_height/1.25,
+                                        y: label_height/2,
                                         id: function( d, i ){ return d },
                                         class: function( d, i ){ 
                                             if ( d === "<" ) { 
