@@ -3815,7 +3815,7 @@ PUBVIS = function () {
                                     .text ( function( d ) { return d; } )
                                     .attr({
                                         x: function( d, i ){ return i * (svgW+10) + 7 }, //later to include the width of the button image
-                                        y: label_height/2,
+                                        y: -label_height/2,
                                         id: function( d, i ){ return d },
                                         class: function( d, i ){ 
                                             if ( d === "<" ) { 
