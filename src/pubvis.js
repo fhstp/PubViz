@@ -1004,6 +1004,7 @@ PUBVIS = function () {
                     chart_years.highlight_subset( get_years({json: dataset, 
                                                             years_to_display: chart_years.get_current_displayed_years()
                                                             }).amount_list );
+                    highlight_time_buttons(dataset);
                 }
 
                 
@@ -1042,6 +1043,29 @@ PUBVIS = function () {
                     //highlight the authors
                     highlight_authors ( selected_authors ); 
                 }                
+            }
+
+            function highlight_time_buttons (dataset) {
+                var years = chart_years.get_current_displayed_years();
+                var start_time = years[0];
+                var end_time = years[years.length - 1];
+
+                var more_to_left = false;
+                var more_to_right = false;
+
+                var selection_details = get_years({json: dataset});
+
+                for (var i=0; i < selection_details.amount_list.length; i++){
+                    if (selection_details.amount_list[i] && selection_details.time_list[i] < start_time){
+                        more_to_left = true;
+                    }
+                    if (selection_details.amount_list[i] && selection_details.time_list[i] > end_time){
+                        more_to_right = true;
+                    }
+                }
+
+                d3.select( ".btn_left" ).style('fill', more_to_left ? selection_color : "rgb(40, 91, 133)");
+                d3.select( ".btn_right" ).style('fill', more_to_right ? selection_color : "rgb(40, 91, 133)");
             }
 
             //change the visibility of the tooltips of the given year 
