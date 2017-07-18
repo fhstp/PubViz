@@ -18,7 +18,7 @@ Created in the context of the project semester in media technology, [St. Poelten
 
 Initial team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
 
-Further development: Alexander RIND, Niklas THÜR, Ewald WIESER
+Further development: [Alexander RIND](http://alex.timebench.org/), [Niklas THÜR](http://www.thuer.site/), Ewald WIESER, [James SCOTT-BROWN](https://github.com/jamesscottbrown)
 
 Project supervisor: [Wolfgang AIGNER](http://mc.fhstp.ac.at/people/wolfgang-aigner)
 
@@ -59,4 +59,5 @@ Citation
 --------------
 Rind, A., A. Haberson, K. Blumenstein, C. Niederer, M. Wagner, and W. Aigner,
 [PubViz: Lightweight Visual Presentation of Publication Data](http://phaidra.fhstp.ac.at/o:1933),
-Proc. Eurographics Conf. Visualization (EuroVis) -- Short Paper, Goslar: EuroGraphics, forthcoming, 2017.
+Proc. Eurographics Conf. Visualization (EuroVis) – Short Paper, Goslar: EuroGraphics, p. 169–173, 2017.
+doi:[10.2312/eurovisshort.20171152](http://dx.doi.org/10.2312/eurovisshort.20171152)
