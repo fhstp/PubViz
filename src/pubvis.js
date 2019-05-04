@@ -1,6 +1,7 @@
 PUBVIS = function () {
     var make_it_all = function (params) {
         filename = params.filename;
+        exclude_keywords = params.exclude_keywords
         target = params.target;
         selection_color = params.color;
 
@@ -22,9 +23,9 @@ PUBVIS = function () {
         $.get( filename, function( data ) {
 
             result = bib2json( data );
-            //console.log(result);
+            // console.log(result);
             result = parseStringYearToCurrentYear( result );
-            //console.log(result);
+            // console.log(result);
             display_data( result.json, prepare_errors( result.errors ).error_text ) ;
 
         }) .fail(function() {
@@ -49,18 +50,19 @@ PUBVIS = function () {
             try {
                 //pars bib-entry to JSON list with one object
                 jsonFormat = bibtexParse.toJSON( entry );
+                // console.log('entry: ', jsonFormat);
+
+               
             } catch (e) {
                 errors.index.push( i );
                 errors.errorMessage.push( e );
                 errors.errorEntry.push ( entry );
                 jsonFormat = "";
             }
-
-            if ( jsonFormat !== "") { 
+             if ( jsonFormat !== "") { 
                 //combine lists 
                 bigJson = bigJson.concat (jsonFormat);
             }
-
         };        
 
         //changing all entryTags and entryTypes to lowercase (e.g. Author -> author) otherwise they will not be recognized by the programm
@@ -477,6 +479,8 @@ PUBVIS = function () {
                 //fetch the keywords
                 keywords = get_words(json).words;
 
+                keywords = exclude_choosen_keywords(keywords);
+            
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
                     keywords = limit_words({ words: keywords, optimum_size: 80, min: 1 });
@@ -534,6 +538,72 @@ PUBVIS = function () {
                 //console.dir( authors );
                 //console.log( "keywords.length: " + keywords.length );
             }
+
+            exclude_choosen_keywords = function (keywords) {
+
+                console.log('keywords: ', keywords);
+                // let test = [];
+                // keywords.forEach( k => {
+                //     test.push(k.text);
+                // });
+                // console.log('uiwui: ', test);
+                // let ol = ['ab', 'ba', 'a', 'ee f'];
+                // let result = ol.from('"a b" c d "e f"'.matchAll(/(?:\")(.+?)(?:\")|(\w+)/gim));
+                // console.log(result);
+                var tmp_keywords = [];
+                var controlCount = 0;
+                console.log('exclude_keywords: ', exclude_keywords);
+                
+                for(var i = 0; i < keywords.length; i ++) {
+                    console.log('keyword at index ', i ,': ', keywords[i]);
+                    var lockForPush = false;
+                    
+                    exclude_keywords.forEach((word, index) => {
+                        console.log(index, ' // (xxx)word: ', word);
+                        
+                        var myReg = new RegExp(word, "i");
+                        // let result = keywords[i].text.match(/(?:\")(.+?)(?:\")|(\w+)/gim);
+                        let splitKeywords = keywords[i].text.split(/[ -]+/);
+                        console.log('uiwui 2 : ', splitKeywords);
+                        found_match = false;
+
+                        for(var j = 0; j < splitKeywords.length; j++ ) {
+                            if(myReg.test(splitKeywords[j])) {
+                                console.log(j, '// should not be shown: ', keywords[i].text, '// with split Keyword: ', splitKeywords[j]);
+                                console.log('is that true? :', j === splitKeywords.length-1);
+                                if (!found_match) {
+                                    // keywords.splice(i, 1);
+                                    lockForPush = true;
+                                    controlCount++;
+                                } 
+                                
+                            } else if((j === splitKeywords.length-1) && index === exclude_keywords.length - 1 && !lockForPush ) {
+                                    
+                                    console.log('NO MATCH FOUND!!!!!')
+                                    tmp_keywords.push(keywords[i]);
+                                    wasPushed = true;
+                            } 
+                        }
+                        
+                        
+                        // if(myReg.test(keywords[i].text)){
+                        //     console.log('i am not allowed');
+                        //     keywords.splice(i, 1);
+                        // } else {
+                            
+                        // }
+                    });
+                }
+                console.log('new keywords: ', tmp_keywords, '// compared to old: ', keywords);
+                console.log('controlCount: ', controlCount);
+                return tmp_keywords; 
+            }
+
+            Array.prototype.unique = function() {
+                return this.filter(function (value, index, self) { 
+                  return self.indexOf(value) === index;
+                });
+              }
 
             //adds an additional filter cirteria to the selected_items list
             //@params.years = number ( eg 2011 )
