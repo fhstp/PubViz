@@ -479,7 +479,7 @@ PUBVIS = function () {
                 //fetch the keywords
                 keywords = get_words(json).words;
 
-                keywords = exclude_choosen_keywords(keywords);
+                keywords = exclude_chosen_keywords(keywords);
             
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
@@ -539,64 +539,29 @@ PUBVIS = function () {
                 //console.log( "keywords.length: " + keywords.length );
             }
 
-            exclude_choosen_keywords = function (keywords) {
-
-                console.log('keywords: ', keywords);
-                // let test = [];
-                // keywords.forEach( k => {
-                //     test.push(k.text);
-                // });
-                // console.log('uiwui: ', test);
-                // let ol = ['ab', 'ba', 'a', 'ee f'];
-                // let result = ol.from('"a b" c d "e f"'.matchAll(/(?:\")(.+?)(?:\")|(\w+)/gim));
-                // console.log(result);
-                var tmp_keywords = [];
-                var controlCount = 0;
-                console.log('exclude_keywords: ', exclude_keywords);
-                
-                for(var i = 0; i < keywords.length; i ++) {
-                    console.log('keyword at index ', i ,': ', keywords[i]);
-                    var lockForPush = false;
-                    
-                    exclude_keywords.forEach((word, index) => {
-                        console.log(index, ' // (xxx)word: ', word);
-                        
-                        var myReg = new RegExp(word, "i");
-                        // let result = keywords[i].text.match(/(?:\")(.+?)(?:\")|(\w+)/gim);
-                        let splitKeywords = keywords[i].text.split(/[ -]+/);
-                        console.log('uiwui 2 : ', splitKeywords);
-                        found_match = false;
-
-                        for(var j = 0; j < splitKeywords.length; j++ ) {
-                            if(myReg.test(splitKeywords[j])) {
-                                console.log(j, '// should not be shown: ', keywords[i].text, '// with split Keyword: ', splitKeywords[j]);
-                                console.log('is that true? :', j === splitKeywords.length-1);
-                                if (!found_match) {
-                                    // keywords.splice(i, 1);
-                                    lockForPush = true;
-                                    controlCount++;
-                                } 
-                                
-                            } else if((j === splitKeywords.length-1) && index === exclude_keywords.length - 1 && !lockForPush ) {
-                                    
-                                    console.log('NO MATCH FOUND!!!!!')
-                                    tmp_keywords.push(keywords[i]);
-                                    wasPushed = true;
-                            } 
-                        }
-                        
-                        
-                        // if(myReg.test(keywords[i].text)){
-                        //     console.log('i am not allowed');
-                        //     keywords.splice(i, 1);
-                        // } else {
-                            
-                        // }
-                    });
+            exclude_chosen_keywords = function (keywords) {
+                if(exclude_chosen_keywords.length > 0) {
+                    var tmp_keywords = [];
+    
+                    for(var i = 0; i < keywords.length; i++) {
+                        if(!lockForPush) {tmp_keywords.push(keywords[i-1])}
+                        var lockForPush = false;
+    
+                        exclude_keywords.forEach((word, index) => {
+                            console.log('compare ', word, '  to ', keywords[i].text);
+                            var tmp_keyword = keywords[i].text.toLowerCase();
+                            var tmp_regex = new RegExp(word);
+                            if(tmp_regex.test(tmp_keyword)) {
+                                console.log('found match at: ', tmp_keyword);
+                                lockForPush = true;
+                            }
+                        });
+    
+                    }
+                    return tmp_keywords; 
+                } else {
+                    return keywords;
                 }
-                console.log('new keywords: ', tmp_keywords, '// compared to old: ', keywords);
-                console.log('controlCount: ', controlCount);
-                return tmp_keywords; 
             }
 
             Array.prototype.unique = function() {
