@@ -544,19 +544,19 @@ PUBVIS = function () {
                     var tmp_keywords = [];
     
                     for(var i = 0; i < keywords.length; i++) {
-                        if(!lockForPush) {tmp_keywords.push(keywords[i-1])}
                         var lockForPush = false;
-    
+                        
                         exclude_keywords.forEach((word, index) => {
-                            console.log('compare ', word, '  to ', keywords[i].text);
+                            // console.log('compare ', word, '  to ', keywords[i].text);
                             var tmp_keyword = keywords[i].text.toLowerCase();
                             var tmp_regex = new RegExp(word);
                             if(tmp_regex.test(tmp_keyword)) {
-                                console.log('found match at: ', tmp_keyword);
+                                // console.log('found match at: ', tmp_keyword);
                                 lockForPush = true;
                             }
                         });
-    
+                        if(!lockForPush) {tmp_keywords.push(keywords[i])}
+                        
                     }
                     return tmp_keywords; 
                 } else {
