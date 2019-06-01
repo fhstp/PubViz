@@ -540,7 +540,7 @@ PUBVIS = function () {
             }
 
             exclude_chosen_keywords = function (keywords) {
-                if(exclude_chosen_keywords.length > 0) {
+                if(Array.isArray(exclude_keywords) && exclude_keywords.length > 0) {
                     var tmp_keywords = [];
     
                     for(var i = 0; i < keywords.length; i++) {
