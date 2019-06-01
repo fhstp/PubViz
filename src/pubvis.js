@@ -2394,7 +2394,9 @@ PUBVIS = function () {
                     //change all words to start with upper case and trim them
                     word = to_title_case( $.trim( all_words_single[y] ) );
                     word = word.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the  -
-                    all_words_single_upperCase.push( word );
+                    if (word.length > 0) {
+                        all_words_single_upperCase.push( word );
+                    }
                 }             
                 
                 //sort the array ignoring upper and lower case
