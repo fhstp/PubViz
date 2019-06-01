@@ -18,7 +18,7 @@ Created in the context of the project semester in media technology, [St. Poelten
 
 Initial team members: Matthias FABI, Andrea HABERSON, San RASUL, Elisabeth SCHNAITT, Paul THEISEN
 
-Further development: [Alexander RIND](http://alex.timebench.org/), [Niklas THÜR](http://www.thuer.site/), Ewald WIESER, [James SCOTT-BROWN](https://github.com/jamesscottbrown)
+Further development: [Alexander RIND](http://alex.timebench.org/), [Niklas THÜR](http://www.thuer.site/), Ewald WIESER, [James SCOTT-BROWN](https://github.com/jamesscottbrown, Magdalena STEINACKER)
 
 Project supervisor: [Wolfgang AIGNER](http://mc.fhstp.ac.at/people/wolfgang-aigner)
 

@@ -1,6 +1,7 @@
 PUBVIS = function () {
     var make_it_all = function (params) {
         filename = params.filename;
+        exclude_keywords = params.exclude_keywords
         target = params.target;
         selection_color = params.color;
 
@@ -22,9 +23,9 @@ PUBVIS = function () {
         $.get( filename, function( data ) {
 
             result = bib2json( data );
-            //console.log(result);
+            // console.log(result);
             result = parseStringYearToCurrentYear( result );
-            //console.log(result);
+            // console.log(result);
             display_data( result.json, prepare_errors( result.errors ).error_text ) ;
 
         }) .fail(function() {
@@ -49,18 +50,19 @@ PUBVIS = function () {
             try {
                 //pars bib-entry to JSON list with one object
                 jsonFormat = bibtexParse.toJSON( entry );
+                // console.log('entry: ', jsonFormat);
+
+               
             } catch (e) {
                 errors.index.push( i );
                 errors.errorMessage.push( e );
                 errors.errorEntry.push ( entry );
                 jsonFormat = "";
             }
-
-            if ( jsonFormat !== "") { 
+             if ( jsonFormat !== "") { 
                 //combine lists 
                 bigJson = bigJson.concat (jsonFormat);
             }
-
         };        
 
         //changing all entryTags and entryTypes to lowercase (e.g. Author -> author) otherwise they will not be recognized by the programm
@@ -477,6 +479,8 @@ PUBVIS = function () {
                 //fetch the keywords
                 keywords = get_words(json).words;
 
+                keywords = exclude_chosen_keywords(keywords);
+            
                 //***if keywords available display them in the tagCloud
                 if ( keywords.length !== 0 ){ 
                     keywords = limit_words({ words: keywords, optimum_size: 80, min: 1 });
@@ -534,6 +538,37 @@ PUBVIS = function () {
                 //console.dir( authors );
                 //console.log( "keywords.length: " + keywords.length );
             }
+
+            exclude_chosen_keywords = function (keywords) {
+                if(exclude_chosen_keywords.length > 0) {
+                    var tmp_keywords = [];
+    
+                    for(var i = 0; i < keywords.length; i++) {
+                        var lockForPush = false;
+                        
+                        exclude_keywords.forEach((word, index) => {
+                            // console.log('compare ', word, '  to ', keywords[i].text);
+                            var tmp_keyword = keywords[i].text.toLowerCase();
+                            var tmp_regex = new RegExp(word);
+                            if(tmp_regex.test(tmp_keyword)) {
+                                // console.log('found match at: ', tmp_keyword);
+                                lockForPush = true;
+                            }
+                        });
+                        if(!lockForPush) {tmp_keywords.push(keywords[i])}
+                        
+                    }
+                    return tmp_keywords; 
+                } else {
+                    return keywords;
+                }
+            }
+
+            Array.prototype.unique = function() {
+                return this.filter(function (value, index, self) { 
+                  return self.indexOf(value) === index;
+                });
+              }
 
             //adds an additional filter cirteria to the selected_items list
             //@params.years = number ( eg 2011 )
