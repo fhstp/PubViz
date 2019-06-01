@@ -731,7 +731,7 @@ PUBVIS = function () {
                 start_period = max_number_of_bars * (-1) - 1;
 
                 //check if the last period of years are less than the number of regular steps
-                //calculate the last step and consequentliy the start_index and end_index to slice the datalist correctly
+                //calculate the last step and consequently the start_index and end_index to slice the datalist correctly
                 if ( ((incoming_dataset.length-1) % steps !== 0 ) 
                      &&  (count_clicks > number_of_periods) ) {
                     
@@ -758,7 +758,7 @@ PUBVIS = function () {
                 return new_dataset;
             }
 
-            //returns the amount of the occurence of the given value in the given array  
+            //returns the amount of the occurrence of the given value in the given array
             //@param.array = array
             //@param.value = string (example "year")
             count_key_in_entryTags = function (array, key) {
@@ -2360,10 +2360,10 @@ PUBVIS = function () {
                                         );
             }
 
-            //fetch all keywords of the given object and count their occuance 
+            //fetch all keywords of the given object and count their occurrence
             //returns a new object with elements. Each element has 
             //a text (no longer than 30 characters)
-            //a size (occurence) and 
+            //a size (occurrence) and
             //a long_size (the whole text) property.
             var get_words = function ( json ) {
                 //console.log( "get_words aufgerufen" );
@@ -2387,7 +2387,7 @@ PUBVIS = function () {
                 //replace _ with whitespace
                 all_words_str = all_words_str.replace (/_/g, " ");
 
-                //split string at every whitspace
+                //split string at every whitespace
                 all_words_single = all_words_str.split( "," );
 
                 for (var y = 0; y < all_words_single.length; y++) {   
@@ -2410,7 +2410,7 @@ PUBVIS = function () {
                     }
                 );
 
-                //compare words and count their occurance
+                //compare words and count their occurrence
                 for (var i = 0; i < all_words_single_upperCase.length; i++) {
                     //all words have to start with upper case 
                     current = all_words_single_upperCase[i];
@@ -2451,7 +2451,7 @@ PUBVIS = function () {
             //reduce the length of the given object
             //lookup the size of the element at the given optimum length. Count up till the size change
             //if the size changes before the absolut max value is reached the object will be cut
-            //if the maximum size is exceeded and the size of the ojects hasn't changed the function will
+            //if the maximum size is exceeded and the size of the objects hasn't changed the function will
             //go back to the optimum object and count down till the size of the object changes and then cut
             //@params.words = json
             //@params.optimum_size = number
@@ -2517,10 +2517,10 @@ PUBVIS = function () {
                 return words;
             }
 
-            //fetch all authors of the given object and count their occuance 
+            //fetch all authors of the given object and count their occurrence
             //returns a new object with elements. Each element has 
             //a text ( last name of author )
-            //a size (occurence) and 
+            //a size (occurrence) and
             //a first_name ( first name of the author ) property.
             var get_authors = function ( json ) {
                 //console.log( "CALL: get_authors" );
