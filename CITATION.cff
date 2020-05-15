@@ -1,0 +1,36 @@
+# YAML 1.2
+---
+abstract: "Publications play a central role in presenting the outcome of scientific research but are typically presented as textual lists, whereas related work in visualization of publication focuses on exploration – not presentation. To bridge this gap, we conducted a design study of an interactive visual representation of publication data in a BibTeX file, PubViz. This paper reports our domain and problem characterization as well as our visualization design decisions in light of our user-centered design process including interviews, two user studies with a paper prototype and a d3.js prototype, and practical application at our group’s website."
+authors: 
+  -
+    affiliation: "Institute of Creative\Media/Technologies, St. Pölten University of Applied Sciences, Austria"
+    family-names: Rind
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0001-8788-4600"
+  -
+    family-names: Haberson
+    given-names: Andrea
+  -
+    family-names: Blumenstein
+    given-names: Kerstin
+	orcid: "https://orcid.org/0000-0003-1255-0096"
+  -
+    family-names: Niederer
+    given-names: Christina
+	orcid: "https://orcid.org/0000-0002-1764-1467"
+  -
+    family-names: Wagner
+    given-names: Markus
+	orcid: "https://orcid.org/0000-0002-6619-6494"
+  -
+    family-names: Aigner
+    given-names: Wolfgang
+	orcid: "https://orcid.org/0000-0001-5762-1869"
+cff-version: "1.1.0"
+date-released: 2017-05-18
+doi: "10.2312/eurovisshort.20171152"
+license: "BSD-2-Clause"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/fhstp/PubViz"
+title: "PubViz: Lightweight Visual Presentation of Publication Data"
+...
