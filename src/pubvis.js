@@ -1562,790 +1562,108 @@ PUBVIS = function () {
                          types_text: entryTypes_grouped_text };
             }
 
-            //iterate the given list containing entries and search for all filter cirteria
-            //contained in the given list with filter criteria
-            //@params.filter_criteria = Object with a list "years" and a list "types" (eg the "selected_items" list)
-            var create_filtered_json = function( params ){
-                //console.log( "create_filtered_json aufgerufen" );
-                var result = [];
-                var filter_criteria = params.filter_criteria;
-                var shorter_list, longer_list;
-                var str = "", n;
-                var word_id; 
-                var searched_word;
-                var pattern;
 
-                for ( var i = 0; i < json.length; i++ ){
-                    
-                    //only years are selected
-                    if (   (filter_criteria.years.length >= 1) 
-                        && (filter_criteria.types.length === 0)
-                        && (filter_criteria.keywords.length === 0)
-                        && (filter_criteria.authors.length === 0)   ){
-
-                        //console.log( "only years are selected" );
-                    
-                        for ( var y = 0; y < filter_criteria.years.length; y++ ){
-
-                            if ( json[i].entryTags.year === filter_criteria.years[y] ) {
-
-                               result.push(json[i]);
-
-                            } 
-                        }
-                    } 
-                  
-                    //only keywords are selected
-                    else if (   (filter_criteria.keywords.length >= 1) 
-                        && (filter_criteria.types.length === 0) 
-                        && (filter_criteria.years.length === 0)
-                        && (filter_criteria.authors.length === 0)   ){
-
-                         //console.log( "only keywords are selected" );
-
-                        for ( var k = 0; k < filter_criteria.keywords.length; k++ ){                           
-
-                            searched_word = lookup_wordtext({ array: words_displayed, word_id: filter_criteria.keywords[k] });
-                            
-                            if (   json[i].entryTags.keywords !== undefined 
-                                && item_already_selected( {array:words_displayed, key:"text", value:searched_word } ) ) {
-                                
-                                //fetch keyword from json
-                                str = json[i].entryTags.keywords;
-                                //str = words_displayed[i].tex
-
-                                str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
-                                
-                                //start every word with upper case
-                                str = to_title_case( str );
-
-                                //lookup if filtered word match in the keywords of this entry
-                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                if ( n !== (-1) ) {
-                                    
-                                    //if match was found check if the result list has already entries
-                                    if ( result.length > 0 ) { 
-                                        
-                                        for ( var r = 0; r < result.length; r++ ){
-                                            
-                                            //check if this entry already exists in the result list.
-                                            if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                
-                                                result.push(json[i]);
-                                            } 
-                                        }
-                                    } else { 
-                                        //is the first entry in the result list
-                                        result.push(json[i]);
-                                    }
-                                } 
-                            }
-                        }
-                    }
-
-                    //only authors are selected
-                    else if (   (filter_criteria.authors.length >= 1) 
-                        && (filter_criteria.types.length === 0) 
-                        && (filter_criteria.years.length === 0)
-                        && (filter_criteria.keywords.length === 0)   ){ 
-
-                        //console.log( "only authors are selected" );
-    
-                        for ( var m = 0; m < filter_criteria.authors.length; m++ ){
-
-                            searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[m] });
-                
-                            //console.log( "searched_word: " + searched_word );
-
-                            if (   json[i].entryTags.author !== undefined 
-                                && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
-
-                                //fetch keyword from json
-                                str = json[i].entryTags.author;
-                                //str = words_displayed[i].tex
-
-                                str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
-                                
-                                //start every word with upper case
-                                str = to_title_case( str );
-                                //console.log( "str: " + str );
-                                
-                                //lookup if filtered word match in the keywords of this entry
-                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                //console.log( "pattern: " + pattern );
-
-                                if ( n !== (-1) ) {
-                                    //if match was found check if it already excists in the result list.
-                                    if ( result.length > 0 ) { 
-                                        
-                                        for ( var r = 0; r < result.length; r++ ){
-
-                                            if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                
-                                                result.push(json[i]);
-                                            } 
-                                        }
-
-                                    } else { 
-                                        result.push(json[i]);
-                                    }
-                                } 
-                            } 
-                        }
-                    }
-
-                    //only types are selected
-                    else if (   (filter_criteria.types.length >= 1) 
-                        && (filter_criteria.years.length === 0) 
-                        && (filter_criteria.keywords.length === 0)
-                        && (filter_criteria.authors.length === 0) ){ 
-
-                        //console.log( "only types are selected" );
-
-                        for ( var z = 0; z < filter_criteria.types.length; z++ ){
-
-                            //check if the entry has the selected type category
-                            if ( is_entry_type_of_catagory({ type: filter_criteria.types[z], entryType: json[i].entryType}) ) {
-                                //console.log ( "match: " +  json[i].entryType);
-                                result.push( json[i] );
-                            } 
-                        }
-                    } 
-
-                    //years and types are selected
-                    else if (    (filter_criteria.types.length >= 1) 
-                        &&  (filter_criteria.years.length >= 1)
-                        &&  (filter_criteria.keywords.length === 0)
-                        &&  (filter_criteria.authors.length === 0) ){ 
-
-                        //console.log( "years and types are selected" );
-
-                        for ( var x = 0; x < filter_criteria.years.length; x++ ){
-                            
-                            for ( var v = 0; v < filter_criteria.types.length; v++ ){
-
-                                if ( json[i].entryTags.year === filter_criteria.years[x] ){
-
-                                    if ( is_entry_type_of_catagory({ type: filter_criteria.types[v], entryType: json[i].entryType}) ) {
-                                        //console.log ( "match: " +  json[i].entryType);
-                                        result.push( json[i] );
-                                    }
-
-                                }                          
-                            }
-                        }
-                    }
-
-                    //years and keywords are selected
-                    else if (   (filter_criteria.types.length === 0) 
-                        && (filter_criteria.years.length >= 1)
-                        && (filter_criteria.keywords.length >= 1) 
-                        && (filter_criteria.authors.length === 0) ){ 
-
-                        //console.log( "years and keywords are selected" );
-
-                        for ( var a = 0; a < filter_criteria.years.length; a++ ){
-                            
-                            for ( var b = 0; b < filter_criteria.keywords.length; b++ ){
-
-                                searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[b] });
-
-                                if (   (json[i].entryTags.year === filter_criteria.years[a]) 
-                                    && (json[i].entryTags.keywords !== undefined)
-                                    && (item_already_selected( {array:words_displayed, key:"text", value:searched_word } )) ) { 
-
-                                    //fetch keyword from json
-                                    str = json[i].entryTags.keywords;
-
-                                    //remove all special chars and whitespaces except the -
-                                    str = str.replace(/[^\w\s\-]/gi, ''); 
-                                    
-                                    //start every word with upper case
-                                    str = to_title_case( str );
-
-                                    //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index     
-
-                                    if ( n !== (-1) ) {
-                                    
-                                        //if match was found check if the result list has already entries
-                                        if ( result.length > 0 ) { 
-                                            
-                                            for ( var r = 0; r < result.length; r++ ){
-                                                
-                                                //check if this entry already exists in the result list.
-                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                    
-                                                    result.push(json[i]);
-                                                } 
-                                            }
-                                        } else { 
-                                            //is the first entry in the result list
-                                            result.push(json[i]);
-                                        }
-                                    } 
-                                }                        
-                            }
-                        }
-                    } 
-
-                    //authors and keywords
-                    else if (   (filter_criteria.types.length === 0) 
-                        && (filter_criteria.years.length === 0)
-                        && (filter_criteria.keywords.length >= 1) 
-                        && (filter_criteria.authors.length >= 0) ){ 
-
-                        //console.log( "authors and keywords are selected" );
-
-                        for ( var s = 0; s < filter_criteria.authors.length; s++ ){
-                            
-                            for ( var t = 0; t < filter_criteria.keywords.length; t++ ){
-
-                                //searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[t] });
-                                
-                                //check if the keyword is contained in the current entry
-                                if (   (json[i].entryTags.keywords !== undefined)
-                                    && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[t] } )) ){ 
-
-                                    searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[t] });
-
-                                    //fetch keyword from json
-                                    str = json[i].entryTags.keywords;
-
-                                    //remove all special chars and whitespaces except the -
-                                    str = str.replace(/[^\w\s\-]/gi, ''); 
-                                    
-                                    //start every word with upper case
-                                    str = to_title_case( str );
-
-                                    //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                    if ( n !== (-1) ) {
-                                        
-                                        //if match was found, check if the author is contained in the current entry
-                                        if (   (json[i].entryTags.author !== undefined)
-                                            && (item_already_selected( {array:authors_displayed, key:"id", value:filter_criteria.authors[s] } ))) {
-
-                                            searched_word = lookup_wordtext({ array:authors_displayed, word_id: filter_criteria.authors[s] });
-
-                                            //fetch keyword from json
-                                            str = json[i].entryTags.author;
-
-                                            //remove all special chars and whitespaces except the -
-                                            str = str.replace(/[^\w\s\-]/gi, ''); 
-                                            
-                                            //start every word with upper case
-                                            str = to_title_case( str );
-
-                                            //lookup if filtered word match in the keywords of this entry
-                                            pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                            n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                            if ( n !== (-1) ) {
-                                    
-                                                //if match was found check if the result list has already entries
-                                                if ( result.length > 0 ) { 
-                                                    
-                                                    for ( var r = 0; r < result.length; r++ ){
-                                                        
-                                                        //check if this entry already exists in the result list.
-                                                        if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                            
-                                                            result.push(json[i]);
-                                                        } 
-                                                    }
-                                                } else { 
-                                                    //is the first entry in the result list
-                                                    result.push(json[i]);
-                                                }
-                                            }
-                                        }
-                                    } 
-                                } 
-                            }
-                        }
-                    }
-
-                    //years and authors are selected
-                    else if (   (filter_criteria.types.length === 0) 
-                        && (filter_criteria.years.length >= 1)
-                        && (filter_criteria.keywords.length === 0) 
-                        && (filter_criteria.authors.length >= 1) ){ 
-
-                        //console.log( "years and authors are selected" );
-
-                        for ( var p = 0; p < filter_criteria.years.length; p++ ){
-                            
-                            for ( var o = 0; o < filter_criteria.authors.length; o++ ){
-
-                                searched_word = lookup_wordtext({ array: authors_displayed, word_id:filter_criteria.authors[o] });
-                                
-                                if (   (json[i].entryTags.year === filter_criteria.years[p]) 
-                                    && (json[i].entryTags.author !== undefined )
-                                    && (item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) ) {
-
-                                    //fetch keyword from json
-                                    str = json[i].entryTags.author;
-                                    //str = words_displayed[i].tex
-
-                                    str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
-                                    
-                                    //start every word with upper case
-                                    str = to_title_case( str );
-
-                                    //lookup if filtered word match in the keywords of this entry
-                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                    if ( n !== (-1) ) {
-                                    
-                                        //if match was found check if the result list has already entries
-                                        if ( result.length > 0 ) { 
-                                            
-                                            for ( var r = 0; r < result.length; r++ ){
-                                                
-                                                //check if this entry already exists in the result list.
-                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                    
-                                                    result.push(json[i]);
-                                                } 
-                                            }
-                                        } else { 
-                                            //is the first entry in the result list
-                                            result.push(json[i]);
-                                        }
-                                    }
-                                } 
-                            }
-                        }
-                    }
-
-                    //types and keywords are selected
-                    else if (    (filter_criteria.types.length >= 1) 
-                        &&  (filter_criteria.years.length === 0)
-                        &&  (filter_criteria.keywords.length >= 1) 
-                        &&  (filter_criteria.authors.length === 0) ){ 
-
-                        //console.log( "types and keywords are selected" );
-
-                        for ( var c = 0; c < filter_criteria.keywords.length; c++ ){
-                            
-                            for ( var d = 0; d < filter_criteria.types.length; d++ ){
-
-                                searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[d] });
-
-                                if (   (json[i].entryTags.keywords !== undefined) 
-                                    && (item_already_selected( {array:words_displayed, key:"text", value:searched_word } )) 
-                                    && (is_entry_type_of_catagory({ type: filter_criteria.types[d], entryType: json[i].entryType})) ){
-
-
-                                    //fetch keyword from json
-                                    str = json[i].entryTags.keywords;
-
-                                    //remove all special chars and whitespaces except the -
-                                    str = str.replace(/[^\w\s\-]/gi, ''); 
-                                    
-                                    //start every word with upper case
-                                    str = to_title_case( str );
-
-                                    //lookup if filtered word match in the keywords of this entry
-                                    n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-                                  
-                                    if ( n !== (-1) ) {
-                                
-                                        //if match was found check if the result list has already entries
-                                        if ( result.length > 0 ) { 
-                                            
-                                            for ( var r = 0; r < result.length; r++ ){
-                                                
-                                                //check if this entry already exists in the result list.
-                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                    
-                                                    result.push(json[i]);
-                                                } 
-                                            }
-                                        } else { 
-                                            //is the first entry in the result list
-                                            result.push(json[i]);
-                                        }
-                                    }          
-                                }
-                            }
-                        }
-                    }
-
-                    //types and authors are selected
-                    else if (    (filter_criteria.types.length >= 1) 
-                        &&  (filter_criteria.years.length === 0)
-                        &&  (filter_criteria.keywords.length === 0) 
-                        &&  (filter_criteria.authors.length >= 1) ){ 
-
-                        //console.log( "types and authors are selected" );
-
-                        for ( var q = 0; q < filter_criteria.authors.length; q++ ){
-
-                            //console.log( "schleife q");
-                            
-                            for ( var r = 0; r < filter_criteria.types.length; r++ ){
-
-                                searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[q] });
-                               
-                                if (   (json[i].entryTags.author !== undefined) 
-                                    && (item_already_selected( {array:authors_displayed, key:"text", value:searched_word } )) 
-                                    && (is_entry_type_of_catagory({ type: filter_criteria.types[r], entryType: json[i].entryType}))  ) { 
-
-                                    //fetch keyword from json
-                                    str = json[i].entryTags.author;
-                                    //str = words_displayed[i].tex
-
-                                    str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
-                                    
-                                    //start every word with upper case
-                                    str = to_title_case( str );
-
-                                    //console.log( "str: " + str );
-
-                                    //lookup if filtered word match in the keywords of this entry
-                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                    if ( n !== (-1) ) {
-                            
-                                        //if match was found check if the result list has already entries
-                                        if ( result.length > 0 ) { 
-                                            
-                                            for ( var r = 0; r < result.length; r++ ){
-                                                
-                                                //check if this entry already exists in the result list.
-                                                if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                    
-                                                    result.push(json[i]);
-                                                } 
-                                            }
-                                        } else { 
-                                            //is the first entry in the result list
-                                            result.push(json[i]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }                       
-
-                    //years, types and keywords are selected 
-                    else if ( (filter_criteria.types.length >= 1) 
-                        &&  (filter_criteria.years.length >= 1)
-                        &&  (filter_criteria.keywords.length >= 1) 
-                        &&  (filter_criteria.authors.length === 0)){ 
-
-                        //console.log( "years, types and keywords are selected" );
-
-                        for ( var e = 0; e < filter_criteria.keywords.length; e++ ){
-
-                            for ( var f = 0; f < filter_criteria.years.length; f++ ){
-                            
-                                for ( var g = 0; g < filter_criteria.types.length; g++ ){
-
-                                    searched_word = lookup_wordtext({ array: words_displayed, word_id: filter_criteria.keywords[g] });
-
-                                    if (   (json[i].entryTags.year === filter_criteria.years[f])
-                                        && (json[i].entryTags.keywords !== undefined) 
-                                        && (item_already_selected( {array:words_displayed, key:"text", value:searched_word } )) 
-                                        && (is_entry_type_of_catagory({ type: filter_criteria.types[g], entryType: json[i].entryType})) ){
-
-
-                                        //fetch keyword from json
-                                        str = json[i].entryTags.keywords;
-
-                                        //remove all special chars and whitespaces except the -
-                                        str = str.replace(/[^\w\s\-]/gi, ''); 
-                                        
-                                        //start every word with upper case
-                                        str = to_title_case( str );
-
-                                        //lookup if filtered word match in the keywords of this entry
-                                        n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                        if ( n !== (-1) ) {
-                                            //if match was found add this entry
-                                            result.push(json[i]);
-                                            //console.log( "pushed!" );
-                                        } else { 
-                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.keywords[k] ); 
-                                        }
-                                    }
-                                }                            
-                            }
-                        }
-                    }    
-
-                    //years, types and authors
-                    else if ( (filter_criteria.types.length >= 1) 
-                        &&  (filter_criteria.years.length >= 1)
-                        &&  (filter_criteria.authors.length >= 1) 
-                        &&  (filter_criteria.keywords.length === 0) ){ 
-
-                        //console.log( "years, types and authors are selected" );
-
-                        for ( var h = 0; h < filter_criteria.years.length; h++ ){
-
-                            for ( var j = 0; j < filter_criteria.authors.length; j++ ){
-                            
-                                for ( var l = 0; l < filter_criteria.types.length; l++ ){
-
-                                    if (   (json[i].entryTags.year === filter_criteria.years[h])
-                                        && (json[i].entryTags.author !== undefined) 
-                                        && (item_already_selected( {array: authors_displayed, key:"id", value:filter_criteria.authors[j] } ) ) 
-                                        && (is_entry_type_of_catagory({ type: filter_criteria.types[l], entryType: json[i].entryType}))  ){
-
-                                        //console.log( "Author is defined & contained" );
-                                        searched_word = lookup_wordtext({ array: authors_displayed, word_id:filter_criteria.authors[j] });
-
-                                        //fetch author from json
-                                        str = json[i].entryTags.author;
-                                        //str = words_displayed[i].tex
-
-                                        str = str.replace(/[^\w\s\-]/gi, ''); //remove all special chars and whitespaces except the . and -
-                                        
-                                        //start every word with upper case
-                                        str = to_title_case( str );
-
-                                        //lookup if filtered word match in the keywords of this entry
-                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                        if ( n !== (-1) ) {
-                                            //if match was found add this entry
-                                            result.push(json[i]);
-                                        } else { 
-                                            //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
-                                        }
-                                    }                               
-                                }                            
-                            }                        
-                        }
-                    }
-
-                    //types, keywords and authors
-                    else if ((filter_criteria.types.length >= 1) 
-                        &&   (filter_criteria.years.length === 0)
-                        &&   (filter_criteria.authors.length >= 1) 
-                        &&   (filter_criteria.keywords.length >= 1) ){ 
-
-                        //console.log( "keywords, types and authors are selected" );
-
-                        for ( var a = 0; a < filter_criteria.authors.length; a++ ){
-
-                            for ( var b = 0; b < filter_criteria.keywords.length; b++ ){
-                            
-                                for ( var c = 0; c < filter_criteria.types.length; c++ ){
-
-                                    
-                                    if (   (is_entry_type_of_catagory({ type: filter_criteria.types[c], entryType: json[i].entryType}))
-                                        && (json[i].entryTags.keywords !== undefined)
-                                        && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[b] } )) ){
-
-                                        searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[b] });
-
-                                        //fetch keyword from json
-                                        str = json[i].entryTags.keywords;
-
-                                        //remove all special chars and whitespaces except the -
-                                        str = str.replace(/[^\w\s\-]/gi, ''); 
-                                        
-                                        //start every word with upper case
-                                        str = to_title_case( str );
-
-                                        //lookup if filtered word match in the keywords of this entry
-                                        pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                        n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                        //check if keyword was found
-                                        if ( n !== (-1) ) {
-
-                                            //if keyword was found, check if the author is contained in the current entry
-                                            if (   (json[i].entryTags.author !== undefined)
-                                                && (item_already_selected( {array:authors_displayed, key:"id", value:filter_criteria.authors[a] } ))) {
-
-                                                searched_word = lookup_wordtext({ array:authors_displayed, word_id: filter_criteria.authors[a] });
-
-                                                //fetch keyword from json
-                                                str = json[i].entryTags.author;
-
-                                                //remove all special chars and whitespaces except the -
-                                                str = str.replace(/[^\w\s\-]/gi, ''); 
-                                                
-                                                //start every word with upper case
-                                                str = to_title_case( str );
-
-                                                //lookup if filtered word match in the keywords of this entry
-                                                n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                                if ( n !== (-1) ) {
-                                                    //if match was found add this entry
-                                                    result.push(json[i]);
-                                                } else { 
-                                                    //console.log("no match for STR: " + str + " filter_criteria.keywords[k]: " + filter_criteria.types[r] ); 
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    //years, keywords and authors
-                    else if ((filter_criteria.types.length === 0) 
-                        &&   (filter_criteria.years.length >= 1)
-                        &&   (filter_criteria.authors.length >= 1) 
-                        &&   (filter_criteria.keywords.length >= 1) ){ 
-
-                        //console.log( "years, keywords and authors are selected" );
-
-                        for ( var e = 0; e < filter_criteria.years.length; e++ ){
-
-                            for ( var f = 0; f < filter_criteria.keywords.length; f++ ){
-                            
-                                for ( var g = 0; g < filter_criteria.authors.length; g++ ){
-
-                                    if (   (json[i].entryTags.year === filter_criteria.years[e]) ){
-
-                                        if (   (json[i].entryTags.keywords !== undefined)
-                                            && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[f] } )) ){ 
-
-                                            searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[f] });
-
-                                            //fetch keyword from json
-                                            str = json[i].entryTags.keywords;
-
-                                            //remove all special chars and whitespaces except the -
-                                            str = str.replace(/[^\w\s\-]/gi, ''); 
-                                            
-                                            //start every word with upper case
-                                            str = to_title_case( str );
-
-                                            //lookup if filtered word match in the keywords of this entry
-                                            n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                            if ( n !== (-1) ) {
-                                                
-                                                //if match was found, check if the author is contained in the current entry
-                                                if (   (json[i].entryTags.author !== undefined)
-                                                    && (item_already_selected( {array:authors_displayed, key:"id", value:filter_criteria.authors[g] } ))) {
-
-                                                    searched_word = lookup_wordtext({ array:authors_displayed, word_id: filter_criteria.authors[g] });
-
-                                                    //fetch keyword from json
-                                                    str = json[i].entryTags.author;
-
-                                                    //remove all special chars and whitespaces except the -
-                                                    str = str.replace(/[^\w\s\-]/gi, ''); 
-                                                    
-                                                    //start every word with upper case
-                                                    str = to_title_case( str );
-
-                                                    //lookup if filtered word match in the keywords of this entry
-                                                    pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                                    n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                                    if ( n !== (-1) ) {
-                                                        //if match was found add this entry
-                                                        result.push(json[i]);
-                                                    } 
-                                                }
-                                            } 
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    //years, types, authors and keywords  
-                    else if ((filter_criteria.types.length >= 1) 
-                        &&   (filter_criteria.years.length >= 1)
-                        &&   (filter_criteria.authors.length >= 1) 
-                        &&   (filter_criteria.keywords.length >= 1) ){ 
-
-                        //console.log( "years, types keywords and authors are selected" );
-                        for ( var y = 0; y < filter_criteria.years.length; y++ ){
-
-                            for ( var a = 0; a < filter_criteria.authors.length; a++ ){
-
-                                for ( var b = 0; b < filter_criteria.keywords.length; b++ ){
-                                
-                                    for ( var c = 0; c < filter_criteria.types.length; c++ ){
-
-                                        if (   (json[i].entryTags.year === filter_criteria.years[y]) 
-                                            && (json[i].entryTags.keywords !== undefined)
-                                            && (is_entry_type_of_catagory({ type: filter_criteria.types[c], entryType: json[i].entryType}))
-                                            && (item_already_selected( {array:words_displayed, key:"id", value:filter_criteria.keywords[b] } ))  ){
-                                                
-                                            searched_word = lookup_wordtext({ array: words_displayed, word_id:  filter_criteria.keywords[b] });
-                                            
-                                            //fetch keyword from json
-                                            str = json[i].entryTags.keywords;
-
-                                            //remove all special chars and whitespaces except the -
-                                            str = str.replace(/[^\w\s\-]/gi, ''); 
-                                            
-                                            //start every word with upper case
-                                            str = to_title_case( str );
-
-                                            //lookup if filtered word match in the keywords of this entry
-                                            n = str.search( searched_word ); //if not contained n = -1 else it retruns the index
-
-                                            if ( n !== (-1) ) {
-
-                                                searched_word = lookup_wordtext({ array:authors_displayed, word_id: filter_criteria.authors[a] });
-                                                
-                                                //fetch keyword from json
-                                                str = json[i].entryTags.author;
-
-                                                //remove all special chars and whitespaces except the -
-                                                str = str.replace(/[^\w\s\-]/gi, ''); 
-                                                
-                                                //start every word with upper case
-                                                str = to_title_case( str );
-
-                                                //lookup if filtered word match in the keywords of this entry
-                                                pattern = new RegExp("\\b" + searched_word + "\\b");// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
-                                                n = str.search( pattern );  //if not contained n = -1 else it retruns the index
-                                
-                                                if ( n !== (-1) ) {
-                                                    
-                                                    //if match was found check if it already excists in the result list.
-                                                    if ( result.length > 0 ) { 
-                                                        
-                                                        for ( var r = 0; r < result.length; r++ ){
-
-                                                            if ( !item_already_selected( {array: result, key:"citationKey", value:json[i].citationKey } ) ){ 
-                                                                
-                                                                result.push(json[i]);
-                                                            } 
-                                                        }
-
-                                                    } else { 
-                                                        result.push(json[i]);
-                                                    }
-                                                }
-                                            } 
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }   
+            var filter_by_year = function(item, filter_criteria){
+                if (filter_criteria.years.length === 0){
+                    return true;
                 }
 
+                for ( var y = 0; y < filter_criteria.years.length; y++ ){
+                    if (item.entryTags.year === filter_criteria.years[y] ) {
+                       return true;
+                    } 
+                }
+                return false;
+            }
 
-                //console.log( "length of filterd_json: " + result.length );
-                //console.log( "result: " )
-                //console.dir( result );
+
+            var filter_by_keyword = function(item, filter_criteria){
+                var searched_word, str;
+
+                if (filter_criteria.keywords.length === 0){
+                    return true;
+                }
+
+                for ( var k = 0; k < filter_criteria.keywords.length; k++ ){                           
+
+                    searched_word = lookup_wordtext({ array: words_displayed, word_id: filter_criteria.keywords[k] });
+                    
+                    if (item.entryTags.keywords !== undefined 
+                        && item_already_selected( {array:words_displayed, key:"text", value:searched_word } ) ) {
+                        
+                        str = item.entryTags.keywords;
+                        str = str.replace(/[^\w\s\-]/gi, ''); // remove special chars/whitespaces, except . and -
+                        str = to_title_case( str );
+
+                        if (str.search(searched_word) !== (-1)) { return true; };
+                    }
+                }
+                return false;
+            }
+
+
+            var filter_by_authors =  function(item, filter_criteria){
+                var searched_word, str, pattern;
+
+                if (filter_criteria.authors.length == 0 ){ 
+                    return true; 
+                }
+
+                for ( var m = 0; m < filter_criteria.authors.length; m++ ){
+
+                    searched_word = lookup_wordtext({ array: authors_displayed, word_id: filter_criteria.authors[m] });
+
+                    if (item.entryTags.author !== undefined 
+                        && item_already_selected( {array: authors_displayed, key:"text", value:searched_word } ) ) {
+
+                        str = item.entryTags.author;
+                        str = str.replace(/[^\w\s\-]/gi, ''); // remove special chars/whitespaces, except . and -
+                                                        
+                        pattern = new RegExp("\\b" + searched_word + "\\b", 'i');// '\b' boundaries, so that whole words will match, and no words that only contain this pattern
+
+                        if (str.search(pattern) !== (-1)) { 
+                            return true; 
+                        }
+                    } 
+                }
+
+                return false;
+            }
+
+
+            var filter_by_type = function(item, filter_criteria){
+
+                if (filter_criteria.types.length === 0){
+                    return true;
+                }
+
+                for ( var z = 0; z < filter_criteria.types.length; z++ ){
+                    if ( is_entry_type_of_catagory({ type: filter_criteria.types[z], entryType: item.entryType}) ) {
+                        return true;
+                    } 
+                }
+                return false;
+            }
+
+            // Iterate over the list of entries, and return those meeting filtering criteria
+            //@params.filter_criteria = Object with a list "years" and a list "types" (eg the "selected_items" list)
+            var create_filtered_json = function( params ){
+
+                var result = [];
+                var filter_criteria = params.filter_criteria;
+
+                for ( var i = 0; i < json.length; i++ ){
+
+                    var item = json[i];
+
+                    if (filter_by_year(item, filter_criteria) && filter_by_authors(item, filter_criteria) 
+                        && filter_by_keyword(item, filter_criteria) && filter_by_type(item, filter_criteria)
+                        && !item_already_selected( {array: result, key:"citationKey", value:item.citationKey}) ){ 
+
+                        result.push(item); 
+                    }
+                }
+
                 return { entries: result };
             }
 
